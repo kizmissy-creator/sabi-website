@@ -153,15 +153,15 @@
 <header class="sticky top-0 z-50 bg-[#FCFEFE]/90 backdrop-blur-md border-b border-[#3D8583]/10">
 <nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
 <div class="flex items-center gap-2">
-<img alt="SABI Logo" class="h-12 w-12 object-contain" height="48" src="images/sabi-mark.png" width="48"/>
+<img alt="SABI Logo" class="h-10 w-10 object-contain" height="40" src="images/sabi-mark.png" width="40"/>
 <span class="text-3xl font-bold tracking-tight text-[#3D8583] font-h1">SABI</span>
 </div>
 <div class="hidden md:flex items-center gap-8">
-<a class="text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md" href="#how-sabi-helps">How SABI Helps</a>
-<a class="text-[#3D8583]/70 hover:text-[#3D8583] transition-colors font-body-md" href="#career-support">Career Support</a>
-<a class="text-[#3D8583]/70 hover:text-[#3D8583] transition-colors font-body-md" href="#business-admin">Business &amp; Admin</a>
-<a class="text-[#3D8583]/70 hover:text-[#3D8583] transition-colors font-body-md" href="#resources">Resources</a>
-<a class="text-[#3D8583]/70 hover:text-[#3D8583] transition-colors font-body-md" href="#about">About</a>
+<a class="desktop-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md transition-colors" href="#how-sabi-helps">How SABI Helps</a>
+<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#services">Services</a>
+<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#starting-points">Starting Points</a>
+<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#about">About</a>
+<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#contact">Contact</a>
 </div>
 <a class="hidden md:inline-flex bg-[#F2C94C] text-[#3D8583] px-6 py-3 rounded-lg font-button hover:bg-[#ebd583] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#3D8583]" href="#starting-points">
             Find your starting point
@@ -172,11 +172,11 @@
 </button>
 </nav>
 <div class="hidden md:hidden flex-col bg-white border-b border-[#3D8583]/10 px-8 py-4 space-y-4 shadow-lg absolute w-full left-0" id="mobile-menu">
-<a class="text-[#3D8583] font-bold font-body-md block" href="#how-sabi-helps">How SABI Helps</a>
-<a class="text-[#3D8583]/80 hover:text-[#3D8583] transition-colors font-body-md block" href="#career-support">Career Support</a>
-<a class="text-[#3D8583]/80 hover:text-[#3D8583] transition-colors font-body-md block" href="#business-admin">Business &amp; Admin</a>
-<a class="text-[#3D8583]/80 hover:text-[#3D8583] transition-colors font-body-md block" href="#resources">Resources</a>
-<a class="text-[#3D8583]/80 hover:text-[#3D8583] transition-colors font-body-md block" href="#about">About</a>
+<a class="mobile-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md block transition-colors self-start" href="#how-sabi-helps">How SABI Helps</a>
+<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#services">Services</a>
+<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#starting-points">Starting Points</a>
+<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#about">About</a>
+<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#contact">Contact</a>
 <a class="bg-[#F2C94C] text-[#3D8583] px-4 py-2 rounded-lg font-button text-center inline-block mt-2" href="#starting-points">Find your starting point</a>
 </div>
 <script>
@@ -204,6 +204,55 @@
         menuLinks.forEach((link) => {
             link.addEventListener('click', closeMenu);
         });
+
+        // Active Navigation State on Scroll
+        const navIds = ['how-sabi-helps', 'services', 'starting-points', 'about', 'contact'];
+        const sections = navIds.map(id => document.getElementById(id)).filter(el => el !== null);
+
+        function updateActiveState() {
+            let current = '';
+            const scrollPos = window.scrollY + 120; // 120px offset to account for sticky header
+
+            sections.forEach(section => {
+                if (scrollPos >= section.offsetTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            // Force 'contact' as active if we are scrolled to the bottom of the page
+            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50) {
+                current = 'contact';
+            }
+
+            // If we are at the very top of the page, default to the first item
+            if (window.scrollY < 100) {
+                current = 'how-sabi-helps';
+            }
+
+            // Update desktop links
+            document.querySelectorAll('.desktop-nav-link').forEach(link => {
+                const href = link.getAttribute('href').substring(1);
+                if (href === current) {
+                    link.className = 'desktop-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md transition-colors';
+                } else {
+                    link.className = 'desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors';
+                }
+            });
+
+            // Update mobile links
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                const href = link.getAttribute('href').substring(1);
+                if (href === current) {
+                    link.className = 'mobile-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md block transition-colors self-start';
+                } else {
+                    link.className = 'mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start';
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveState);
+        window.addEventListener('load', updateActiveState);
+        updateActiveState();
         </script>
 </header>
 <main>
@@ -237,7 +286,7 @@
 <div class="relative w-full aspect-square">
 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/5 blur-[100px] rounded-full -z-10"></div>
 <div class="absolute bottom-4 left-8 w-full h-full bg-surface-container rounded-xl overflow-hidden shadow-xl z-10 border border-primary/5">
-<img alt="Organised workspace" class="w-full h-full object-cover" decoding="async" loading="eager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCz7Rvk8EX9MKwW7H1Od2MwMdo4V3xPmgkAS2iDKv85hlThptWeDLU1Zk6uY4PBXN9CXKSDRTJvF58rSG5L_tW70W2N46RLKqpgpEcx-m4xAqvG-CD1Oz-kdIr_J69gUKZVG1plyivKt8L_5nLJCerK5znLCAZiVs2xkfLg6LMe60BWo2rHtO5JYXHZjKioFJnEI51YdYgysCNslRR_n3rRKgxxSXdqKKrNqt6J4Ka8HSo_Mbv7AWXGSJrx21D0ELOEvBtAJY2S5sPj"/>
+<img alt="Organised workspace" class="w-full h-full object-cover" decoding="async" loading="eager" src="images/hero-workspace.webp"/>
 </div>
 <div class="absolute -bottom-6 -left-6 bg-[#F2C94C] p-6 rounded-xl shadow-lg z-20 max-w-[240px] -rotate-2">
 <p class="font-h3 text-sm italic text-primary leading-tight">Sometimes the problem is not motivation. It is carrying too much without the right structure.</p>
