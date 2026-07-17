@@ -207,7 +207,7 @@
 
         // Active Navigation State on Scroll
         const navIds = ['how-sabi-helps', 'services', 'starting-points', 'about', 'contact'];
-        const sections = navIds.map(id => document.getElementById(id)).filter(el => el !== null);
+        let sections = [];
 
         function updateActiveState() {
             let current = '';
@@ -252,7 +252,11 @@
 
         window.addEventListener('scroll', updateActiveState);
         window.addEventListener('load', updateActiveState);
-        updateActiveState();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            sections = navIds.map(id => document.getElementById(id)).filter(el => el !== null);
+            updateActiveState();
+        });
         </script>
 </header>
 <main>
@@ -309,7 +313,7 @@
 <!-- Card 1 -->
 <div class="p-8 bg-surface-container-lowest rounded-xl border border-outline-variant/30 relative overflow-hidden transition-colors">
 <div class="w-12 h-12 bg-error-container/30 rounded-lg flex items-center justify-center mb-6 text-error">
-<span aria-hidden="true" class="material-symbols-outlined" data-weight="fill">brain</span>
+<span aria-hidden="true" class="material-symbols-outlined" data-weight="fill">psychology</span>
 </div>
 <h3 class="font-h3 text-h3 text-primary mb-4">Everything is in your head</h3>
 <p class="font-body-md text-on-surface-variant">Appointments, deadlines, ideas, responsibilities and unfinished tasks are all competing for the same small patch of attention. SABI helps you get them out of your head and into a structure you can actually use.</p>
