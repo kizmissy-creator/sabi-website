@@ -152,26 +152,29 @@
 <body class="bg-background font-body-md text-on-background antialiased selection:bg-tertiary-container selection:text-on-tertiary-container">
 <header class="sticky top-0 z-50 bg-[#FCFEFE]/90 backdrop-blur-md border-b border-[#3D8583]/10">
 <nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
-<div class="flex items-center gap-2">
-<img alt="SABI Logo" class="h-10 w-10 object-contain" height="40" src="images/sabi-mark.png" width="40"/>
+<div class="flex shrink-0 items-center gap-2">
+<img alt="SABI Logo" class="h-10 w-10 object-contain" height="40" src="images/sabi-mark-complete.png" width="40"/>
 <span class="text-3xl font-bold tracking-tight text-[#3D8583] font-h1">SABI</span>
 </div>
-<div class="hidden md:flex items-center gap-8">
+<div class="hidden xl:flex items-center gap-8">
 <a class="desktop-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md transition-colors" href="#how-sabi-helps">How SABI Helps</a>
 <a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#services">Services</a>
 <a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#starting-points">Starting Points</a>
 <a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#about">About</a>
 <a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#contact">Contact</a>
 </div>
-<a class="hidden md:inline-flex bg-[#F2C94C] text-[#3D8583] px-6 py-3 rounded-lg font-button hover:bg-[#ebd583] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#3D8583]" href="#starting-points">
-            Find your starting point
+<div class="flex shrink-0 items-center gap-3">
+<a class="inline-flex shrink-0 bg-[#F2C94C] text-[#3D8583] px-3 sm:px-6 py-3 rounded-lg font-button hover:bg-[#ebd583] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#3D8583]" href="#starting-points">
+<span class="sm:hidden">Start here</span>
+<span class="hidden sm:inline">Find your starting point</span>
         </a>
-<button aria-controls="mobile-menu" aria-expanded="false" class="md:hidden text-[#3D8583] p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3D8583] rounded" id="mobile-menu-btn">
+<button aria-controls="mobile-menu" aria-expanded="false" class="xl:hidden text-[#3D8583] p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3D8583] rounded" id="mobile-menu-btn">
 <span class="sr-only">Open main menu</span>
 <span class="material-symbols-outlined">menu</span>
 </button>
+</div>
 </nav>
-<div class="hidden md:hidden flex-col bg-white border-b border-[#3D8583]/10 px-8 py-4 space-y-4 shadow-lg absolute w-full left-0" id="mobile-menu">
+<div class="hidden xl:hidden flex-col bg-white border-b border-[#3D8583]/10 px-8 py-4 space-y-4 shadow-lg absolute w-full left-0" id="mobile-menu">
 <a class="mobile-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md block transition-colors self-start" href="#how-sabi-helps">How SABI Helps</a>
 <a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#services">Services</a>
 <a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#starting-points">Starting Points</a>
