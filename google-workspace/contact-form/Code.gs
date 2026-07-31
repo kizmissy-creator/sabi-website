@@ -133,7 +133,7 @@ function safeContactCell_(value) {
 function contactSuccessResponse_() {
   const successUrl = PropertiesService.getScriptProperties().getProperty('CONTACT_SUCCESS_URL');
   const safeUrl = JSON.stringify(successUrl || 'https://celadon-melomakarona-a77f9d.netlify.app/thank-you.html').replace(/</g, '\\u003c');
-  return HtmlService.createHtmlOutput('<!doctype html><meta charset="utf-8"><title>Thank you</title><script>location.replace(' + safeUrl + ');</script><p>Your enquiry has been received.</p>');
+  return HtmlService.createHtmlOutput('<!doctype html><meta charset="utf-8"><base target="_top"><title>Thank you</title><script>window.top.location.replace(' + safeUrl + ');</script><p>Your enquiry has been received. <a href=' + safeUrl + '>Continue to SABI</a>.</p>');
 }
 
 function contactErrorResponse_() {
