@@ -430,7 +430,7 @@
                 </a>
 </div>
 </div>
-</section><section class="py-24 bg-white" id="contact-form"><div class="max-w-2xl mx-auto px-8"><h2 class="font-h2 text-3xl text-primary mb-8 text-center">Send an enquiry</h2><!-- Connect this form to the final SABI form handling service before publishing --><form action="/thank-you.html" class="space-y-6" data-netlify="true" method="POST" name="sabi-enquiry" netlify-honeypot="bot-field"><input name="form-name" type="hidden" value="sabi-enquiry"/><p class="hidden"><label>Do not fill this out if you are human: <input name="bot-field"/></label></p><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="name">Name</label><input autocomplete="name" class="rounded-lg border-outline-variant/30 focus:ring-primary" id="name" name="name" required="" type="text"/></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="email">Email address</label><input autocomplete="email" class="rounded-lg border-outline-variant/30 focus:ring-primary" id="email" name="email" required="" type="email"/></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="help">What would you like help with?</label><textarea class="rounded-lg border-outline-variant/30 focus:ring-primary" id="help" name="help" required="" rows="4"></textarea></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="comm">Preferred way to communicate</label><select class="rounded-lg border-outline-variant/30 focus:ring-primary" id="comm" name="preferred_contact"><option value="">No preference</option><option value="email">Email</option><option value="telephone">Telephone</option><option value="video-call">Video call</option><option value="text-message">Text message</option></select></div><button class="w-full bg-primary text-white py-4 rounded-lg font-button hover:bg-primary/90 transition-colors" type="submit">Submit enquiry</button></form></div></section>
+</section><section class="py-24 bg-white" id="contact-form"><div class="max-w-2xl mx-auto px-8"><h2 class="font-h2 text-3xl text-primary mb-8 text-center">Send an enquiry</h2><form action="https://script.google.com/macros/s/AKfycbwqAynskya9uZnYvfzAt3g81ZKyiXJpNbspZQ8fSN40269t-m8gCm5w4K2uc_1P-QBg9g/exec" class="space-y-6" id="sabi-enquiry" method="POST"><input id="submission-id" name="submissionId" type="hidden"/><input id="form-started-at" name="formStartedAt" type="hidden"/><p aria-hidden="true" class="hidden"><label>Leave this field empty: <input autocomplete="off" name="company" tabindex="-1" type="text"/></label></p><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="name">Name</label><input autocomplete="name" class="rounded-lg border-outline-variant/30 focus:ring-primary" id="name" maxlength="120" name="name" required="" type="text"/></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="email">Email address</label><input autocomplete="email" class="rounded-lg border-outline-variant/30 focus:ring-primary" id="email" maxlength="254" name="email" required="" type="email"/></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="help">What would you like help with?</label><textarea class="rounded-lg border-outline-variant/30 focus:ring-primary" id="help" maxlength="3000" name="help" required="" rows="4"></textarea></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="comm">Preferred way to communicate</label><select class="rounded-lg border-outline-variant/30 focus:ring-primary" id="comm" name="preferred_contact"><option value="">No preference</option><option value="email">Email</option><option value="telephone">Telephone</option><option value="video-call">Video call</option><option value="text-message">Text message</option></select></div><label class="flex items-start gap-3 text-sm text-on-surface-variant"><input class="mt-1 rounded border-outline-variant/30 text-primary focus:ring-primary" name="privacyAcknowledged" required="" type="checkbox" value="yes"/><span>I understand that SABI will use these details to respond to my enquiry.</span></label><button class="w-full bg-primary text-white py-4 rounded-lg font-button hover:bg-primary/90 transition-colors" type="submit">Submit enquiry</button></form></div></section>
 </main>
 <footer class="bg-[#FCFEFE] border-t-2 border-[#F2C94C]/20">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full px-8 py-16 max-w-7xl mx-auto">
@@ -466,4 +466,27 @@
         © 2026 SABI. Built with care in Newcastle upon Tyne.
     </div>
 </footer>
+<script>
+    (() => {
+        const form = document.getElementById('sabi-enquiry');
+        if (!form) return;
+
+        const submissionId = document.getElementById('submission-id');
+        const formStartedAt = document.getElementById('form-started-at');
+        const createSubmissionId = () => {
+            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                return window.crypto.randomUUID();
+            }
+
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, character => {
+                const random = Math.random() * 16 | 0;
+                const value = character === 'x' ? random : (random & 0x3 | 0x8);
+                return value.toString(16);
+            });
+        };
+
+        submissionId.value = createSubmissionId();
+        formStartedAt.value = String(Date.now());
+    })();
+</script>
 </body></html>
