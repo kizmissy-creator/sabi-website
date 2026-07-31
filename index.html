@@ -117,6 +117,25 @@
             outline: 2px solid #3d8583;
             outline-offset: 4px;
         }
+        [class~="text-[#3D8583]"] {
+            color: #2f6a68 !important;
+        }
+        [class~="text-[#3D8583]/70"],
+        [class~="text-[#3D8583]/80"],
+        [class~="text-[#3D8583]/60"],
+        [class~="text-[#3D8583]/40"] {
+            color: #2b6462 !important;
+        }
+        [class~="bg-[#F2C94C]"][class~="text-[#3D8583]"] {
+            color: #174f4d !important;
+        }
+        [class~="bg-[#3D8583]"][class~="text-white"] {
+            background-color: #347270 !important;
+        }
+        #sabi-enquiry input:not([type="hidden"]):not([type="checkbox"]),
+        #sabi-enquiry select {
+            min-height: 44px;
+        }
         .imperfect-underline {
             position: relative;
             display: inline-block;
@@ -150,6 +169,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;display=swap" rel="stylesheet"/>
 <link href="images/favicon.png" rel="icon" type="image/png"/><meta content="SABI | Practical support for real life" property="og:title"/><meta content="Career support, business systems, practical advocacy and accessible resources designed around real life." property="og:description"/><meta content="website" property="og:type"/></head>
 <body class="bg-background font-body-md text-on-background antialiased selection:bg-tertiary-container selection:text-on-tertiary-container">
+<a class="fixed left-4 top-4 z-[100] -translate-y-24 rounded-lg bg-white px-4 py-3 font-button text-[#2F6A68] shadow-lg focus:translate-y-0" href="#main-content">Skip to main content</a>
 <header class="sticky top-0 z-50 bg-[#FCFEFE]/90 backdrop-blur-md border-b border-[#3D8583]/10">
 <nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
 <div class="flex shrink-0 items-center gap-2">
@@ -168,7 +188,7 @@
 <span class="sm:hidden">Start here</span>
 <span class="hidden sm:inline">Find your starting point</span>
         </a>
-<button aria-controls="mobile-menu" aria-expanded="false" class="xl:hidden text-[#3D8583] p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3D8583] rounded" id="mobile-menu-btn">
+<button aria-controls="mobile-menu" aria-expanded="false" class="xl:hidden min-h-11 min-w-11 text-[#3D8583] p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3D8583] rounded" id="mobile-menu-btn">
 <span class="sr-only">Open main menu</span>
 <span class="material-symbols-outlined">menu</span>
 </button>
@@ -206,6 +226,13 @@
 
         menuLinks.forEach((link) => {
             link.addEventListener('click', closeMenu);
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+                closeMenu();
+                button.focus();
+            }
         });
 
         // Active Navigation State on Scroll
@@ -262,7 +289,7 @@
         });
         </script>
 </header>
-<main>
+<main id="main-content" tabindex="-1">
 <!-- Hero Section -->
 <section class="relative pt-20 pb-32 overflow-hidden">
 <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -448,13 +475,13 @@
 </div>
 <div class="grid grid-cols-2 gap-8">
 <div class="flex flex-col gap-4">
-<h4 class="font-label-caps text-primary border-l-2 border-tertiary-container pl-2">Services</h4>
+<h3 class="font-label-caps text-primary border-l-2 border-tertiary-container pl-2">Services</h3>
 <a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#career-support">Career Support</a>
 <a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#business-admin">Business and Admin</a>
 <a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#resources">Resources</a>
 </div>
 <div class="flex flex-col gap-4">
-<h4 class="font-label-caps text-primary border-l-2 border-tertiary-container pl-2">Information</h4>
+<h3 class="font-label-caps text-primary border-l-2 border-tertiary-container pl-2">Information</h3>
 <a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#about">About SABI</a>
 <a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#contact">Contact</a>
 <span class="text-[#3D8583]/60 font-body-md text-base">Privacy page coming soon</span>
