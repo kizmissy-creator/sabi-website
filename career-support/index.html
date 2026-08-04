@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" class="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>SABI Career Support | Development Route</title>
+  <meta name="description" content="Development-only Career Support onboarding route for fictional testing.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="SABI home">
+      <img src="../images/sabi-mark-complete.png" alt="" width="40" height="40">
+      <span>SABI</span>
+    </a>
+    <span class="development-badge">Development preview</span>
+  </header>
+
+  <main id="main-content" class="page-shell">
+    <section class="warning-panel" aria-labelledby="test-only-title">
+      <div>
+        <p class="eyebrow">Fictional testing only</p>
+        <h1 id="test-only-title">Career Support route shell</h1>
+        <p>Do not enter real client, payment, health, employment or contact information. Use an <strong>@example.com</strong> email address only. Paid checkout is disabled.</p>
+      </div>
+    </section>
+
+    <nav class="progress" aria-label="Onboarding progress">
+      <ol>
+        <li data-progress="service" aria-current="step"><span>1</span>Service</li>
+        <li data-progress="age"><span>2</span>Age route</li>
+        <li data-progress="email"><span>3</span>Secure return</li>
+        <li data-progress="draft"><span>4</span>Draft shell</li>
+      </ol>
+    </nav>
+
+    <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+    <div id="error-summary" class="error-summary" role="alert" tabindex="-1" hidden></div>
+
+    <section id="service-screen" class="screen card" aria-labelledby="service-heading">
+      <p class="eyebrow">Step 1 of 4</p>
+      <h2 id="service-heading">Choose the service being tested</h2>
+      <p class="intro">The visible name, price and summary come from one approved configuration object. An altered or unknown service code is never guessed.</p>
+      <div id="service-options" class="service-grid"></div>
+      <div id="selected-service" class="selected-service" hidden></div>
+      <div class="actions">
+        <button id="continue-to-age" class="button primary" type="button" disabled>Continue</button>
+      </div>
+    </section>
+
+    <section id="age-screen" class="screen card" aria-labelledby="age-heading" hidden>
+      <p class="eyebrow">Step 2 of 4</p>
+      <h2 id="age-heading">Which age group applies to the fictional test person?</h2>
+      <p class="intro">SABI Career Support is available from age 16 at launch. A parent or guardian is not required solely because someone is 16 or 17.</p>
+      <fieldset class="choice-group">
+        <legend class="visually-hidden">Age group</legend>
+        <label class="choice-card">
+          <input type="radio" name="age-band" value="16-17">
+          <span><strong>16 or 17</strong><small>Continue directly with clear, age-appropriate information.</small></span>
+        </label>
+        <label class="choice-card">
+          <input type="radio" name="age-band" value="18-plus">
+          <span><strong>18 or over</strong><small>Continue through the standard route.</small></span>
+        </label>
+        <label class="choice-card">
+          <input type="radio" name="age-band" value="under-16">
+          <span><strong>Under 16</strong><small>Stop before email, uploads, detailed questions or payment.</small></span>
+        </label>
+      </fieldset>
+      <div id="age-information" class="information-panel" hidden></div>
+      <div class="actions split">
+        <button class="button secondary" type="button" data-back="service">Back</button>
+        <button id="continue-to-email" class="button primary" type="button" disabled>Continue</button>
+      </div>
+    </section>
+
+    <section id="under-16-screen" class="screen card" aria-labelledby="under-16-heading" hidden>
+      <p class="eyebrow">This route stops here</p>
+      <h2 id="under-16-heading">SABI is not currently able to provide this service to someone under 16</h2>
+      <p>No email address, documents, detailed history or payment information has been requested.</p>
+      <p>A school, college, local careers service or trusted youth-support organisation may be able to help with a first CV or career questions.</p>
+      <div class="actions split">
+        <button class="button secondary" type="button" data-back="age">Change the age group</button>
+        <a class="button primary" href="../index.html">Return to SABI</a>
+      </div>
+    </section>
+
+    <section id="email-screen" class="screen card" aria-labelledby="email-heading" hidden>
+      <p class="eyebrow">Step 3 of 4</p>
+      <h2 id="email-heading">Create or reopen a fictional test draft</h2>
+      <p class="intro">The finished route will verify the email address and create a secure return link. During this development stage, only <strong>@example.com</strong> addresses are accepted.</p>
+
+      <form id="verification-request-form" novalidate>
+        <label for="test-email">Fictional test email</label>
+        <input id="test-email" name="email" type="email" autocomplete="off" inputmode="email" placeholder="sam.test@example.com" required>
+        <p class="field-help">Never use a real person’s email address in this preview.</p>
+        <button class="button primary" type="submit">Send fictional verification code</button>
+      </form>
+
+      <form id="verification-code-form" class="verification-code-form" novalidate hidden>
+        <label for="verification-code">Six-digit test code</label>
+        <input id="verification-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required>
+        <p id="development-code" class="development-code" hidden></p>
+        <button class="button primary" type="submit">Verify and open draft</button>
+      </form>
+
+      <div class="actions">
+        <button class="button secondary" type="button" data-back="age">Back</button>
+      </div>
+    </section>
+
+    <section id="draft-screen" class="screen card" aria-labelledby="draft-heading" hidden>
+      <p class="eyebrow">Step 4 of 4</p>
+      <h2 id="draft-heading">Draft shell</h2>
+      <div class="draft-reference">
+        <span>Draft reference</span>
+        <strong id="draft-reference">Not created</strong>
+      </div>
+      <p id="save-state" class="save-state" role="status" aria-live="polite">No changes to save.</p>
+
+      <form id="draft-form" novalidate>
+        <div class="field-row">
+          <label for="fictional-name">Fictional preferred name</label>
+          <input id="fictional-name" name="preferredName" type="text" maxlength="60" placeholder="Example Person">
+        </div>
+        <div class="field-row">
+          <label for="fictional-note">Fictional test note</label>
+          <textarea id="fictional-note" name="testNote" rows="4" maxlength="500" placeholder="Use invented information only."></textarea>
+        </div>
+        <div class="information-panel">
+          <h3>Not part of this first shell</h3>
+          <p>Uploads, real work history, health information, Terms acceptance, early-start choices and payment remain disabled until their own controls are built and tested.</p>
+        </div>
+      </form>
+
+      <div class="actions split">
+        <button class="button secondary" type="button" data-back="email">Back</button>
+        <button id="copy-return-link" class="button primary" type="button">Copy fictional return link</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 SABI. Development route. Fictional data only.</p>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
