@@ -30,7 +30,7 @@ matches = (
 )
 
 media = MediaFileUpload(
-    str(snapshot_path), mime_type="application/zip", resumable=True
+    str(snapshot_path), mimetype="application/zip", resumable=True
 )
 
 if matches:
