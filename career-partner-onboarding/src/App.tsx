@@ -86,6 +86,17 @@ function App() {
     setAnswers((current) => ({ ...current, [key]: value }))
   }
 
+  function setServiceFit(value: string) {
+    const suggested: Record<string, ServiceId> = {
+      'I know the target and need one strong CV': 'professional-cv',
+      'I want to change direction or work out what fits': 'career-change',
+      'I have a broad direction and need coordinated application documents': 'career-partner',
+      'I also need interview preparation and short follow-up support': 'career-partner-plus',
+      'I need a first CV for a limited, straightforward history': 'starter-cv',
+    }
+    setAnswers((current) => ({ ...current, serviceFit: value, service: suggested[value] }))
+  }
+
   function toggle(key: string, value: string) {
     const values = (answers[key] as string[]) ?? []
     setValue(key, values.includes(value) ? values.filter((item) => item !== value) : [...values, value])
@@ -111,9 +122,19 @@ function App() {
   const area = (key: string, label: string, help?: string, optional = true) => (
     <Field label={label} help={help} optional={optional}><TextArea id={key} name={key} label={label} value={(answers[key] as string) ?? ''} onChange={(event) => setValue(key, event.target.value)} /></Field>
   )
-  const choices = (key: string, label: string, options: string[], multiple = false, help?: string) => (
-    <Field label={label} help={help}><div className="grid gap-3 sm:grid-cols-2">{options.map((option) => <SelectableOptionCard key={option} name={key} value={option} label={option} type={multiple ? 'checkbox' : 'radio'} selected={multiple ? ((answers[key] as string[]) ?? []).includes(option) : answers[key] === option} onChange={() => multiple ? toggle(key, option) : setValue(key, option)} />)}</div></Field>
+  const choices = (key: string, label: string, options: string[], multiple = false, help?: string, optional = true) => (
+    <Field label={label} help={help} optional={optional}><div className="grid gap-3 sm:grid-cols-2">{options.map((option) => <SelectableOptionCard key={option} name={key} value={option} label={option} type={multiple ? 'checkbox' : 'radio'} selected={multiple ? ((answers[key] as string[]) ?? []).includes(option) : answers[key] === option} onChange={() => multiple ? toggle(key, option) : setValue(key, option)} />)}</div></Field>
   )
+  const sectionReady = [
+    Boolean(answers.serviceFit && answers.ageBand) && answers.ageBand !== 'Under 16',
+    Boolean(answers.firstName && answers.lastName && answers.email && answers.location),
+    (answers.employmentStatus as string[]).length > 0 && Boolean(answers.currentRoleApplies),
+    Boolean(answers.workHistoryMethod),
+    Boolean(answers.clarity && answers.preferenceDetail),
+    ((answers.evidenceSources as string[]) ?? []).length > 0,
+    Boolean(answers.searchStage && answers.applicationSupportNow),
+    true, true, true, true,
+  ]
 
   return <div className="min-h-screen">
     <PageHeader currentStep={step + 1} totalSteps={sections.length} stepLabel={sections[step][1]} />
@@ -131,6 +152,15 @@ function App() {
         <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
           {step === 0 && <>
             <Info title="Before you begin">This development form stores fictional answers only in this browser. The finished service will provide secure email verification, save-and-return and private records. Read the SABI Privacy Notice before entering detailed information.</Info>
+            <Field label="Which statement is closest to what you need?" help="This suggests a starting service. You can still choose a different service below." optional={false}><div className="grid gap-3">{Object.entries({
+              'I know the target and need one strong CV': 'Professional CV',
+              'I want to change direction or work out what fits': 'Career Change',
+              'I have a broad direction and need coordinated application documents': 'Career Partner',
+              'I also need interview preparation and short follow-up support': 'Career Partner Plus',
+              'I need a first CV for a limited, straightforward history': 'Starter CV',
+            }).map(([answer, result]) => <button type="button" key={answer} onClick={() => setServiceFit(answer)} className={`rounded-2xl border-2 p-4 text-left ${answers.serviceFit === answer ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white'}`}><strong className="block text-teal-900">{answer}</strong><span className="mt-1 block text-sm text-slate-600">Suggested starting point: {result}</span></button>)}</div></Field>
+            {answers.serviceFit && <Info title={`Suggested starting point: ${service.name}`}>This is a guide, not an automatic suitability decision. Any combined, urgent, specialist or materially different work is reviewed before payment.</Info>}
+            <h3 className="font-display text-2xl font-semibold text-teal-900">Confirm the service you want to explore</h3>
             <div className="grid gap-3 sm:grid-cols-2">{services.map((item) => <button type="button" key={item.id} onClick={() => setValue('service', item.id)} className={`rounded-2xl border-2 p-4 text-left ${service.id === item.id ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white'}`}><span className="font-display text-xl font-semibold text-teal-900">{item.name}</span><span className="float-right font-bold text-teal-800">£{item.price}</span><p className="mt-2 text-sm leading-6 text-slate-600">{item.summary}</p></button>)}</div>
             {choices('ageBand', 'Which age group applies to you?', singleOptions.ageBand, false, 'Career Support is available from age 16 at launch. A full date of birth is not required.')}
             {answers.ageBand === 'Under 16' && <Info tone="warning" title="This service is currently available from age 16">Please speak with a school, college or appropriate careers-support service. No email verification, detailed intake or payment will be started.</Info>}
@@ -150,56 +180,43 @@ function App() {
 
           {step === 2 && <>
             {choices('employmentStatus', 'Which of these best describe your current situation?', employmentOptions, true)}
-            {text('currentRole', 'What is your current or most recent role?', 'Use the title you were given, describe the work, or enter Not applicable.')}
-            {text('currentOrganisation', 'Organisation or setting')}
-            {text('currentDates', 'When did you do this role?', 'Approximate month and year are enough.')}
-            {area('currentLikes', 'What do you like about your current or most recent work?', 'Think about tasks, environment, people, pace, purpose or ways of working.')}
-            {area('currentChange', 'What would you like to change about it?', 'You can mention tasks, hours, pay, progression, travel, pressure or anything else that matters.')}
+            {choices('currentRoleApplies', 'Do you have a current or recent role you want to describe here?', ['Yes', 'No', 'Not sure or prefer to discuss'], false, 'Choose No if your most useful experience comes from education, caring, volunteering, projects or another setting.', false)}
+            {answers.currentRoleApplies === 'Yes' && <>{text('currentRole', 'What is your current or most recent role?', 'Use the title you were given or describe the work.')}{text('currentOrganisation', 'Organisation or setting')}{text('currentDates', 'When did you do this role?', 'Approximate month and year are enough.')}{area('currentLikes', 'What do you like about your current or most recent work?', 'Think about tasks, environment, people, pace, purpose or ways of working.')}{area('currentChange', 'What would you like to change about it?', 'You can mention tasks, hours, pay, progression, travel, pressure or anything else that matters.')}</>}
+            {answers.currentRoleApplies === 'No' && area('currentSituationDetail', 'What experience or current situation would be more useful to start with?', 'This could be education, caring, volunteering, projects, recovery, job seeking or another part of your life.')}
+            {answers.currentRoleApplies === 'Not sure or prefer to discuss' && <Info title="You can leave the detailed role fields for later">SABI can identify the most useful starting point through follow-up questions or an agreed discussion.</Info>}
           </>}
 
           {step === 3 && <>
-            {choices('hasCv', 'Do you have an existing CV or work-history document?', ['Yes', 'No'])}
-            <SimulatedUpload label="Existing CV or work-history document" files={simulatedFiles} onFiles={addSimulatedFiles} onRemove={(name) => setSimulatedFiles((items) => items.filter((item) => item !== name))} />
-            <Repeating title="Work, self-employment or substantial roles" items={roles} onChange={(index, key, value) => updateRepeat(setRoles, index, key, value)} onAdd={() => setRoles((items) => [...items, { title: '', organisation: '', dates: '', responsibilities: '', achievements: '', leaving: '' }])} onRemove={(index) => setRoles((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Role or activity'],['organisation','Organisation or setting'],['dates','Approximate dates and hours/type'],['responsibilities','Responsibilities'],['achievements','Achievements'],['leaving','Reason for leaving, optional']]} />
-            {area('employmentGaps', 'Is there any gap or transition that you would like help presenting?', 'Not every gap needs to appear on a CV. SABI will not invent dates or activities.')}
+            {choices('workHistoryMethod', 'What is the easiest way to give SABI your work history?', ['Upload a reasonably complete CV or work-history document', 'Upload a document, then add or correct missing details', 'Enter the relevant history here', 'I am not sure or would prefer to discuss it'], false, 'Manual history is only needed when an uploaded document is absent or incomplete.', false)}
+            {(answers.workHistoryMethod === 'Upload a reasonably complete CV or work-history document' || answers.workHistoryMethod === 'Upload a document, then add or correct missing details') && <SimulatedUpload label="Existing CV or work-history document" files={simulatedFiles} onFiles={addSimulatedFiles} onRemove={(name) => setSimulatedFiles((items) => items.filter((item) => item !== name))} />}
+            {(answers.workHistoryMethod === 'Upload a document, then add or correct missing details' || answers.workHistoryMethod === 'Enter the relevant history here') && <Repeating title="Work, self-employment or substantial roles" items={roles} onChange={(index, key, value) => updateRepeat(setRoles, index, key, value)} onAdd={() => setRoles((items) => [...items, { title: '', organisation: '', dates: '', responsibilities: '', achievements: '', leaving: '' }])} onRemove={(index) => setRoles((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Role or activity'],['organisation','Organisation or setting'],['dates','Approximate dates and hours/type'],['responsibilities','Responsibilities'],['achievements','Achievements'],['leaving','Reason for leaving, optional']]} />}
+            {answers.workHistoryMethod && answers.workHistoryMethod !== 'Upload a reasonably complete CV or work-history document' && area('employmentGaps', 'Is there any gap or transition that you would like help presenting?', 'Not every gap needs to appear on a CV. SABI will not invent dates or activities.')}
+            {answers.workHistoryMethod === 'I am not sure or would prefer to discuss it' && <Info title="That is fine">SABI can agree a written or discussion-based way to collect only the history needed for your service.</Info>}
           </>}
 
           {step === 4 && <>
-            {choices('priorities', 'What matters most to you in your next role?', priorityOptions, true)}
-            {choices('arrangements', 'What working arrangements would you consider?', arrangementOptions, true)}
-            {choices('hours', 'What hours or working pattern could work for you?', hoursOptions, true)}
-            {area('availabilityLimits', 'Are there days, times or practical limits SABI should take into account?')}
-            {choices('travel', 'How are you able to travel for work?', travelOptions, true)}
-            {text('commuteLimit', 'What is the longest journey you would usually consider for work?', 'Give a time, distance, area or Remote work only.', false)}
-            {choices('payMinimum', 'Do you have a minimum level of pay you need?', singleOptions.payMinimum)}
-            {(answers.payMinimum === 'Yes' || answers.payMinimum === 'Not sure') && text('payDetail', 'What pay level or range should SABI use as a practical guide?', 'State whether this is annual, hourly, daily or another basis.')}
-            {choices('clarity', 'How clear do you currently feel about what you would like to do next?', singleOptions.clarity)}
-            {area('roleIdeas', 'Are there any roles, sectors or types of work you are considering?')}
-            {area('avoidWork', 'Is there any work, environment or condition you know you do not want?')}
+            {choices('clarity', 'How clear do you currently feel about what you would like to do next?', singleOptions.clarity, false, undefined, false)}
+            {answers.clarity && answers.clarity !== 'I am completely unsure' && area('roleIdeas', 'Are there any roles, sectors or types of work you are considering?')}
+            {answers.clarity === 'I am completely unsure' && <Info title="You do not need a finished career idea">The Career Change route can explore realistic directions before a CV target is agreed.</Info>}
+            {choices('preferenceDetail', 'Would you like to add practical preferences and limits now?', ['Yes, show the detailed questions', 'No, I have no important limits to add', 'I would prefer to discuss these'], false, 'These details help rule in realistic work rather than making assumptions.', false)}
+            {answers.preferenceDetail === 'Yes, show the detailed questions' && <>{choices('priorities', 'What matters most to you in your next role?', priorityOptions, true)}{choices('arrangements', 'What working arrangements would you consider?', arrangementOptions, true)}{choices('hours', 'What hours or working pattern could work for you?', hoursOptions, true)}{area('availabilityLimits', 'Are there days, times or practical limits SABI should take into account?')}{choices('travel', 'How are you able to travel for work?', travelOptions, true)}{text('commuteLimit', 'What is the longest journey you would usually consider for work?', 'Give a time, distance, area or Remote work only.', false)}{choices('payMinimum', 'Do you have a minimum level of pay you need?', singleOptions.payMinimum)}{(answers.payMinimum === 'Yes' || answers.payMinimum === 'Not sure') && text('payDetail', 'What pay level or range should SABI use as a practical guide?', 'State whether this is annual, hourly, daily or another basis.')}{area('avoidWork', 'Is there any work, environment or condition you know you do not want?')}</>}
+            {answers.preferenceDetail === 'I would prefer to discuss these' && <Info title="Practical preferences can be discussed">A written alternative remains available; choosing discussion here does not require video.</Info>}
           </>}
 
           {step === 5 && <>
-            {choices('skills', 'Which of these do you feel confident doing?', skillOptions, true)}
-            {area('skillsExamples', 'Tell me about anything you do well or people rely on you for', 'Examples can come from work, education, caring, volunteering, hobbies, advocacy, projects or daily life.')}
-            {area('otherStrengths', 'If someone who knows you well described your strengths, what might they say?')}
-            {area('tools', 'Which software, systems, equipment or digital tools have you used?')}
-            {choices('technologyLearning', 'How do you usually feel about learning a new system or technology?', ['Comfortable', 'Comfortable with time or guidance', 'It depends', 'Often difficult', 'Not sure'])}
-            {choices('hasQualifications', 'Do you have relevant qualifications, training, licences or memberships?', ['Yes', 'No'])}
-            {answers.hasQualifications === 'Yes' && <Repeating title="Qualifications, training, licences or memberships" items={qualifications} onChange={(index, key, value) => updateRepeat(setQualifications, index, key, value)} onAdd={() => setQualifications((items) => [...items, { title: '', provider: '', dates: '', status: '' }])} onRemove={(index) => setQualifications((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Official title'],['provider','Provider and level'],['dates','Dates or expiry'],['status','Grade, result or status']]} />}
-            {area('unpaidExperience', 'Tell me about relevant volunteering, caring, advocacy, community work, projects or unpaid responsibility')}
-            {area('achievement', 'Is there anything you have done, created, managed or overcome that you feel proud of?')}
-            {area('interests', 'Are there interests, hobbies or subjects that show what you enjoy or are good at?')}
+            {choices('evidenceSources', 'Where might useful evidence about your skills come from?', ['Paid work or self-employment', 'Education or training', 'Volunteering or community activity', 'Caring or household responsibilities', 'Advocacy or lived experience', 'Projects, hobbies or interests', 'I am not sure yet'], true, 'Choose every source that might be relevant. You do not need to translate it into polished career language.', false)}
+            {((answers.evidenceSources as string[]) ?? []).length > 0 && <>{choices('skills', 'Which of these do you feel confident doing?', skillOptions, true)}{area('skillsExamples', 'Tell me about anything you do well or people rely on you for', 'Examples can come from work, education, caring, volunteering, hobbies, advocacy, projects or daily life.')}{area('otherStrengths', 'If someone who knows you well described your strengths, what might they say?')}{area('tools', 'Which software, systems, equipment or digital tools have you used?')}{choices('technologyLearning', 'How do you usually feel about learning a new system or technology?', ['Comfortable', 'Comfortable with time or guidance', 'It depends', 'Often difficult', 'Not sure'])}{choices('hasQualifications', 'Do you have relevant qualifications, training, licences or memberships?', ['Yes', 'No'])}{answers.hasQualifications === 'Yes' && <Repeating title="Qualifications, training, licences or memberships" items={qualifications} onChange={(index, key, value) => updateRepeat(setQualifications, index, key, value)} onAdd={() => setQualifications((items) => [...items, { title: '', provider: '', dates: '', status: '' }])} onRemove={(index) => setQualifications((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Official title'],['provider','Provider and level'],['dates','Dates or expiry'],['status','Grade, result or status']]} />}{(answers.evidenceSources as string[]).some((item) => ['Volunteering or community activity', 'Caring or household responsibilities', 'Advocacy or lived experience', 'Projects, hobbies or interests'].includes(item)) && area('unpaidExperience', 'Tell me about relevant unpaid experience, responsibility or projects')}{area('achievement', 'Is there anything you have done, created, managed or overcome that you feel proud of?')}{(answers.evidenceSources as string[]).includes('Projects, hobbies or interests') && area('interests', 'Are there interests, hobbies or subjects that show what you enjoy or are good at?')}</>}
           </>}
 
           {step === 6 && <>
             {choices('searchStage', 'Where are you currently with looking or applying for work?', singleOptions.searchStage)}
-            {choices('difficulties', 'Which parts currently feel difficult?', difficultyOptions, true)}
-            {area('currentStrategies', 'What are you already doing that seems useful?')}
-            <Repeating title="Example jobs, roles or organisations" items={examples} onChange={(index, key, value) => updateRepeat(setExamples, index, key, value)} onAdd={() => setExamples((items) => [...items, { title: '', link: '', appeal: '', concerns: '' }])} onRemove={(index) => setExamples((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Role or organisation'],['link','Link, optional'],['appeal','What appeals'],['concerns','Any concerns']]} />
+            {answers.searchStage && choices('applicationSupportNow', 'Do you have active jobs, applications or interviews you want this service to consider?', ['Yes', 'No', 'Not yet, but I want preparation', 'Not sure'], false, undefined, false)}
+            {answers.applicationSupportNow && <>{choices('difficulties', 'Which parts currently feel difficult?', difficultyOptions, true)}{area('currentStrategies', 'What are you already doing that seems useful?')}</>}
+            {(answers.applicationSupportNow === 'Yes' || answers.applicationSupportNow === 'Not sure') && <Repeating title="Example jobs, roles or organisations" items={examples} onChange={(index, key, value) => updateRepeat(setExamples, index, key, value)} onAdd={() => setExamples((items) => [...items, { title: '', link: '', appeal: '', concerns: '' }])} onRemove={(index) => setExamples((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Role or organisation'],['link','Link, optional'],['appeal','What appeals'],['concerns','Any concerns']]} />}
             {area('supportGoal', 'What would you most like this support to help you achieve?', 'Describe what would make the service feel useful to you.', false)}
             {choices('deadline', 'Do you have a vacancy, interview or other deadline?', singleOptions.deadline)}
             {answers.deadline !== 'No' && answers.deadline && area('deadlineDetail', 'Tell SABI about the deadline', 'Include the date, time, time zone and what must be completed.')}
-            <SimulatedUpload label="Job advert, application draft or other supporting document" files={simulatedFiles} onFiles={addSimulatedFiles} onRemove={(name) => setSimulatedFiles((items) => items.filter((item) => item !== name))} />
+            {(answers.applicationSupportNow === 'Yes' || (answers.deadline && answers.deadline !== 'No')) && <SimulatedUpload label="Job advert, application draft or other supporting document" files={simulatedFiles} onFiles={addSimulatedFiles} onRemove={(name) => setSimulatedFiles((items) => items.filter((item) => item !== name))} />}
           </>}
 
           {step === 7 && <ServiceQuestions serviceId={service.id} answers={answers} setValue={setValue} area={area} choices={choices} />}
@@ -236,7 +253,7 @@ function App() {
             <button type="button" disabled className="w-full rounded-2xl bg-slate-300 px-6 py-4 font-extrabold text-slate-600">Secure payment disabled in development · £{total}</button>
           </>}
 
-          <div className="rounded-3xl bg-teal-900 p-5 text-white sm:p-7"><div className="flex flex-col gap-3 sm:flex-row-reverse sm:justify-between"><button type="button" onClick={() => move(step + 1)} disabled={step === sections.length - 1 || answers.ageBand === 'Under 16'} className="rounded-xl bg-gold-400 px-6 py-3 font-extrabold text-teal-900 disabled:opacity-40">{step === sections.length - 2 ? 'Review answers' : 'Continue →'}</button><button type="button" onClick={() => move(step - 1)} disabled={step === 0} className="rounded-xl px-5 py-3 font-bold disabled:opacity-30">← Back</button></div><p className="mt-4 border-t border-white/20 pt-4 text-sm" aria-live="polite">{saveMessage}</p></div>
+          <div className="rounded-3xl bg-teal-900 p-5 text-white sm:p-7"><div className="flex flex-col gap-3 sm:flex-row-reverse sm:justify-between"><button type="button" onClick={() => move(step + 1)} disabled={step === sections.length - 1 || !sectionReady[step]} className="rounded-xl bg-gold-400 px-6 py-3 font-extrabold text-teal-900 disabled:opacity-40">{step === sections.length - 2 ? 'Review answers' : 'Continue →'}</button><button type="button" onClick={() => move(step - 1)} disabled={step === 0} className="rounded-xl px-5 py-3 font-bold disabled:opacity-30">← Back</button></div>{!sectionReady[step] && step < 7 && <p className="mt-3 text-sm font-semibold text-amber-200">Answer the gateway questions shown above to continue. Detailed questions appear only when relevant.</p>}<p className="mt-4 border-t border-white/20 pt-4 text-sm" aria-live="polite">{saveMessage}</p></div>
         </form>
       </section>
     </main>
@@ -244,7 +261,7 @@ function App() {
 }
 
 function Field({ label, help, optional = true, children }: { label: string, help?: string, optional?: boolean, children: ReactNode }) {
-  return <section className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><div className="mb-4"><h3 className="font-display text-2xl font-semibold text-ink">{label}</h3>{optional && <span className="text-xs font-bold uppercase tracking-wide text-slate-500">Optional unless marked or required by your route</span>}{help && <p className="mt-2 leading-6 text-slate-600">{help}</p>}</div>{children}</section>
+  return <section className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><div className="mb-4"><h3 className="font-display text-2xl font-semibold text-ink">{label}</h3><span className={`text-xs font-bold uppercase tracking-wide ${optional ? 'text-slate-500' : 'text-teal-700'}`}>{optional ? 'Optional unless marked or required by your route' : 'Required gateway question'}</span>{help && <p className="mt-2 leading-6 text-slate-600">{help}</p>}</div>{children}</section>
 }
 
 function Info({ title, children, tone = 'normal' }: { title: string, children: ReactNode, tone?: 'normal' | 'warning' }) {
