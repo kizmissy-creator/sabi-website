@@ -10,18 +10,22 @@ file in the dedicated Google Drive folder.
 - Folder ID: `1gPQZMUPJ4K8iPUhxC9GzXXuA_VQnKIHr`
 - URL: <https://drive.google.com/drive/folders/1gPQZMUPJ4K8iPUhxC9GzXXuA_VQnKIHr>
 
-## Required GitHub configuration
+## Authentication
 
-The workflow expects:
+The workflow uses short-lived GitHub OpenID Connect credentials through Google
+Cloud Workload Identity Federation. It does not use a downloaded service-account
+key or a GitHub credential secret.
 
-- Repository secret `GOOGLE_DRIVE_CREDENTIALS`: the complete JSON credential
-  for a restricted Google service account.
-- Repository variable `GOOGLE_DRIVE_FOLDER_ID`:
-  `1gPQZMUPJ4K8iPUhxC9GzXXuA_VQnKIHr`
+- Google Cloud project number: `140178503272`
+- Workload Identity Pool: `github`
+- Workload Identity Provider: `sabi-website`
+- Service account:
+  `sabi-github-drive-sync@ninth-wares-504519-g1.iam.gserviceaccount.com`
+- Allowed GitHub repository: `kizmissy-creator/sabi-website`
 
 The Drive folder must be shared as **Editor** with the service account email.
-Do not commit the JSON credential to the repository or paste it into issues,
-pull requests, workflow files, or logs.
+The provider must restrict access to the named repository, and the service
+account must grant Workload Identity User only to that repository principal.
 
 ## Behaviour
 

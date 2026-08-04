@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   sync-drive-snapshot:
@@ -26,13 +27,14 @@ jobs:
       - name: Authenticate to Google
         uses: google-github-actions/auth@v3
         with:
-          credentials_json: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          workload_identity_provider: projects/140178503272/locations/global/workloadIdentityPools/github/providers/sabi-website
+          service_account: sabi-github-drive-sync@ninth-wares-504519-g1.iam.gserviceaccount.com
 
       - name: Install Google Drive client
         run: python -m pip install --disable-pip-version-check google-api-python-client google-auth
 
       - name: Replace Drive snapshot
         env:
-          GOOGLE_DRIVE_FOLDER_ID: ${{ vars.GOOGLE_DRIVE_FOLDER_ID }}
+          GOOGLE_DRIVE_FOLDER_ID: 1gPQZMUPJ4K8iPUhxC9GzXXuA_VQnKIHr
           SNAPSHOT_PATH: SABI_Website_Main.zip
         run: python .github/scripts/sync_snapshot_to_drive.py
