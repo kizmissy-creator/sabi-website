@@ -24,7 +24,14 @@ query = (
 )
 matches = (
     drive.files()
-    .list(q=query, spaces="drive", fields="files(id,name)", pageSize=10)
+    .list(
+        q=query,
+        spaces="drive",
+        fields="files(id,name)",
+        pageSize=10,
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True,
+    )
     .execute()
     .get("files", [])
 )
@@ -35,11 +42,16 @@ media = MediaFileUpload(
 
 if matches:
     file_id = matches[0]["id"]
-    drive.files().update(fileId=file_id, media_body=media).execute()
+    drive.files().update(
+        fileId=file_id, media_body=media, supportsAllDrives=True
+    ).execute()
     print(f"Updated Google Drive snapshot: {snapshot_path.name}")
 else:
     metadata = {"name": snapshot_path.name, "parents": [folder_id]}
     drive.files().create(
-        body=metadata, media_body=media, fields="id,name"
+        body=metadata,
+        media_body=media,
+        fields="id,name",
+        supportsAllDrives=True,
     ).execute()
     print(f"Created Google Drive snapshot: {snapshot_path.name}")

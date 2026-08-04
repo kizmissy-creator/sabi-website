@@ -35,6 +35,6 @@ jobs:
 
       - name: Replace Drive snapshot
         env:
-          GOOGLE_DRIVE_FOLDER_ID: 1gPQZMUPJ4K8iPUhxC9GzXXuA_VQnKIHr
+          GOOGLE_DRIVE_FOLDER_ID: 0ABAuKX_bvh9eUk9PVA
           SNAPSHOT_PATH: SABI_Website_Main.zip
         run: python .github/scripts/sync_snapshot_to_drive.py
