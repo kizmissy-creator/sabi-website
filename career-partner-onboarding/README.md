@@ -1,6 +1,6 @@
-# SABI Career Partner onboarding prototype
+# SABI Career Support onboarding development shell
 
-An isolated front-end prototype for Brona’s Career Partner onboarding experience.
+An isolated, framework-driven front-end development form for SABI Career Support.
 
 ## Run locally
 
@@ -19,7 +19,9 @@ pnpm build
 
 - React, TypeScript and Tailwind CSS
 - Local component state only
-- “Save and return later” stores the five example answers in the current browser’s `localStorage`
+- Local development saving in the current browser only
+- Shared intake sections and service-specific branches for all five paid launch services
+- Simulated uploads, scope flags, review, contractual controls and disabled checkout
 - No account, payment, database, email, upload or analytics integration
 - No changes to the existing SABI website repository
 
