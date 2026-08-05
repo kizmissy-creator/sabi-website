@@ -233,9 +233,10 @@ type TextInputProps = InputHTMLAttributes<HTMLInputElement> & {
 }
 
 export function TextInput({ label, hideLabel = true, id, ...props }: TextInputProps) {
+  const showLabel = !hideLabel || String(id).startsWith('experience-')
   return (
     <div>
-      <label htmlFor={id} className={hideLabel ? 'sr-only' : 'mb-2 block font-bold'}>
+      <label htmlFor={id} className={showLabel ? 'mb-2 block font-bold text-teal-950' : 'sr-only'}>
         {label}
       </label>
       <input id={id} className="field" {...props} />
