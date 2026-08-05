@@ -1,0 +1,100 @@
+{
+  "$schema": "./service-form-contract.schema.json",
+  "contractId": "sabi-admin-systems-v0",
+  "status": "development-disabled",
+  "source": {
+    "framework": "CURRENT - SABI Admin and Systems Service Framework - v10 - August 2026",
+    "driveFileId": "16tZNV1SkUCUIY5vPdrNnasePo7a7Rwzq",
+    "formArchitectureId": "1PGf4K_D2WIFPNP2geVal-UAf8wWo06iujfqXFQROgEA"
+  },
+  "serviceFamily": "admin-systems",
+  "routes": ["admin-tool-fix", "workflow-reset", "clarity-review", "tailored-systems-project"],
+  "reference": {
+    "enquiryPattern": "AS-ENQ-YYYY-NNN",
+    "projectPattern": "AS-PRJ-YYYY-NNN",
+    "sequenceScope": "admin-systems-only"
+  },
+  "stage1": {
+    "purpose": "brief-routing-enquiry",
+    "uploadsAllowed": false,
+    "fields": [
+      { "id": "enquiryFor", "type": "single", "required": true },
+      { "id": "contactName", "type": "text", "required": true },
+      { "id": "email", "type": "email", "required": true },
+      { "id": "organisation", "type": "text", "required": false },
+      { "id": "authority", "type": "text", "requiredWhen": "enquiryFor != self" },
+      { "id": "startingNeed", "type": "single", "required": true, "options": ["one-existing-item", "one-simple-new-item", "recurring-process", "problem-not-clear", "several-connected-processes", "not-sure"] },
+      { "id": "problemSummary", "type": "textarea", "required": true },
+      { "id": "intendedOutcome", "type": "textarea", "required": true },
+      { "id": "systemsInvolved", "type": "textarea", "required": false },
+      { "id": "sensitiveDataLikely", "type": "single", "required": true, "options": ["yes", "no", "not-sure"] },
+      { "id": "deadlineExists", "type": "single", "required": true, "options": ["yes", "no", "not-sure"] },
+      { "id": "deadlineSummary", "type": "text", "requiredWhen": "deadlineExists == yes" },
+      { "id": "accessNeeds", "type": "textarea", "required": false },
+      { "id": "privacyAcknowledged", "type": "control", "required": true }
+    ],
+    "routing": {
+      "one-existing-item": "admin-tool-fix-review",
+      "one-simple-new-item": "admin-tool-fix-review",
+      "recurring-process": "workflow-reset-review",
+      "problem-not-clear": "clarity-review-review",
+      "several-connected-processes": "tailored-project-review",
+      "not-sure": "manual-review"
+    }
+  },
+  "stage2": {
+    "access": { "tokenRequired": true, "tokenExpiryDays": "TBD", "saveAndReturnRequired": true },
+    "commonFields": ["enquiryReference", "confirmedRoute", "projectWorkingTitle", "currentState", "intendedUsers", "decisionOwner", "whatMustRemainUnchanged", "desiredOutcomes", "successMeasures", "platformsAndAccounts", "accountOwnership", "dataSensitivity", "redactedOrDummyMaterialAvailable", "accessibilityRequirements", "deadline", "budgetConstraints", "thirdPartyCosts", "clientResponsibilities", "privacyVersion"],
+    "branches": {
+      "admin-tool-fix": ["boundedItem", "primaryPurpose", "clearBrief", "existingProblem", "outputFormat", "platformLimitations"],
+      "workflow-reset": ["currentProcess", "normalPath", "knownVariations", "rolesAndResponsibilities", "painPoints", "exceptions", "businessCriticality", "failureConsequences", "backupPlan", "rollbackPlan", "representativeUserTesting", "handoverFormat", "automationExpectations", "manualFallback", "minimumEffectiveIntervention"],
+      "clarity-review": ["connectedAreas", "previousAttempts", "safeExamples", "priorities", "constraints", "diagnosticDecisionNeeded"],
+      "tailored-systems-project": ["connectedProcesses", "stakeholders", "migrationEstimate", "integrationNeeds", "milestonesNeeded"]
+    }
+  },
+  "endpoint": {
+    "enabled": false,
+    "url": null,
+    "deployment": "dedicated-admin-systems-apps-script",
+    "scriptPropertyKey": "ADMIN_SYSTEMS_CONFIG"
+  },
+  "storage": {
+    "sheetId": "TBD",
+    "sheetPurpose": "admin-systems-structured-records-only",
+    "driveFolderId": "TBD",
+    "drivePurpose": "admin-systems-approved-uploads-only",
+    "restrictedAccessGroup": "TBD",
+    "crossServiceStorageAllowed": false
+  },
+  "uploads": {
+    "enabled": false,
+    "allowedStage": 2,
+    "requiresApprovedRoute": true,
+    "malwareAndTypeChecks": "TBD",
+    "record": ["caseReference", "originalName", "mimeType", "size", "uploadedAt", "retentionClass", "scheduledDeletionAt"]
+  },
+  "notifications": {
+    "recipients": "TBD",
+    "includeAnswers": false,
+    "includeAttachments": false,
+    "safeFields": ["reference", "route", "receivedAt", "manualReviewFlag"]
+  },
+  "retention": {
+    "policyVersion": "TBD",
+    "enquiryDays": "TBD",
+    "declinedDays": "TBD",
+    "projectDaysAfterClosure": "TBD",
+    "deletionEvidenceRequired": true
+  },
+  "controls": {
+    "privacyVersion": "TBD",
+    "termsVersion": "TBD",
+    "serverValidation": true,
+    "duplicateProtection": true,
+    "rateLimiting": true,
+    "spreadsheetFormulaEscaping": true,
+    "highRiskDataManualReview": true,
+    "payment": { "enabled": false }
+  },
+  "acceptance": ["stage1-no-upload", "all-routing-outcomes", "token-expiry", "save-and-return", "server-validation", "duplicate-protection", "safe-notification-content", "restricted-sheet-permissions", "restricted-folder-permissions", "failed-upload-recovery", "deletion-and-evidence", "keyboard-and-screen-reader", "mobile-and-zoom", "no-career-or-writing-records"]
+}

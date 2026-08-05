@@ -1,0 +1,102 @@
+{
+  "$schema": "./service-form-contract.schema.json",
+  "contractId": "sabi-writing-clarity-v0",
+  "status": "development-disabled",
+  "source": {
+    "portfolioFrameworkId": "1T_N4Rfi6JMQyiQNQJUmV-zf4N3T3F3qC3KCLzSUjTls",
+    "enquirySpecificationId": "1qCxlZn7p5JkhbsmZtC3jk3Bn9Lo-ig3M6yJjK_1br20",
+    "formArchitectureId": "1PGf4K_D2WIFPNP2geVal-UAf8wWo06iujfqXFQROgEA"
+  },
+  "serviceFamily": "writing-clarity",
+  "routes": ["clarity-edit", "case-study", "report-briefing", "article-expert-content", "manual-review"],
+  "reference": {
+    "enquiryPattern": "WC-ENQ-YYYY-NNN",
+    "quotationPatterns": { "clarity-edit": "CE-YYYY-NNN", "case-study": "CS-YYYY-NNN", "report-briefing": "RB-YYYY-NNN", "article-expert-content": "AC-YYYY-NNN" },
+    "sequenceScope": "writing-clarity-only"
+  },
+  "stage1": {
+    "purpose": "brief-routing-enquiry",
+    "uploadsAllowed": false,
+    "fields": [
+      { "id": "enquiryFor", "type": "single", "required": true, "options": ["self", "business-organisation", "another-person-with-knowledge", "not-sure"] },
+      { "id": "contactName", "type": "text", "required": true },
+      { "id": "email", "type": "email", "required": true },
+      { "id": "organisationRoleAuthority", "type": "textarea", "requiredWhen": "enquiryFor == business-organisation" },
+      { "id": "ageBand", "type": "single", "requiredWhen": "enquiryFor == self", "options": ["16-17", "18-plus", "organisation"] },
+      { "id": "need", "type": "single", "required": true, "options": ["improve-draft", "case-study", "report-briefing", "article-expert-content", "not-sure"] },
+      { "id": "currentMaterial", "type": "single", "required": true, "options": ["complete-draft", "rough-draft", "notes-or-sources", "interviews-or-people", "findings-or-records", "idea-only"] },
+      { "id": "intendedReaderAndOutcome", "type": "textarea", "required": true },
+      { "id": "deadline", "type": "text", "required": false },
+      { "id": "thirdPartyOrSensitiveLikely", "type": "single", "required": true, "options": ["yes", "no", "not-sure"] },
+      { "id": "accessNeeds", "type": "textarea", "required": false },
+      { "id": "privacyAcknowledged", "type": "control", "required": true }
+    ],
+    "routing": {
+      "improve-draft": "clarity-edit",
+      "case-study": "case-study-manual-safeguard-review",
+      "report-briefing": "report-briefing",
+      "article-expert-content": "article-expert-content",
+      "not-sure": "manual-review"
+    }
+  },
+  "stage2": {
+    "access": { "tokenRequired": true, "tokenExpiryDays": 21, "reminderDay": 14, "controlledRouteDefaultDays": 7, "saveAndReturnRequired": true },
+    "commonFields": ["enquiryReference", "serviceRoute", "projectWorkingTitle", "sourceStatusAndVersion", "materialTransferMethod", "unnecessaryInformationRemoved", "thirdPartyAndSensitiveDeclaration", "authorityToProvideMaterial", "factualApprovalOwner", "specialistApprovalOwner", "publicationApprovalOwner", "toneAndVoice", "deliveryFormat", "deadlineConfirmation", "privacyVersion"],
+    "branches": {
+      "clarity-edit": ["draftPurpose", "intendedReader", "desiredChangeLevel", "mustKeep", "knownFactChecks", "approvalOwner"],
+      "case-study": ["projectOrOutcome", "participantRelationship", "allIdentifiableParticipants18Plus", "vulnerabilityOrDependencyReview", "supportArrangements", "identityTreatment", "publicationLocation", "permissionStatus", "withdrawalPoint", "participantRecordOwner", "interviewMethod", "outcomeEvidence", "participantApprovalOwner", "organisationApprovalOwner"],
+      "report-briefing": ["reportType", "audience", "purposeAndDecision", "requiredTemplate", "wordRange", "sourceList", "fileCount", "approximatePages", "authoritativeSourceRule", "stakeholderInputs", "findingsStatus", "recommendationAuthority", "citationsTablesVisualisation", "specialistApprovalOwner"],
+      "article-expert-content": ["topic", "platform", "reader", "desiredAction", "authorVoice", "centralPoint", "briefMethod", "sourceList", "newResearchRequested", "brandVoice", "prohibitedClaims", "seoAndLinks", "byline", "publicationApprovalOwner", "consequentialClaims"]
+    }
+  },
+  "endpoint": {
+    "enabled": false,
+    "url": null,
+    "deployment": "dedicated-writing-clarity-apps-script",
+    "scriptPropertyKey": "WRITING_CLARITY_CONFIG"
+  },
+  "storage": {
+    "sheetId": "TBD",
+    "sheetPurpose": "writing-clarity-structured-records-only",
+    "driveFolderId": "TBD",
+    "drivePurpose": "writing-clarity-approved-source-files-only",
+    "participantApprovalStoreId": "TBD",
+    "restrictedAccessGroup": "TBD",
+    "crossServiceStorageAllowed": false
+  },
+  "uploads": {
+    "enabled": false,
+    "allowedStage": 2,
+    "requiresApprovedRoute": true,
+    "standardSingleFileLimitMb": 10,
+    "sourcePackExceptionsRequireApproval": true,
+    "record": ["caseReference", "originalName", "mimeType", "size", "uploadedAt", "retentionClass", "scheduledDeletionAt"]
+  },
+  "notifications": {
+    "recipients": "TBD",
+    "includeAnswers": false,
+    "includeAttachments": false,
+    "safeFields": ["reference", "route", "receivedAt", "manualReviewFlag", "participantSafeguardFlag"]
+  },
+  "retention": {
+    "policyVersion": "TBD",
+    "enquiryDays": "TBD",
+    "declinedDays": "TBD",
+    "projectDaysAfterClosure": "TBD",
+    "participantApprovalDays": "TBD",
+    "deletionEvidenceRequired": true
+  },
+  "controls": {
+    "privacyVersion": "TBD",
+    "termsVersion": "TBD",
+    "serverValidation": true,
+    "duplicateProtection": true,
+    "rateLimiting": true,
+    "spreadsheetFormulaEscaping": true,
+    "identifiableUnder18CaseStudyStop": true,
+    "vulnerableAdultManualReview": true,
+    "sourceAndClaimMapsRequired": ["report-briefing", "article-expert-content"],
+    "payment": { "enabled": false }
+  },
+  "acceptance": ["stage1-no-upload", "all-routing-outcomes", "correct-reference-pattern", "token-creation-and-expiry", "save-and-return", "server-validation", "safe-notification-content", "restricted-sheet-permissions", "restricted-folder-permissions", "failed-upload-recovery", "under18-case-study-stop", "vulnerable-adult-review", "separate-participant-approval", "source-and-claim-maps", "deletion-and-evidence", "keyboard-and-screen-reader", "mobile-and-zoom", "no-career-or-admin-records"]
+}
