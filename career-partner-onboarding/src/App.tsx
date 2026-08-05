@@ -17,6 +17,7 @@ import {
 
 type Answers = Record<string, string | string[] | boolean>
 type RepeatItem = Record<string, string>
+type ValidationIssue = { key: string, message: string }
 
 const initialAnswers: Answers = {
   service: 'career-partner', ageBand: '', firstName: '', lastName: '', preferredName: '', pronouns: '', email: '', phone: '', location: '',
@@ -44,6 +45,7 @@ function App() {
   const [qualifications, setQualifications] = useState<RepeatItem[]>([{ title: '', provider: '', dates: '', status: '' }])
   const [examples, setExamples] = useState<RepeatItem[]>([{ title: '', link: '', appeal: '', concerns: '' }])
   const [simulatedFiles, setSimulatedFiles] = useState<string[]>([])
+  const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([])
 
   useEffect(() => {
     try {
@@ -107,8 +109,56 @@ function App() {
   }
 
   function move(next: number) {
+    setValidationIssues([])
     setStep(Math.max(0, Math.min(next, sections.length - 1)))
     window.setTimeout(() => document.getElementById('form-section')?.scrollIntoView({ block: 'start' }), 0)
+  }
+
+  function issuesForStep(): ValidationIssue[] {
+    const issues: ValidationIssue[] = []
+    const requireValue = (condition: boolean, key: string, message: string) => { if (!condition) issues.push({ key, message }) }
+    if (step === 0) {
+      requireValue(Boolean(answers.serviceFit), 'service-fit-first', 'Choose the statement closest to what you need.')
+      requireValue(Boolean(answers.ageBand), 'ageBand', 'Choose your age group.')
+    }
+    if (step === 1) {
+      requireValue(Boolean(answers.firstName), 'firstName', 'Enter your first name.')
+      requireValue(Boolean(answers.lastName), 'lastName', 'Enter your last name.')
+      requireValue(Boolean(answers.email), 'email', 'Enter your email address.')
+      requireValue(Boolean(answers.location), 'location', 'Enter your town, city or postcode area.')
+    }
+    if (step === 2) {
+      requireValue((answers.employmentStatus as string[]).length > 0, 'employmentStatus', 'Choose at least one current situation.')
+      requireValue(Boolean(answers.currentRoleApplies), 'currentRoleApplies', 'Tell us whether a current or recent role applies.')
+    }
+    if (step === 3) requireValue(Boolean(answers.workHistoryMethod), 'workHistoryMethod', 'Choose how you would like to provide your work history.')
+    if (step === 4) {
+      requireValue(Boolean(answers.clarity), 'clarity', 'Choose how clear you feel about your next role.')
+      requireValue(Boolean(answers.preferenceDetail), 'preferenceDetail', 'Choose whether to add practical preferences now.')
+    }
+    if (step === 5) requireValue(((answers.evidenceSources as string[]) ?? []).length > 0, 'evidenceSources', 'Choose at least one possible source of skills evidence.')
+    if (step === 6) {
+      requireValue(Boolean(answers.searchStage), 'searchStage', 'Choose where you are with looking or applying for work.')
+      requireValue(Boolean(answers.applicationSupportNow), 'applicationSupportNow', 'Tell us whether active applications should be considered.')
+    }
+    return issues
+  }
+
+  function requestMove(next: number) {
+    const issues = issuesForStep()
+    if (issues.length > 0) {
+      setValidationIssues(issues)
+      window.setTimeout(() => document.getElementById('validation-summary')?.focus(), 0)
+      return
+    }
+    move(next)
+  }
+
+  function focusIssue(key: string) {
+    const target = key === 'service-fit-first'
+      ? document.querySelector<HTMLButtonElement>('button[data-service-fit]')
+      : document.querySelector<HTMLElement>(`[name="${key}"]`)
+    target?.focus()
   }
 
   function addSimulatedFiles(files: FileList | null) {
@@ -150,6 +200,7 @@ function App() {
         <div className="mb-7 border-l-4 border-gold-400 pl-5"><p className="eyebrow">Section {step + 1} of {sections.length}</p><h2 className="mt-2 font-display text-3xl font-semibold text-teal-900">{sections[step][1]}</h2></div>
 
         <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+          {validationIssues.length > 0 && <section id="validation-summary" role="alert" aria-labelledby="validation-title" tabIndex={-1} className="rounded-2xl border-2 border-red-700 bg-red-50 p-5 text-red-950 outline-none focus:ring-4 focus:ring-red-300"><h3 id="validation-title" className="text-xl font-extrabold">Please answer the required questions</h3><p className="mt-2">Your other answers are still saved. Choose a message below to move to that question.</p><ul className="mt-3 list-disc space-y-2 pl-5">{validationIssues.map((issue) => <li key={issue.key}><button type="button" onClick={() => focusIssue(issue.key)} className="font-bold underline decoration-2 underline-offset-2">{issue.message}</button></li>)}</ul></section>}
           {step === 0 && <>
             <Info title="Before you begin">This development form stores fictional answers only in this browser. The finished service will provide secure email verification, save-and-return and private records. Read the SABI Privacy Notice before entering detailed information.</Info>
             <Field label="Which statement is closest to what you need?" help="This suggests a starting service. You can still choose a different service below." optional={false}><div className="grid gap-3">{Object.entries({
@@ -158,7 +209,7 @@ function App() {
               'I have a broad direction and need coordinated application documents': 'Career Partner',
               'I also need interview preparation and short follow-up support': 'Career Partner Plus',
               'I need a first CV for a limited, straightforward history': 'Starter CV',
-            }).map(([answer, result]) => <button type="button" key={answer} onClick={() => setServiceFit(answer)} className={`rounded-2xl border-2 p-4 text-left ${answers.serviceFit === answer ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white'}`}><strong className="block text-teal-900">{answer}</strong><span className="mt-1 block text-sm text-slate-600">Suggested starting point: {result}</span></button>)}</div></Field>
+            }).map(([answer, result], index) => <button type="button" key={answer} data-service-fit={index === 0 ? 'first' : undefined} onClick={() => setServiceFit(answer)} className={`rounded-2xl border-2 p-4 text-left ${answers.serviceFit === answer ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white'}`}><strong className="block text-teal-900">{answer}</strong><span className="mt-1 block text-sm text-slate-600">Suggested starting point: {result}</span></button>)}</div></Field>
             {answers.serviceFit && <Info title={`Suggested starting point: ${service.name}`}>This is a guide, not an automatic suitability decision. Any combined, urgent, specialist or materially different work is reviewed before payment.</Info>}
             <h3 className="font-display text-2xl font-semibold text-teal-900">Confirm the service you want to explore</h3>
             <div className="grid gap-3 sm:grid-cols-2">{services.map((item) => <button type="button" key={item.id} onClick={() => setValue('service', item.id)} className={`rounded-2xl border-2 p-4 text-left ${service.id === item.id ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white'}`}><span className="font-display text-xl font-semibold text-teal-900">{item.name}</span><span className="float-right font-bold text-teal-800">£{item.price}</span><p className="mt-2 text-sm leading-6 text-slate-600">{item.summary}</p></button>)}</div>
@@ -250,10 +301,11 @@ function App() {
               ['declaration', 'I confirm that the information supplied is accurate to the best of my knowledge and that I will review final documents before using them'],
             ].map(([key, label]) => <label key={key} className="flex gap-3 rounded-2xl border border-teal-200 bg-white p-4"><input type="checkbox" checked={Boolean(answers[key])} onChange={(event) => setValue(key, event.target.checked)} /><span>{label}</span></label>)}</div></Field>
             {scopeFlags.length > 0 && <Info tone="warning" title="Manual scope review required">{scopeFlags.join(' ')}</Info>}
+            {!answers.termsAccepted && <section role="alert" className="rounded-2xl border-2 border-red-700 bg-red-50 p-5 text-red-950"><h3 className="font-extrabold">Terms acceptance is required before payment</h3><p className="mt-2">Review and accept the Career Support Terms and Service Schedule above. Your form answers remain saved.</p></section>}
             <button type="button" disabled className="w-full rounded-2xl bg-slate-300 px-6 py-4 font-extrabold text-slate-600">Secure payment disabled in development · £{total}</button>
           </>}
 
-          <div className="rounded-3xl bg-teal-900 p-5 text-white sm:p-7"><div className="flex flex-col gap-3 sm:flex-row-reverse sm:justify-between"><button type="button" onClick={() => move(step + 1)} disabled={step === sections.length - 1 || !sectionReady[step]} className="rounded-xl bg-gold-400 px-6 py-3 font-extrabold text-teal-900 disabled:opacity-40">{step === sections.length - 2 ? 'Review answers' : 'Continue →'}</button><button type="button" onClick={() => move(step - 1)} disabled={step === 0} className="rounded-xl px-5 py-3 font-bold disabled:opacity-30">← Back</button></div>{!sectionReady[step] && step < 7 && <p className="mt-3 text-sm font-semibold text-amber-200">Answer the gateway questions shown above to continue. Detailed questions appear only when relevant.</p>}<p className="mt-4 border-t border-white/20 pt-4 text-sm" aria-live="polite">{saveMessage}</p></div>
+          <div className="rounded-3xl bg-teal-900 p-5 text-white sm:p-7"><div className="flex flex-col gap-3 sm:flex-row-reverse sm:justify-between"><button type="button" onClick={() => requestMove(step + 1)} disabled={step === sections.length - 1 || answers.ageBand === 'Under 16'} className="rounded-xl bg-gold-400 px-6 py-3 font-extrabold text-teal-900 disabled:opacity-40">{step === sections.length - 2 ? 'Review answers' : 'Continue →'}</button><button type="button" onClick={() => move(step - 1)} disabled={step === 0} className="rounded-xl px-5 py-3 font-bold disabled:opacity-30">← Back</button></div>{!sectionReady[step] && step < 7 && <p className="mt-3 text-sm font-semibold text-amber-200">Answer the gateway questions shown above to continue. Detailed questions appear only when relevant.</p>}<p className="mt-4 border-t border-white/20 pt-4 text-sm" aria-live="polite">{saveMessage}</p></div>
         </form>
       </section>
     </main>
