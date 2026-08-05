@@ -31,30 +31,30 @@ No item may be marked passed from code inspection alone when the test requires i
 
 | ID | Scenario | Expected result | State |
 | --- | --- | --- | --- |
-| ROUTE-01 | Choose Career + defined need | Career result appears and Continue opens Career intake | Not run |
-| ROUTE-02 | Choose Career + explore | Guided Career result appears | Not run |
-| ROUTE-03 | Choose Admin | Admin result opens Admin service page | Not run |
-| ROUTE-04 | Choose Writing | Writing result opens Writing service page | Not run |
-| ROUTE-05 | Choose unsure or brief enquiry | General enquiry route appears; no detailed service form opens | Not run |
-| ROUTE-06 | Start again | Both umbrella answers and result reset | Not run |
-| PAGE-01 | Review Admin page | Two public launch offers and correct starting-price wording display | Not run |
-| PAGE-02 | Review Writing page | Four public routes and correct starting prices display | Not run |
-| PAGE-03 | Follow enquiry CTA | Correct service-specific Stage 1 shell opens | Not run |
-| PAGE-04 | Use back controls | Returns to the correct service page/router without submitting | Not run |
+| ROUTE-01 | Choose Career + defined need | Career result appears and Continue opens Career intake | Manual pass |
+| ROUTE-02 | Choose Career + explore | Guided Career result appears | Manual pass |
+| ROUTE-03 | Choose Admin | Admin result opens Admin service page | Manual pass |
+| ROUTE-04 | Choose Writing | Writing result opens Writing service page | Manual pass |
+| ROUTE-05 | Choose unsure or brief enquiry | General enquiry route appears; no detailed service form opens | Manual pass |
+| ROUTE-06 | Start again | Both umbrella answers and result reset | Manual pass |
+| PAGE-01 | Review Admin page | Two public launch offers and correct starting-price wording display | Manual pass |
+| PAGE-02 | Review Writing page | Four public routes and correct starting prices display | Manual pass |
+| PAGE-03 | Follow enquiry CTA | Correct service-specific Stage 1 shell opens | Manual pass |
+| PAGE-04 | Use back controls | Returns to the correct service page/router without submitting | Manual pass |
 
 ## Stage 1 enquiry acceptance
 
 | ID | Scenario | Expected result | State |
 | --- | --- | --- | --- |
-| ENQ-01 | Submit an empty Admin review | Accessible error summary lists required fields | Not run |
-| ENQ-02 | Complete fictional Admin Tool Fix route | Admin Tool Fix review result appears; Submission stays disabled | Not run |
-| ENQ-03 | Complete fictional Workflow Reset route | Workflow Reset review result appears; Submission stays disabled | Not run |
-| ENQ-04 | Complete fictional Writing Clarity Edit route | Clarity Edit review result appears; Submission stays disabled | Not run |
-| ENQ-05 | Choose Writing case study | Safeguard and suitability review result appears | Not run |
-| ENQ-06 | Enter third-party/sensitive = Yes | No sensitive-detail field or upload is requested | Not run |
+| ENQ-01 | Submit an empty Admin review | Accessible error summary lists required fields | Manual pass |
+| ENQ-02 | Complete fictional Admin Tool Fix route | Admin Tool Fix review result appears; Submission stays disabled | Manual pass |
+| ENQ-03 | Complete fictional Workflow Reset route | Workflow Reset review result appears; Submission stays disabled | Manual pass |
+| ENQ-04 | Complete fictional Writing Clarity Edit route | Clarity Edit review result appears; Submission stays disabled | Manual pass |
+| ENQ-05 | Choose Writing case study | Safeguard and suitability review result appears | Manual pass |
+| ENQ-06 | Enter third-party/sensitive = Yes | No sensitive-detail field or upload is requested | Manual pass |
 | ENQ-07 | Inspect network and browser storage | No request is sent and no enquiry value is persisted | Not run |
-| ENQ-08 | Refresh after entering fictional answers | Answers clear; no save-and-return claim is made | Not run |
-| ENQ-09 | Inspect form controls | No file input, payment button, live privacy agreement or endpoint exists | Not run |
+| ENQ-08 | Refresh after entering fictional answers | Answers clear; no save-and-return claim is made | Manual pass |
+| ENQ-09 | Inspect form controls | No file input, payment button, live privacy agreement or endpoint exists | Manual pass |
 
 ## Accessibility acceptance
 
@@ -62,23 +62,23 @@ No item may be marked passed from code inspection alone when the test requires i
 | --- | --- | --- | --- |
 | A11Y-01 | Complete router and both Stage 1 shells without a pointer | Keyboard only; include backward navigation | Not run |
 | A11Y-02 | Focus remains visible on every interactive element | Keyboard review at 100% and 200% zoom | Not run |
-| A11Y-03 | Headings, landmarks, fieldsets, legends and labels form a coherent structure | Screen reader and accessibility tree | Not run |
-| A11Y-04 | Error summary is announced and focus moves to it | Screen reader with empty-form review | Not run |
+| A11Y-03 | Headings, landmarks, fieldsets, legends and labels form a coherent structure | Screen reader and accessibility tree | Partial pass: accessibility tree only |
+| A11Y-04 | Error summary is announced and focus moves to it | Screen reader with empty-form review | Partial pass: focus/tree only |
 | A11Y-05 | Routing result is announced without an unexpected context change | Screen reader | Not run |
-| A11Y-06 | Content reflows without horizontal page scrolling | 320 CSS px and 400% zoom | Not run |
-| A11Y-07 | Selected radio and checkbox states are perceivable without colour alone | Visual and screen-reader review | Not run |
+| A11Y-06 | Content reflows without horizontal page scrolling | 320 CSS px and 400% zoom | Partial pass: 320 CSS px |
+| A11Y-07 | Selected radio and checkbox states are perceivable without colour alone | Visual and screen-reader review | Partial pass: accessibility tree |
 | A11Y-08 | Reduced-motion preference removes non-essential motion | OS/browser reduced-motion emulation | Not run |
 | A11Y-09 | Text and meaningful controls meet contrast requirements | Automated scan plus manual spot check | Not run |
-| A11Y-10 | Touch targets and spacing are usable on mobile | Mobile viewport and touch review | Not run |
+| A11Y-10 | Touch targets and spacing are usable on mobile | Mobile viewport and touch review | Partial pass: 320 CSS px reflow |
 
 ## Career regression checks
 
 | ID | Scenario | Expected result | State |
 | --- | --- | --- | --- |
-| CAREER-01 | Return to Career after using router | Existing fictional draft behaviour remains intact | Not run |
-| CAREER-02 | Attempt to advance without gateway answers | Error summary appears and answers remain | Not run |
-| CAREER-03 | Decline optional special-category consent | Sensitive questions remain locked | Not run |
-| CAREER-04 | Reach review | Service Schedule is labelled development preview and payment remains disabled | Not run |
+| CAREER-01 | Return to Career after using router | Existing fictional draft behaviour remains intact | Manual pass |
+| CAREER-02 | Attempt to advance without gateway answers | Error summary appears and answers remain | Manual pass |
+| CAREER-03 | Decline optional special-category consent | Sensitive questions remain locked | Manual pass |
+| CAREER-04 | Reach review | Service Schedule is labelled development preview and payment remains disabled | Manual pass |
 | CAREER-05 | Inspect local storage | Only Career fictional development data is present; no Admin/Writing data is stored | Not run |
 
 ## Backend and production tests—currently blocked

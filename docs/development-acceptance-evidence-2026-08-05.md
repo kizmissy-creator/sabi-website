@@ -1,7 +1,7 @@
 # Development acceptance evidence — 5 August 2026
 
 **Branch:** `career-partner-onboarding-prototype`  
-**Data used:** None; build and static checks only  
+**Data used:** Fictional browser-test values only
 **Production impact:** None; `main` unchanged  
 
 ## Passed
@@ -50,11 +50,28 @@ Command: `git diff --check`
 
 Result: passed.
 
-## Not run
+## Interactive public-preview evidence
 
-Interactive browser, responsive, keyboard, screen-reader and browser-storage tests were not run. The local preview built and started on `127.0.0.1:4173`, but browser automation was prevented from controlling that local URL by the application URL security policy. No alternative browser-control route was used.
+Environment: Netlify deploy preview for PR #1, commit `0ee30fb0e3055c534a2c68470f43bccbfdb64a46`.
 
-These rows remain `Not run` in `development-acceptance-plan.md`; they must not be treated as passed.
+Observed passes:
+
+- ROUTE-01 through ROUTE-06;
+- PAGE-01 through PAGE-04;
+- ENQ-01 through ENQ-06, ENQ-08 and ENQ-09;
+- CAREER-01 through CAREER-04;
+- Writing self-enquiry validation requires both age band and current-material branch fields;
+- accessibility tree exposes the router heading, two labelled fieldsets and labelled inputs;
+- the router reflows at 320 CSS pixels with `scrollWidth` equal to `innerWidth` and no unlabelled inputs;
+- error summaries receive focus in the tested browser interaction;
+- selected states are present in the accessibility tree;
+- review remains explicitly a development Service Schedule and payment remains disabled.
+
+Defect found and repaired during testing: the Writing enquiry displayed age band and current material as required but did not enforce them. `0ee30fb` adds both conditional validation checks and safeguard assertions.
+
+## Not run or only partially run
+
+Keyboard-only completion, a real screen reader, 200%/400% zoom, reduced-motion emulation, formal contrast measurement and touch-device testing were not completed. Browser storage inspection was not available through the preview control surface; the no-persistence boundary remains covered by the source validator and the observed refresh reset, not a direct storage read. These rows remain `Not run` or `Partial pass` and must not be treated as full accessibility passes.
 
 ## Still blocked
 
