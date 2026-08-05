@@ -39,6 +39,7 @@ const singleOptions: Record<string, string[]> = {
 }
 
 function App() {
+  const [journey, setJourney] = useState<'router' | 'career'>('router')
   const [answers, setAnswers] = useState<Answers>(initialAnswers)
   const [step, setStep] = useState(0)
   const [saveMessage, setSaveMessage] = useState('Development mode: fictional data only. Nothing is submitted.')
@@ -194,9 +195,12 @@ function App() {
     true, true, true, true,
   ]
 
+  if (journey === 'router') return <StartingPointRouter onStartCareer={() => setJourney('career')} />
+
   return <div className="min-h-screen">
     <PageHeader currentStep={step + 1} totalSteps={sections.length} stepLabel={sections[step][1]} />
     <div className="border-b border-amber-300 bg-amber-50 px-5 py-3 text-center text-sm font-bold text-amber-950">Development shell · use fictional information only · uploads, verification, submission and payment are simulated</div>
+    <div className="mx-auto max-w-6xl px-5 pt-6 sm:px-8"><button type="button" onClick={() => setJourney('router')} className="font-bold text-teal-800 underline decoration-2 underline-offset-4">← Back to Find Your Starting Point</button></div>
     <main>
       <section className="border-b border-teal-200/60"><div className="mx-auto grid max-w-6xl gap-7 px-5 py-10 sm:px-8 lg:grid-cols-[1fr_22rem]">
         <div><p className="eyebrow mb-3">SABI Career Support</p><h1 className="font-display text-4xl font-semibold text-teal-900 sm:text-5xl">A thoughtful intake, built around real life</h1><p className="mt-4 max-w-3xl text-lg leading-8 text-slate-700">Use existing documents where helpful, answer in your own words and skip optional details you would rather discuss directly.</p></div>
@@ -315,6 +319,69 @@ function App() {
 
           <div className="rounded-3xl bg-teal-900 p-5 text-white sm:p-7"><div className="flex flex-col gap-3 sm:flex-row-reverse sm:justify-between"><button type="button" onClick={() => requestMove(step + 1)} disabled={step === sections.length - 1 || answers.ageBand === 'Under 16'} className="rounded-xl bg-gold-400 px-6 py-3 font-extrabold text-teal-900 disabled:opacity-40">{step === sections.length - 2 ? 'Review answers' : 'Continue →'}</button><button type="button" onClick={() => move(step - 1)} disabled={step === 0} className="rounded-xl px-5 py-3 font-bold disabled:opacity-30">← Back</button></div>{!sectionReady[step] && step < 7 && <p className="mt-3 text-sm font-semibold text-amber-200">Answer the gateway questions shown above to continue. Detailed questions appear only when relevant.</p>}<p className="mt-4 border-t border-white/20 pt-4 text-sm" aria-live="polite">{saveMessage}</p></div>
         </form>
+      </section>
+    </main>
+  </div>
+}
+
+type StartingArea = 'career' | 'admin' | 'writing' | 'unsure'
+type StartingStyle = 'defined' | 'explore' | 'enquiry'
+
+const startingAreas: Array<{ id: StartingArea, title: string, description: string }> = [
+  { id: 'career', title: 'Career & Job Support', description: 'CVs, applications, interviews, career direction or a coordinated job-search package.' },
+  { id: 'admin', title: 'Admin & Systems Support', description: 'Organising administration, improving practical systems or creating a clearer way of working.' },
+  { id: 'writing', title: 'Writing & Clarity', description: 'Making important information, documents or communications clearer and more effective.' },
+  { id: 'unsure', title: 'I am not sure, or it crosses more than one area', description: 'Start with a brief enquiry so SABI can help identify the right route without collecting a full intake.' },
+]
+
+const startingStyles: Array<{ id: StartingStyle, title: string, description: string }> = [
+  { id: 'defined', title: 'I know the outcome I need', description: 'You can describe a fairly specific piece of work or result.' },
+  { id: 'explore', title: 'I need help working out the right starting point', description: 'You know the general area, but the service or scope is not yet clear.' },
+  { id: 'enquiry', title: 'I only want to ask a brief question first', description: 'Use the short general enquiry rather than a detailed service form.' },
+]
+
+function StartingPointRouter({ onStartCareer }: { onStartCareer: () => void }) {
+  const [area, setArea] = useState<StartingArea | ''>('')
+  const [style, setStyle] = useState<StartingStyle | ''>('')
+  const result = useMemo(() => {
+    if (!area || !style) return null
+    if (area === 'unsure' || style === 'enquiry') return {
+      eyebrow: 'Brief enquiry',
+      title: 'Start with the general enquiry',
+      body: 'This keeps the first contact short. You do not need to complete a detailed service form until the right route is clear.',
+      action: 'enquiry' as const,
+    }
+    if (area === 'career') return {
+      eyebrow: style === 'explore' ? 'Career route · guided start' : 'Career route',
+      title: style === 'explore' ? 'Explore Career & Job Support' : 'Continue to Career & Job Support',
+      body: 'The Career development journey can suggest a service from your answers. It is a guide rather than an automatic acceptance or suitability decision.',
+      action: 'career' as const,
+    }
+    if (area === 'admin') return {
+      eyebrow: 'Admin & Systems route',
+      title: 'Admin & Systems Support is the closest starting point',
+      body: 'Its dedicated public page and separate intake are still being built. Use the brief enquiry for now; do not enter Admin information into the Career form.',
+      action: 'enquiry' as const,
+    }
+    return {
+      eyebrow: 'Writing & Clarity route',
+      title: 'Writing & Clarity is the closest starting point',
+      body: 'Its dedicated public page and separate intake are still being built. Use the brief enquiry for now; do not enter Writing information into the Career form.',
+      action: 'enquiry' as const,
+    }
+  }, [area, style])
+
+  return <div className="min-h-screen">
+    <header className="border-b border-teal-200 bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between gap-5 px-5 py-5 sm:px-8"><a href="../index.html" aria-label="SABI home" className="flex items-center gap-3"><img src="/sabi-mark.png" alt="" className="h-11 w-11 object-contain" /><span className="font-display text-2xl font-semibold text-teal-900">SABI</span></a><span className="rounded-full bg-teal-50 px-4 py-2 text-sm font-bold text-teal-800">Find Your Starting Point</span></div></header>
+    <div className="border-b border-amber-300 bg-amber-50 px-5 py-3 text-center text-sm font-bold text-amber-950">Development shell · fictional information only · this router does not submit or transmit answers</div>
+    <main>
+      <section className="border-b border-teal-200/60"><div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16"><p className="eyebrow">One short route into SABI</p><h1 className="mt-3 max-w-3xl font-display text-4xl font-semibold text-teal-900 sm:text-5xl">What would you like help with?</h1><p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700">Answer two broad questions. We will point you towards a service or the brief enquiry form. These answers stay in this page and are not saved.</p></div></section>
+      <section className="mx-auto max-w-5xl space-y-7 px-5 py-10 sm:px-8">
+        <fieldset className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><legend className="px-2 font-display text-2xl font-semibold text-teal-900">1. Which area is closest to what you need?</legend><div className="mt-5 grid gap-3 sm:grid-cols-2">{startingAreas.map((item) => <label key={item.id} className={`block cursor-pointer rounded-2xl border-2 p-4 transition ${area === item.id ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white hover:border-teal-400'}`}><span className="flex gap-3"><input type="radio" name="starting-area" value={item.id} checked={area === item.id} onChange={() => setArea(item.id)} className="mt-1 h-5 w-5 shrink-0 accent-teal-800" /><span><strong className="block text-lg text-teal-900">{item.title}</strong><span className="mt-1 block leading-6 text-slate-600">{item.description}</span></span></span></label>)}</div></fieldset>
+        <fieldset className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><legend className="px-2 font-display text-2xl font-semibold text-teal-900">2. How clear is the help you need?</legend><div className="mt-5 grid gap-3">{startingStyles.map((item) => <label key={item.id} className={`block cursor-pointer rounded-2xl border-2 p-4 transition ${style === item.id ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white hover:border-teal-400'}`}><span className="flex gap-3"><input type="radio" name="starting-style" value={item.id} checked={style === item.id} onChange={() => setStyle(item.id)} className="mt-1 h-5 w-5 shrink-0 accent-teal-800" /><span><strong className="block text-lg text-teal-900">{item.title}</strong><span className="mt-1 block leading-6 text-slate-600">{item.description}</span></span></span></label>)}</div></fieldset>
+        {!result && <aside aria-live="polite" className="rounded-2xl border border-teal-200 bg-teal-50 p-5 text-teal-950"><strong>Choose one answer in each section.</strong><p className="mt-1">Your suggested starting point will appear here.</p></aside>}
+        {result && <section aria-live="polite" aria-labelledby="starting-result" className="rounded-3xl border-2 border-teal-700 bg-teal-50 p-6 sm:p-8"><p className="eyebrow">{result.eyebrow}</p><h2 id="starting-result" className="mt-2 font-display text-3xl font-semibold text-teal-900">{result.title}</h2><p className="mt-3 max-w-3xl leading-7 text-slate-700">{result.body}</p><div className="mt-6 flex flex-col gap-3 sm:flex-row">{result.action === 'career' ? <button type="button" onClick={onStartCareer} className="rounded-xl bg-teal-800 px-6 py-3 font-extrabold text-white">Continue to the Career development journey →</button> : <a href="../index.html#contact" className="rounded-xl bg-teal-800 px-6 py-3 text-center font-extrabold text-white">Go to the brief enquiry →</a>}<button type="button" onClick={() => { setArea(''); setStyle('') }} className="rounded-xl border-2 border-teal-700 px-6 py-3 font-bold text-teal-800">Start again</button></div></section>}
+        <p className="text-sm leading-6 text-slate-600">This tool suggests where to begin. It does not decide eligibility, create a booking, agree scope or enable payment.</p>
       </section>
     </main>
   </div>
