@@ -10,6 +10,7 @@
   <link rel="icon" href="/images/favicon.png" type="image/png">
   <link rel="stylesheet" href="./onboarding.css">
   <link rel="stylesheet" href="./responsive-nav.css">
+  <link rel="stylesheet" href="./compact-form.css">
   <script src="./config.js" defer></script>
   <script src="./onboarding.js" defer></script>
 </head>
@@ -30,7 +31,7 @@
       <div>
         <p class="eyebrow">PACKAGE AGREED · PAYMENT COMPLETE · ONBOARDING</p>
         <h1>Welcome, Bronagh.</h1>
-        <p class="lead">Your Career Partner package is confirmed. This is the final step before we begin: a calm place to tell me about your work so far, what you want next and what would make the process easier. You do not need polished answers.</p>
+        <p class="lead">Your Career Partner package is confirmed. Use this page to tell me about your work so far, what you want next and what would make the process easier. You do not need polished answers.</p>
         <div class="reassurance"><span aria-hidden="true">✓</span> Your answers save automatically on this device.</div>
       </div>
       <aside class="package-card" aria-label="Package summary">
@@ -55,7 +56,7 @@
         <p id="progress-text" aria-live="polite">Step 1 of 9</p>
         <button class="step-menu-toggle" id="step-menu-toggle" type="button" aria-expanded="false" aria-controls="step-list">Show all steps <span aria-hidden="true">⌄</span></button>
         <ol id="step-list">
-          <li class="active">Before we begin</li><li>About you</li><li>Your situation</li><li>Your experience</li><li>What comes next</li><li>Applications</li><li>Documents</li><li>Working together</li><li>Review and send</li>
+          <li class="active">Quick check</li><li>About you</li><li>Your situation</li><li>Your experience</li><li>What comes next</li><li>Applications</li><li>Documents</li><li>Working together</li><li>Review and send</li>
         </ol>
         <p class="save-state" id="save-state" aria-live="polite">Ready to save</p>
         <button class="text-button" id="download-draft" type="button">Download a backup</button>
@@ -70,21 +71,21 @@
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
 
         <section class="form-step active" data-step="0">
-          <p class="eyebrow">STEP 1</p><h2 id="form-title">Before we begin</h2>
+          <p class="eyebrow">STEP 1</p><h2 id="form-title">A quick check</h2>
           <div class="info-box"><h3>A few useful things to know</h3><ul><li>Most people take around 30–45 minutes, but there is no timer.</li><li>You can skip optional questions and return later on this device.</li><li>Approximate dates and rough notes are completely fine.</li><li>Please do not include information you do not want SABI to receive.</li></ul></div>
           <fieldset><legend>Are you aged 16 or over? <span>*</span></legend><label class="choice"><input type="radio" name="ageEligible" value="yes" required> Yes</label><label class="choice"><input type="radio" name="ageEligible" value="no"> No</label></fieldset>
           <div id="under-16" class="notice hidden" role="alert">SABI’s Career Support route is currently available from age 16. A school, college or local careers service may be able to help you now. This form will not collect further details.</div>
           <div class="privacy-note"><strong>How your information is used</strong><p>SABI will use the information you provide to understand your goals and deliver your confirmed Career Partner package. Detailed answers and documents should only be sent when you are comfortable proceeding.</p></div>
         </section>
 
-        <section class="form-step" data-step="1">
+        <section class="form-step compact-details" data-step="1">
           <p class="eyebrow">STEP 2</p><h2>About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p>
           <div class="grid two"><label>First name <span>*</span><input name="firstName" autocomplete="given-name" required value="Bronagh"></label><label>Last name <span>*</span><input name="lastName" autocomplete="family-name" required></label></div>
           <div class="grid two"><label>Preferred name <small>Optional</small><input name="preferredName" autocomplete="nickname"></label><label>Pronouns <small>Optional</small><input name="pronouns"></label></div>
-          <label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required></label>
-          <label>Telephone number <small>Optional</small><input type="tel" name="telephone" autocomplete="tel"></label>
-          <fieldset><legend>How would you usually like me to contact you? <span>*</span></legend><label class="choice"><input type="radio" name="preferredContact" value="email" required> Email</label><label class="choice"><input type="radio" name="preferredContact" value="whatsapp"> WhatsApp for brief practical messages</label><label class="choice"><input type="radio" name="preferredContact" value="phone"> Telephone</label><label class="choice"><input type="radio" name="preferredContact" value="video"> Video call</label></fieldset>
-          <label>Town, city or postcode area <small>Optional — no full address needed</small><input name="location"></label>
+          <label class="field-medium">Email address <span>*</span><input type="email" name="email" autocomplete="email" required></label>
+          <label class="field-short">Telephone number <small>Optional</small><input type="tel" name="telephone" autocomplete="tel"></label>
+          <fieldset class="compact-choices"><legend>How would you usually like me to contact you? <span>*</span></legend><label class="choice"><input type="radio" name="preferredContact" value="email" required> Email</label><label class="choice"><input type="radio" name="preferredContact" value="whatsapp"> WhatsApp for brief practical messages</label><label class="choice"><input type="radio" name="preferredContact" value="phone"> Telephone</label><label class="choice"><input type="radio" name="preferredContact" value="video"> Video call</label></fieldset>
+          <label class="field-medium">Town, city or postcode area <small>Optional — no full address needed</small><input name="location"></label>
         </section>
 
         <section class="form-step" data-step="2">
