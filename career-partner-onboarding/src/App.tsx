@@ -202,6 +202,15 @@ function App() {
   const choices = (key: string, label: string, options: string[], multiple = false, help?: string, optional = true) => (
     <Field label={label} help={help} optional={optional}><div className="grid gap-3 sm:grid-cols-2">{options.map((option) => <SelectableOptionCard key={option} name={key} value={option} label={option} type={multiple ? 'checkbox' : 'radio'} selected={multiple ? ((answers[key] as string[]) ?? []).includes(option) : answers[key] === option} onChange={() => multiple ? toggle(key, option) : setValue(key, option)} />)}</div></Field>
   )
+  const groupedText = (key: string, label: string, help?: string, required = false) => (
+    <GroupedQuestion label={label} help={help} required={required}><TextInput id={key} name={key} label={label} hideLabel value={(answers[key] as string) ?? ''} onChange={(event) => setValue(key, event.target.value)} /></GroupedQuestion>
+  )
+  const groupedArea = (key: string, label: string, help?: string, required = false) => (
+    <GroupedQuestion label={label} help={help} required={required}><TextArea id={key} name={key} label={label} hideLabel value={(answers[key] as string) ?? ''} onChange={(event) => setValue(key, event.target.value)} /></GroupedQuestion>
+  )
+  const groupedChoices = (key: string, label: string, options: string[], multiple = false, help?: string, required = false) => (
+    <GroupedQuestion label={label} help={help} required={required}><div className="grid gap-3 sm:grid-cols-2">{options.map((option) => <SelectableOptionCard key={option} name={key} value={option} label={option} type={multiple ? 'checkbox' : 'radio'} selected={multiple ? ((answers[key] as string[]) ?? []).includes(option) : answers[key] === option} onChange={() => multiple ? toggle(key, option) : setValue(key, option)} />)}</div></GroupedQuestion>
+  )
   const sectionReady = [
     Boolean(answers.serviceFit && answers.ageBand) && answers.ageBand !== 'Under 16',
     Boolean(answers.firstName && answers.lastName && answers.email && answers.location),
@@ -255,20 +264,17 @@ function App() {
           </>}
 
           {step === 1 && <>
-            <div className="grid gap-5 sm:grid-cols-2">{text('firstName', 'First name', undefined, false)}{text('lastName', 'Last name', undefined, false)}{text('preferredName', 'What name would you like me to use?')}{text('pronouns', 'Pronouns')}</div>
-            {text('email', 'Email address', 'Secure verification is simulated in this development build.', false)}
-            {choices('contactAllowed', 'How are you happy for SABI to contact you?', contactOptions, true, undefined, false)}
-            {choices('contactPrimary', 'Which contact method should I normally try first?', (answers.contactAllowed as string[]).length ? answers.contactAllowed as string[] : ['Email'], false, undefined, false)}
-            {(answers.contactAllowed as string[]).some((item) => item === 'Telephone' || item === 'SMS where available') && text('phone', 'Telephone number', undefined, false)}
-            {text('location', 'Where are you based?', 'Town, city or postcode area is enough. A full home address is not needed.', false)}
-            {choices('lifeStageImpact', 'Is there anything in your life right now that affects the work or support that would suit you?', singleOptions.lifeStageImpact, false, 'For example, caring responsibilities, study, health, housing, finances or a change in circumstances.')}
-            {(answers.lifeStageImpact === 'Yes' || answers.lifeStageImpact === 'Not sure') && area('lifeStageDetail', 'What would be helpful for us to understand?')}
+            <Field label="Your details" optional={null}><div className="grid gap-5 sm:grid-cols-2">{groupedText('firstName', 'First name', undefined, true)}{groupedText('lastName', 'Last name', undefined, true)}{groupedText('preferredName', 'What name would you like me to use?')}{groupedText('pronouns', 'Pronouns')}</div></Field>
+            <Field label="Contact details and preferences" optional={null}><div className="space-y-5">{groupedText('email', 'Email address', 'Secure verification is simulated in this development build.', true)}{groupedChoices('contactAllowed', 'How are you happy for SABI to contact you?', contactOptions, true, undefined, true)}{groupedChoices('contactPrimary', 'Which contact method should I normally try first?', (answers.contactAllowed as string[]).length ? answers.contactAllowed as string[] : ['Email'], false, undefined, true)}{(answers.contactAllowed as string[]).some((item) => item === 'Telephone' || item === 'SMS where available') && groupedText('phone', 'Telephone number', undefined, true)}</div></Field>
+            <Field label="Location and anything affecting your options" optional={null}><div className="space-y-5">{groupedText('location', 'Where are you based?', 'Town, city or postcode area is enough. A full home address is not needed.', true)}
+            {groupedChoices('lifeStageImpact', 'Is there anything in your life right now that affects the work or support that would suit you?', singleOptions.lifeStageImpact, false, 'For example, caring responsibilities, study, health, housing, finances or a change in circumstances.')}
+            {(answers.lifeStageImpact === 'Yes' || answers.lifeStageImpact === 'Not sure') && groupedArea('lifeStageDetail', 'What would be helpful for us to understand?')}</div></Field>
           </>}
 
           {step === 2 && <>
             {choices('employmentStatus', 'Which of these best describe your current situation?', employmentOptions, true, undefined, false)}
             {choices('currentRoleApplies', 'Would you like to start with your current or most recent job?', ['Yes', 'No', 'Not sure or prefer to discuss'], false, 'Choose No if it would be more useful to start with education, caring, volunteering, projects or something else.', false)}
-            {answers.currentRoleApplies === 'Yes' && <>{text('currentRole', 'What is your current or most recent job title?', 'Use the title you were given or briefly describe the work.')}{text('currentOrganisation', 'Organisation or setting')}<MonthYearRange legend="When did you do this role?" prefix="currentRole" values={answers} onChange={setValue} />{area('currentLikes', 'What do you like about your current or most recent work?', 'Think about tasks, environment, people, pace, purpose or ways of working.')}{area('currentChange', 'What would you like to change about it?', 'You can mention tasks, hours, pay, progression, travel, pressure or anything else that matters.')}</>}
+            {answers.currentRoleApplies === 'Yes' && <Field label="Your current or most recent job" optional={null}><div className="space-y-5">{groupedText('currentRole', 'Job title or brief description', 'Use the title you were given or briefly describe the work.')}{groupedText('currentOrganisation', 'Organisation or setting')}<GroupedMonthYearRange legend="When did you do this?" prefix="currentRole" values={answers} onChange={setValue} />{groupedArea('currentLikes', 'What do you like about it?', 'Think about tasks, environment, people, pace, purpose or ways of working.')}{groupedArea('currentChange', 'What would you like to change?', 'You can mention tasks, hours, pay, progression, travel, pressure or anything else that matters.')}</div></Field>}
             {answers.currentRoleApplies === 'No' && area('currentSituationDetail', 'What would be more useful to start with?', 'This could be education, caring, volunteering, projects, recovery, looking for work or another part of your life.')}
             {answers.currentRoleApplies === 'Not sure or prefer to discuss' && <Info title="You can leave the detailed role fields for later">SABI can identify the most useful starting point through follow-up questions or an agreed discussion.</Info>}
           </>}
@@ -282,19 +288,14 @@ function App() {
           </>}
 
           {step === 4 && <>
-            {choices('clarity', 'How clear do you currently feel about what you would like to do next?', singleOptions.clarity, false, undefined, false)}
-            {answers.clarity && area('roleIdeas', 'Are there any roles, sectors or types of work you are considering?', 'Include possibilities even where you are not sure they fit. You can answer Not sure yet.')}
+            <Field label="Your direction" optional={null}><div className="space-y-5">{groupedChoices('clarity', 'How clear do you currently feel about what you would like to do next?', singleOptions.clarity, false, undefined, true)}
+            {answers.clarity && groupedArea('roleIdeas', 'Are there any roles, sectors or types of work you are considering?', 'Include possibilities even where you are not sure they fit. You can answer Not sure yet.')}
             {answers.clarity === 'I am completely unsure' && <Info title="You do not need a finished career idea">The Career Change route can explore realistic directions before a CV target is agreed.</Info>}
+            {groupedArea('avoidWork', 'Is there any work or environment you already know you do not want?', 'This helps us avoid suggesting options that would not suit you.')}</div></Field>
             <Info title="Why we ask">Your answers help us focus on options that could genuinely work for you. Choose Not sure or give a short answer if something is not fixed.</Info>
-            {choices('priorities', 'What matters most to you in your next role?', priorityOptions, true, undefined, false)}
-            {choices('arrangements', 'What working arrangements would you consider?', arrangementOptions, true, undefined, false)}
-            {choices('hours', 'What hours or working pattern could work for you?', hoursOptions, true, undefined, false)}
-            {area('availabilityLimits', 'Are there days, times or practical limits SABI should take into account?', 'Only include information that affects realistic work options or delivery of your support.')}
-            {choices('travel', 'How are you able to travel for work?', travelOptions, true, undefined, false)}
-            {text('commuteLimit', 'How far would you usually travel for work?', 'You can give a journey time, distance or area, or say Remote work only.', false)}
-            {choices('payMinimum', 'Do you have a minimum level of pay you need?', singleOptions.payMinimum, false, undefined, false)}
-            {(answers.payMinimum === 'Yes' || answers.payMinimum === 'Not sure') && text('payDetail', 'What pay level or range should SABI use as a practical guide?', 'State whether this is annual, hourly, daily or another basis.')}
-            {area('avoidWork', 'Is there any work, environment or condition you know you do not want?', 'This can prevent SABI suggesting options that are unsuitable for you.')}
+            <Field label="What needs to work for you" optional={null}><div className="space-y-5">{groupedChoices('priorities', 'What matters most to you in your next role?', priorityOptions, true, undefined, true)}{groupedChoices('arrangements', 'What working arrangements would you consider?', arrangementOptions, true, undefined, true)}{groupedChoices('hours', 'What hours or working pattern could work for you?', hoursOptions, true, undefined, true)}{groupedArea('availabilityLimits', 'Are there days, times or practical limits we should take into account?', 'Only include information that affects realistic work options or delivery of your support.')}</div></Field>
+            <Field label="Travel" optional={null}><div className="space-y-5">{groupedChoices('travel', 'How are you able to travel for work?', travelOptions, true, undefined, true)}{groupedText('commuteLimit', 'How far would you usually travel?', 'You can give a journey time, distance or area, or say Remote work only.', true)}</div></Field>
+            <Field label="Pay" optional={null}><div className="space-y-5">{groupedChoices('payMinimum', 'Do you have a minimum level of pay you need?', singleOptions.payMinimum, false, undefined, true)}{(answers.payMinimum === 'Yes' || answers.payMinimum === 'Not sure') && groupedText('payDetail', 'What pay level or range should we use as a practical guide?', 'State whether this is annual, hourly, daily or another basis.')}</div></Field>
           </>}
 
           {step === 5 && <>
@@ -303,13 +304,11 @@ function App() {
           </>}
 
           {step === 6 && <>
-            {choices('searchStage', 'Where are you currently with looking or applying for work?', singleOptions.searchStage, false, undefined, false)}
-            {answers.searchStage && choices('applicationSupportNow', 'Do you have active jobs, applications or interviews you want this service to consider?', ['Yes', 'No', 'Not yet, but I want preparation', 'Not sure'], false, undefined, false)}
-            {answers.applicationSupportNow && <>{choices('difficulties', 'Which parts currently feel difficult?', difficultyOptions, true)}{area('currentStrategies', 'What are you already doing that seems useful?')}</>}
+            <Field label="Where you are with applications" optional={null}><div className="space-y-5">{groupedChoices('searchStage', 'Where are you currently with looking or applying for work?', singleOptions.searchStage, false, undefined, true)}
+            {answers.searchStage && groupedChoices('applicationSupportNow', 'Do you have active jobs, applications or interviews you want this service to consider?', ['Yes', 'No', 'Not yet, but I want preparation', 'Not sure'], false, undefined, true)}
+            {answers.applicationSupportNow && <>{groupedChoices('difficulties', 'Which parts currently feel difficult?', difficultyOptions, true)}{groupedArea('currentStrategies', 'What are you already doing that seems useful?')}</>}</div></Field>
             {(answers.applicationSupportNow === 'Yes' || answers.applicationSupportNow === 'Not sure') && <Repeating title="Example jobs, roles or organisations" items={examples} onChange={(index, key, value) => updateRepeat(setExamples, index, key, value)} onAdd={() => setExamples((items) => [...items, { title: '', link: '', appeal: '', concerns: '' }])} onRemove={(index) => setExamples((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Role or organisation'],['link','Link, optional'],['appeal','What appeals'],['concerns','Any concerns']]} />}
-            {area('supportGoal', 'What would you most like this support to help you achieve?', 'Describe what would make the service feel useful to you.', false)}
-            {choices('deadline', 'Do you have a vacancy, interview or other deadline?', singleOptions.deadline, false, undefined, false)}
-            {answers.deadline !== 'No' && answers.deadline && area('deadlineDetail', 'What is the deadline?', 'Include the date and time, and tell us what needs to be completed.')}
+            <Field label="What you need from this support" optional={null}><div className="space-y-5">{groupedArea('supportGoal', 'What would you most like this support to help you achieve?', 'Describe what would make the service feel useful to you.', true)}{groupedChoices('deadline', 'Do you have a vacancy, interview or other deadline?', singleOptions.deadline, false, undefined, true)}{answers.deadline !== 'No' && answers.deadline && groupedArea('deadlineDetail', 'What is the deadline?', 'Include the date and time, and tell us what needs to be completed.')}</div></Field>
             {(answers.applicationSupportNow === 'Yes' || (answers.deadline && answers.deadline !== 'No')) && <SimulatedUpload label="Job advert, application draft or other supporting document" files={simulatedFiles} onFiles={addSimulatedFiles} onRemove={(name) => setSimulatedFiles((items) => items.filter((item) => item !== name))} />}
           </>}
 
@@ -329,8 +328,8 @@ function App() {
 
           {step === 9 && <>
             <Field label="Optional additions"><div className="grid gap-3 sm:grid-cols-2">{addOns.map((item) => { const unavailable = service.id === 'career-partner-plus' && item.id === 'interview'; return <label key={item.id} className={`flex gap-3 rounded-2xl border p-4 ${unavailable ? 'bg-slate-100 text-slate-500' : 'bg-white border-teal-200'}`}><input type="checkbox" disabled={unavailable} checked={(answers.addOns as string[]).includes(item.id)} onChange={() => toggle('addOns', item.id)} /><span><strong>{item.name} · £{item.price}</strong>{unavailable && <small className="block">Already included in Career Partner Plus</small>}</span></label> })}</div></Field>
-            {choices('payerDifferent', 'Is someone else paying for this service?', singleOptions.payerDifferent, false, undefined, false)}
-            {answers.payerDifferent === 'Yes' && <><Info title="Client information remains private">Payment does not authorise the payer to receive intake answers, documents or career decisions.</Info>{text('payerName', 'Payer name', undefined, false)}{text('payerEmail', 'Payer email', undefined, false)}{text('payerRole', 'Relationship or funding role')}</>}
+            <Field label="Payment details" optional={null}><div className="space-y-5">{groupedChoices('payerDifferent', 'Is someone else paying for this service?', singleOptions.payerDifferent, false, undefined, true)}
+            {answers.payerDifferent === 'Yes' && <><Info title="Client information remains private">Payment does not authorise the payer to receive intake answers, documents or career decisions.</Info>{groupedText('payerName', 'Payer name', undefined, true)}{groupedText('payerEmail', 'Payer email', undefined, true)}{groupedText('payerRole', 'Relationship or funding role')}</>}</div></Field>
             {area('additionalInfo', 'Is there anything else you would like SABI to know?')}
             {choices('source', 'How did you first hear about SABI?', ['Search engine', 'Social media', 'Recommendation', 'Existing contact', 'Event or community', 'Other'])}
           </>}
@@ -428,6 +427,12 @@ function MonthYearRange({ legend, prefix, values, onChange }: { legend: string, 
   return <Field label={legend} help="Choose the closest month and year. You do not need an exact day."><div className="grid gap-4 sm:grid-cols-2"><SelectField id={`${prefix}StartMonth`} label="Start month" value={String(values[`${prefix}StartMonth`] ?? '')} options={monthOptions} onChange={(value) => onChange(`${prefix}StartMonth`, value)} /><SelectField id={`${prefix}StartYear`} label="Start year" value={String(values[`${prefix}StartYear`] ?? '')} options={yearOptions} onChange={(value) => onChange(`${prefix}StartYear`, value)} /><SelectField id={`${prefix}EndMonth`} label="End month" value={String(values[`${prefix}EndMonth`] ?? '')} options={monthOptions} onChange={(value) => onChange(`${prefix}EndMonth`, value)} /><SelectField id={`${prefix}EndYear`} label="End year" value={String(values[`${prefix}EndYear`] ?? '')} options={yearOptions} onChange={(value) => onChange(`${prefix}EndYear`, value)} /></div><label className="mt-4 flex items-center gap-3 font-semibold text-teal-950"><input type="checkbox" checked={isCurrent} onChange={(event) => onChange(currentKey, event.target.checked)} className="h-5 w-5 accent-teal-800" />I am still doing this role</label></Field>
 }
 
+function GroupedMonthYearRange({ legend, prefix, values, onChange }: { legend: string, prefix: string, values: Answers, onChange: (key: string, value: string | boolean) => void }) {
+  const currentKey = `${prefix}IsCurrent`
+  const isCurrent = Boolean(values[currentKey])
+  return <GroupedQuestion label={legend} help="Choose the closest month and year. You do not need an exact day."><div className="grid gap-4 sm:grid-cols-2"><SelectField id={`${prefix}StartMonth`} label="Start month" value={String(values[`${prefix}StartMonth`] ?? '')} options={monthOptions} onChange={(value) => onChange(`${prefix}StartMonth`, value)} /><SelectField id={`${prefix}StartYear`} label="Start year" value={String(values[`${prefix}StartYear`] ?? '')} options={yearOptions} onChange={(value) => onChange(`${prefix}StartYear`, value)} /><SelectField id={`${prefix}EndMonth`} label="End month" value={String(values[`${prefix}EndMonth`] ?? '')} options={monthOptions} onChange={(value) => onChange(`${prefix}EndMonth`, value)} /><SelectField id={`${prefix}EndYear`} label="End year" value={String(values[`${prefix}EndYear`] ?? '')} options={yearOptions} onChange={(value) => onChange(`${prefix}EndYear`, value)} /></div><label className="mt-4 flex items-center gap-3 font-semibold text-teal-950"><input type="checkbox" checked={isCurrent} onChange={(event) => onChange(currentKey, event.target.checked)} className="h-5 w-5 accent-teal-800" />I am still doing this</label></GroupedQuestion>
+}
+
 function WorkHistory({ items, onChange, onAdd, onRemove }: { items: RepeatItem[], onChange: (index: number, key: string, value: string) => void, onAdd: () => void, onRemove: (index: number) => void }) {
   const hourOptions = ['Fewer than 10 hours a week', '10–19 hours a week', '20–29 hours a week', '30–37 hours a week', '38 hours or more a week', 'Hours varied', 'Not sure or not applicable']
   return <section aria-labelledby="experience-heading">
@@ -446,8 +451,12 @@ function WorkHistory({ items, onChange, onAdd, onRemove }: { items: RepeatItem[]
   </section>
 }
 
-function Field({ label, help, optional = true, children }: { label: string, help?: string, optional?: boolean, children: ReactNode }) {
-  return <section className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><div className="mb-4"><h3 className="font-display text-2xl font-semibold text-ink">{label}{!optional && <span className="ml-1 font-sans font-extrabold text-red-700" aria-hidden="true">*</span>}</h3>{!optional && <span className="sr-only">Required question</span>}{optional && <span className="text-xs font-bold uppercase tracking-wide text-slate-500">Optional</span>}{help && <p className="mt-2 leading-6 text-slate-600">{help}</p>}</div>{children}</section>
+function Field({ label, help, optional = true, children }: { label: string, help?: string, optional?: boolean | null, children: ReactNode }) {
+  return <section className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><div className="mb-4"><h3 className="font-display text-2xl font-semibold text-ink">{label}{optional === false && <span className="ml-1 font-sans font-extrabold text-red-700" aria-hidden="true">*</span>}</h3>{optional === false && <span className="sr-only">Required question</span>}{optional === true && <span className="text-xs font-bold uppercase tracking-wide text-slate-500">Optional</span>}{help && <p className="mt-2 leading-6 text-slate-600">{help}</p>}</div>{children}</section>
+}
+
+function GroupedQuestion({ label, help, required = false, children }: { label: string, help?: string, required?: boolean, children: ReactNode }) {
+  return <div className="border-t border-teal-100 pt-5 first:border-t-0 first:pt-0"><h4 className="text-lg font-extrabold text-teal-950">{label}{required && <span className="ml-1 text-red-700" aria-hidden="true">*</span>}</h4>{required && <span className="sr-only">Required question</span>}{help && <p className="mb-3 mt-1 leading-6 text-slate-600">{help}</p>}{!help && <div className="mb-3" />}{children}</div>
 }
 
 function Info({ title, children, tone = 'normal' }: { title: string, children: ReactNode, tone?: 'normal' | 'warning' }) {
