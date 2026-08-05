@@ -36,6 +36,8 @@ $required = @(
   'Reports & Briefings',
   'Articles & Expert Content',
   'Submission disabled'
+  'Choose the age group that applies.'
+  'Choose what material you currently have.'
 )
 
 $missing = foreach ($pattern in $required) {
