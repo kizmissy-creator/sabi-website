@@ -61,15 +61,15 @@ No item may be marked passed from code inspection alone when the test requires i
 | ID | Test | Required method | State |
 | --- | --- | --- | --- |
 | A11Y-01 | Complete router and both Stage 1 shells without a pointer | Keyboard only; include backward navigation | Not run |
-| A11Y-02 | Focus remains visible on every interactive element | Keyboard review at 100% and 200% zoom | Not run |
+| A11Y-02 | Focus remains visible on every interactive element | Keyboard review at 100% and 200% zoom | Partial pass: sampled controls and focused error alert |
 | A11Y-03 | Headings, landmarks, fieldsets, legends and labels form a coherent structure | Screen reader and accessibility tree | Partial pass: accessibility tree only |
 | A11Y-04 | Error summary is announced and focus moves to it | Screen reader with empty-form review | Partial pass: focus/tree only |
 | A11Y-05 | Routing result is announced without an unexpected context change | Screen reader | Not run |
-| A11Y-06 | Content reflows without horizontal page scrolling | 320 CSS px and 400% zoom | Partial pass: 320 CSS px |
+| A11Y-06 | Content reflows without horizontal page scrolling | 320 CSS px and 400% zoom | Partial pass: 320/640 CSS px zoom-equivalent reflow |
 | A11Y-07 | Selected radio and checkbox states are perceivable without colour alone | Visual and screen-reader review | Partial pass: accessibility tree |
-| A11Y-08 | Reduced-motion preference removes non-essential motion | OS/browser reduced-motion emulation | Not run |
-| A11Y-09 | Text and meaningful controls meet contrast requirements | Automated scan plus manual spot check | Not run |
-| A11Y-10 | Touch targets and spacing are usable on mobile | Mobile viewport and touch review | Partial pass: 320 CSS px reflow |
+| A11Y-08 | Reduced-motion preference removes non-essential motion | OS/browser reduced-motion emulation | Partial pass: fail-safe CSS verified; emulation not run |
+| A11Y-09 | Text and meaningful controls meet contrast requirements | Automated scan plus manual spot check | Partial pass: automated router text sample |
+| A11Y-10 | Touch targets and spacing are usable on mobile | Mobile viewport and touch review | Partial pass: 320 CSS px layout; touch review not run |
 
 ## Career regression checks
 

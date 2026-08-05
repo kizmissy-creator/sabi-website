@@ -69,9 +69,21 @@ Observed passes:
 
 Defect found and repaired during testing: the Writing enquiry displayed age band and current material as required but did not enforce them. `0ee30fb` adds both conditional validation checks and safeguard assertions.
 
+Further accessibility testing at commit `a180ec397f8fd3928637fe943f38f55a41e8b42b` found and repaired two defects:
+
+- the `320px` body minimum combined with a vertical scrollbar to create horizontal overflow; `min-width: 0` now gives `scrollWidth = clientWidth = 305px` in the 320px test viewport;
+- the focused Stage 1 error/review regions lacked a visible focus treatment; the error alert now receives a visible 4px ring and the review result receives the corresponding gold ring.
+
+Additional partial evidence:
+
+- sampled focused radio control: solid visible outline;
+- router text contrast sample: 26 visible direct-text elements tested, with no computed WCAG ratio failure in the sample;
+- responsive checks at 640px and 320px found no remaining document overflow after the repair;
+- reduced-motion CSS disables smooth scrolling and reduces transition/animation duration, but OS/browser preference emulation was not run.
+
 ## Not run or only partially run
 
-Keyboard-only completion, a real screen reader, 200%/400% zoom, reduced-motion emulation, formal contrast measurement and touch-device testing were not completed. Browser storage inspection was not available through the preview control surface; the no-persistence boundary remains covered by the source validator and the observed refresh reset, not a direct storage read. These rows remain `Not run` or `Partial pass` and must not be treated as full accessibility passes.
+Keyboard-only completion, a real screen reader, browser-level 200%/400% zoom, reduced-motion emulation, manual contrast review and touch-device testing were not completed. Browser storage inspection was not available through the preview control surface; the no-persistence boundary remains covered by the source validator and the observed refresh reset, not a direct storage read. These rows remain `Not run` or `Partial pass` and must not be treated as full accessibility passes.
 
 ## Still blocked
 
