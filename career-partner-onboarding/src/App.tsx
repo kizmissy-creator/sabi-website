@@ -14,6 +14,7 @@ import {
   travelOptions,
   type ServiceId,
 } from './framework'
+import { createDevelopmentControlRecord, type ControlKey, type DevelopmentControlRecord } from './developmentRecords'
 
 type Answers = Record<string, string | string[] | boolean>
 type RepeatItem = Record<string, string>
@@ -46,6 +47,7 @@ function App() {
   const [examples, setExamples] = useState<RepeatItem[]>([{ title: '', link: '', appeal: '', concerns: '' }])
   const [simulatedFiles, setSimulatedFiles] = useState<string[]>([])
   const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([])
+  const [controlRecords, setControlRecords] = useState<Partial<Record<ControlKey, DevelopmentControlRecord>>>({})
 
   useEffect(() => {
     try {
@@ -57,6 +59,7 @@ function App() {
       setQualifications(data.qualifications?.length ? data.qualifications : qualifications)
       setExamples(data.examples?.length ? data.examples : examples)
       setSimulatedFiles(data.simulatedFiles ?? [])
+      setControlRecords(data.controlRecords ?? {})
       setStep(Math.min(data.step ?? 0, sections.length - 1))
       setSaveMessage('Restored fictional development data from this browser.')
     } catch {
@@ -66,11 +69,11 @@ function App() {
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      localStorage.setItem('sabi-career-form-development', JSON.stringify({ answers, roles, qualifications, examples, simulatedFiles, step }))
+      localStorage.setItem('sabi-career-form-development', JSON.stringify({ answers, roles, qualifications, examples, simulatedFiles, controlRecords, step }))
       setSaveMessage('Saved locally on this device. No information was transmitted.')
     }, 400)
     return () => window.clearTimeout(timer)
-  }, [answers, roles, qualifications, examples, simulatedFiles, step])
+  }, [answers, roles, qualifications, examples, simulatedFiles, controlRecords, step])
 
   const service = services.find((item) => item.id === answers.service) ?? services[2]
   const selectedAddOns = addOns.filter((item) => (answers.addOns as string[]).includes(item.id) && !(service.id === 'career-partner-plus' && item.id === 'interview'))
@@ -86,6 +89,11 @@ function App() {
 
   function setValue(key: string, value: string | string[] | boolean) {
     setAnswers((current) => ({ ...current, [key]: value }))
+  }
+
+  function recordControl(key: ControlKey, selected: boolean) {
+    setValue(key, selected)
+    setControlRecords((current) => ({ ...current, [key]: createDevelopmentControlRecord(key, selected) }))
   }
 
   function setServiceFit(value: string) {
@@ -274,7 +282,7 @@ function App() {
 
           {step === 8 && <>
             {choices('accessibilityGate', 'Would you like to tell SABI about practical communication, accessibility or support needs?', singleOptions.accessibilityGate, false, 'Optional. You do not need a diagnosis.')}
-            {answers.accessibilityGate === 'Yes' && <Field label="Optional special-category consent"><label className="flex gap-3 rounded-2xl border border-teal-200 bg-white p-4"><input type="checkbox" checked={Boolean(answers.specialConsent)} onChange={(event) => setValue('specialConsent', event.target.checked)} /><span>I explicitly consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. I understand that these questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</span></label></Field>}
+            {answers.accessibilityGate === 'Yes' && <Field label="Optional special-category consent"><label className="flex gap-3 rounded-2xl border border-teal-200 bg-white p-4"><input type="checkbox" checked={Boolean(answers.specialConsent)} onChange={(event) => recordControl('specialConsent', event.target.checked)} /><span>I explicitly consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. I understand that these questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</span></label>{controlRecords.specialConsent && <ControlEvidence record={controlRecords.specialConsent} />}</Field>}
             {answers.accessibilityGate === 'Yes' && !answers.specialConsent && <Info tone="warning" title="Sensitive questions remain locked">You can give consent, choose No, or continue without providing sensitive information.</Info>}
             {Boolean(answers.specialConsent) && area('accessPractical', 'What would help you take part in the service?', 'Examples include written questions, processing time, shorter sections, reminders, captions or reduced video use.')}
             {Boolean(answers.specialConsent) && choices('disclosureSupport', 'Would you like support thinking about reasonable adjustments or disclosure?', ['Yes', 'No', 'Not sure'])}
@@ -293,13 +301,13 @@ function App() {
           </>}
 
           {step === 10 && <>
-            <Review service={service} answers={answers} selectedAddOns={selectedAddOns} total={total} roles={roles} qualifications={qualifications} files={simulatedFiles} scopeFlags={scopeFlags} onEdit={(index) => move(index)} />
+            <Review service={service} answers={answers} selectedAddOns={selectedAddOns} total={total} roles={roles} qualifications={qualifications} files={simulatedFiles} scopeFlags={scopeFlags} controlRecords={controlRecords} onEdit={(index) => move(index)} />
             <Info title="Privacy reminder">The live form must show the current Privacy Notice again here. Privacy information is not an agreement checkbox.</Info>
             <Field label="Terms and declarations"><div className="space-y-3">{[
               ['termsAccepted', 'I have read and agree to the SABI Career Support Terms and the Service Schedule for this purchase'],
               ['earlyStart', 'I ask SABI to begin providing my service during the 14-day cancellation period. I understand that a reasonable amount may be deducted if I cancel after work begins, and that I lose the right to cancel once the service has been fully performed.'],
               ['declaration', 'I confirm that the information supplied is accurate to the best of my knowledge and that I will review final documents before using them'],
-            ].map(([key, label]) => <label key={key} className="flex gap-3 rounded-2xl border border-teal-200 bg-white p-4"><input type="checkbox" checked={Boolean(answers[key])} onChange={(event) => setValue(key, event.target.checked)} /><span>{label}</span></label>)}</div></Field>
+            ].map(([key, label]) => <div key={key}><label className="flex gap-3 rounded-2xl border border-teal-200 bg-white p-4"><input type="checkbox" checked={Boolean(answers[key])} onChange={(event) => recordControl(key as ControlKey, event.target.checked)} /><span>{label}</span></label>{controlRecords[key as ControlKey] && <ControlEvidence record={controlRecords[key as ControlKey]!} />}</div>)}</div></Field>
             {scopeFlags.length > 0 && <Info tone="warning" title="Manual scope review required">{scopeFlags.join(' ')}</Info>}
             {!answers.termsAccepted && <section role="alert" className="rounded-2xl border-2 border-red-700 bg-red-50 p-5 text-red-950"><h3 className="font-extrabold">Terms acceptance is required before payment</h3><p className="mt-2">Review and accept the Career Support Terms and Service Schedule above. Your form answers remain saved.</p></section>}
             <button type="button" disabled className="w-full rounded-2xl bg-slate-300 px-6 py-4 font-extrabold text-slate-600">Secure payment disabled in development · £{total}</button>
@@ -335,7 +343,11 @@ function ServiceQuestions({ serviceId, answers, setValue, area, choices }: { ser
   return <>{area('cpDirection', 'What broad direction should the Career Partner documents support?', 'A role group or sector is enough.', false)}{area('cpSecondTarget', 'What vacancy or industry should the additional CV version target?')}{area('cpCoverTarget', 'What role, vacancy or industry should the included cover letter address?')}{choices('applicationExists', 'Do you have a substantially completed application for SABI to review?', ['Yes', 'Not yet', 'I need most or all of it written'])}{serviceId === 'career-partner-plus' && <>{choices('interviewKnown', 'Do you have an interview booked or a particular role to prepare for?', ['Interview booked', 'Particular role', 'Not yet'])}{answers.interviewKnown !== 'Not yet' && area('interviewDetail', 'Add the role, employer, interview date and supplied information')}</>}</>
 }
 
-function Review({ service, answers, selectedAddOns, total, roles, qualifications, files, scopeFlags, onEdit }: any) {
+function ControlEvidence({ record }: { record: DevelopmentControlRecord }) {
+  return <p className="mt-2 rounded-xl bg-slate-100 px-4 py-2 text-xs text-slate-700" aria-live="polite">Development record: {record.selected ? 'selected' : 'not selected'} · wording {record.wordingVersion} · {new Date(record.recordedAt).toLocaleString()}</p>
+}
+
+function Review({ service, answers, selectedAddOns, total, roles, qualifications, files, scopeFlags, controlRecords, onEdit }: any) {
   const rows = [
     ['Service', `${service.name} · £${service.price}`, 0],
     ['Client', [answers.firstName, answers.lastName].filter(Boolean).join(' ') || 'Not answered', 1],
@@ -347,7 +359,18 @@ function Review({ service, answers, selectedAddOns, total, roles, qualifications
     ['Add-ons', selectedAddOns.map((item: any) => `${item.name} (£${item.price})`).join(', ') || 'None', 9],
     ['Total shown', `£${total} · payment disabled`, 9],
   ]
-  return <section className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-8"><h3 className="font-display text-3xl font-semibold text-teal-900">Review your development-form answers</h3><dl className="mt-6 divide-y divide-teal-100">{rows.map(([label, value, section]) => <div key={label} className="grid gap-2 py-4 sm:grid-cols-[12rem_1fr_auto]"><dt className="font-bold text-teal-800">{label}</dt><dd className="text-slate-700">{value}</dd><button type="button" onClick={() => onEdit(section)} className="font-bold text-teal-800">Edit</button></div>)}</dl>{scopeFlags.length === 0 ? <p className="mt-5 rounded-xl bg-teal-50 p-4 font-semibold text-teal-900">No simulated scope flag is currently active.</p> : <ul className="mt-5 list-disc rounded-xl bg-amber-50 p-5 pl-9 text-amber-950">{scopeFlags.map((flag: string) => <li key={flag}>{flag}</li>)}</ul>}</section>
+  const scheduleRows = [
+    ['Service', `${service.name} · £${service.price}`],
+    ['Agreed target', answers.cpDirection || answers.pcvTarget || answers.roleIdeas || 'To be confirmed'],
+    ['Included outputs', service.includes.join('; ')],
+    ['Provisional additions', selectedAddOns.map((item: any) => `${item.name} (£${item.price})`).join('; ') || 'None'],
+    ['Provisional total', `£${total}`],
+    ['Deadline', answers.deadlineDetail || answers.deadline || 'No deadline supplied'],
+    ['Delivery preference', answers.consultation || 'Not selected'],
+    ['Payer', answers.payerDifferent === 'Yes' ? `${answers.payerName || 'Different payer'} — transaction information only` : 'Client'],
+    ['Scope status', scopeFlags.length ? 'Manual review required before payment' : 'No development scope flag'],
+  ]
+  return <><section className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-8"><h3 className="font-display text-3xl font-semibold text-teal-900">Review your development-form answers</h3><dl className="mt-6 divide-y divide-teal-100">{rows.map(([label, value, section]) => <div key={label} className="grid gap-2 py-4 sm:grid-cols-[12rem_1fr_auto]"><dt className="font-bold text-teal-800">{label}</dt><dd className="text-slate-700">{value}</dd><button type="button" onClick={() => onEdit(section)} className="font-bold text-teal-800">Edit</button></div>)}</dl>{scopeFlags.length === 0 ? <p className="mt-5 rounded-xl bg-teal-50 p-4 font-semibold text-teal-900">No simulated scope flag is currently active.</p> : <ul className="mt-5 list-disc rounded-xl bg-amber-50 p-5 pl-9 text-amber-950">{scopeFlags.map((flag: string) => <li key={flag}>{flag}</li>)}</ul>}</section><section className="rounded-3xl border-2 border-teal-700 bg-teal-50 p-5 sm:p-8" aria-labelledby="schedule-title"><p className="eyebrow">Development preview · not a contract</p><h3 id="schedule-title" className="mt-2 font-display text-3xl font-semibold text-teal-900">Draft Service Schedule</h3><p className="mt-3 leading-7 text-slate-700">This preview shows the values that a secure backend would freeze at checkout. It cannot create a booking or payment.</p><dl className="mt-5 divide-y divide-teal-200">{scheduleRows.map(([label, value]) => <div key={label} className="grid gap-1 py-3 sm:grid-cols-[11rem_1fr]"><dt className="font-bold text-teal-900">{label}</dt><dd>{value}</dd></div>)}</dl><h4 className="mt-5 font-bold text-teal-900">Recorded controls</h4><ul className="mt-2 space-y-2 text-sm">{(['specialConsent','termsAccepted','earlyStart','declaration'] as ControlKey[]).map((key) => <li key={key}><strong>{key}:</strong> {controlRecords[key] ? `${controlRecords[key].selected ? 'selected' : 'not selected'} at ${new Date(controlRecords[key].recordedAt).toLocaleString()} (${controlRecords[key].wordingVersion})` : 'no development event recorded'}</li>)}</ul></section></>
 }
 
 export default App
