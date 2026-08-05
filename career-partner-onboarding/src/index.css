@@ -47,7 +47,7 @@
   }
 
   .field-compact {
-    @apply rounded-xl py-2.5;
+    @apply rounded-lg px-3 py-1.5;
   }
 
   .field-auto-grow {
