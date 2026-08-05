@@ -419,7 +419,7 @@ function StartingPointRouter({ onOpenJourney }: { onOpenJourney: (journey: 'care
 }
 
 function SelectField({ id, label, value, options, onChange, placeholder = 'Select' }: { id: string, label: string, value: string, options: string[], onChange: (value: string) => void, placeholder?: string }) {
-  return <label className="block font-bold text-teal-950">{label}<select id={id} name={id} value={value} onChange={(event) => onChange(event.target.value)} className="field mt-2 font-normal"><option value="">{placeholder}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+  return <label className="block font-bold text-teal-950">{label}<select id={id} name={id} value={value} onChange={(event) => onChange(event.target.value)} className="field field-compact mt-2 font-normal"><option value="">{placeholder}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
 }
 
 function MonthYearRange({ legend, prefix, values, onChange }: { legend: string, prefix: string, values: Answers, onChange: (key: string, value: string | boolean) => void }) {

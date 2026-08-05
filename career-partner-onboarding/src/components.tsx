@@ -239,7 +239,7 @@ export function TextInput({ label, hideLabel = true, id, ...props }: TextInputPr
       <label htmlFor={id} className={showLabel ? 'mb-2 block font-bold text-teal-950' : 'sr-only'}>
         {label}
       </label>
-      <input id={id} className="field" {...props} />
+      <input id={id} className="field field-compact" {...props} />
     </div>
   )
 }
