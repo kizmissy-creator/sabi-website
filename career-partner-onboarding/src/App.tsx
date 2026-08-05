@@ -312,7 +312,7 @@ function App() {
           </>}
 
           {step === 10 && <>
-            <Review service={service} answers={answers} selectedAddOns={selectedAddOns} total={total} roles={roles} qualifications={qualifications} files={simulatedFiles} scopeFlags={scopeFlags} controlRecords={controlRecords} onEdit={(index) => move(index)} />
+            <Review service={service} answers={answers} selectedAddOns={selectedAddOns} total={total} roles={roles} qualifications={qualifications} files={simulatedFiles} scopeFlags={scopeFlags} controlRecords={controlRecords} onEdit={(index: number) => move(index)} />
             <Info title="Privacy reminder">The live form must show the current Privacy Notice again here. Privacy information is not an agreement checkbox.</Info>
             <Field label="Terms and declarations"><div className="space-y-3">{[
               ['termsAccepted', 'I have read and agree to the SABI Career Support Terms and the Service Schedule for this purchase'],
