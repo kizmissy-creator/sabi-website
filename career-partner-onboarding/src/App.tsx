@@ -16,6 +16,7 @@ import {
 } from './framework'
 import { createDevelopmentControlRecord, type ControlKey, type DevelopmentControlRecord } from './developmentRecords'
 import { ServiceLandingPage } from './ServicePages'
+import { ServiceEnquiry } from './ServiceEnquiry'
 
 type Answers = Record<string, string | string[] | boolean>
 type RepeatItem = Record<string, string>
@@ -40,7 +41,7 @@ const singleOptions: Record<string, string[]> = {
 }
 
 function App() {
-  const [journey, setJourney] = useState<'router' | 'career' | 'admin' | 'writing'>('router')
+  const [journey, setJourney] = useState<'router' | 'career' | 'admin' | 'writing' | 'admin-enquiry' | 'writing-enquiry'>('router')
   const [answers, setAnswers] = useState<Answers>(initialAnswers)
   const [step, setStep] = useState(0)
   const [saveMessage, setSaveMessage] = useState('Development mode: fictional data only. Nothing is submitted.')
@@ -197,7 +198,11 @@ function App() {
   ]
 
   if (journey === 'router') return <StartingPointRouter onOpenJourney={setJourney} />
-  if (journey === 'admin' || journey === 'writing') return <ServiceLandingPage kind={journey} onBack={() => setJourney('router')} />
+  if (journey === 'admin' || journey === 'writing') return <ServiceLandingPage kind={journey} onBack={() => setJourney('router')} onEnquire={() => setJourney(journey === 'admin' ? 'admin-enquiry' : 'writing-enquiry')} />
+  if (journey === 'admin-enquiry' || journey === 'writing-enquiry') {
+    const kind = journey === 'admin-enquiry' ? 'admin' : 'writing'
+    return <ServiceEnquiry kind={kind} onBack={() => setJourney(kind)} onStartOver={() => setJourney('router')} />
+  }
 
   return <div className="min-h-screen">
     <PageHeader currentStep={step + 1} totalSteps={sections.length} stepLabel={sections[step][1]} />
