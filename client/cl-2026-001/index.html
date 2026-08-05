@@ -9,6 +9,7 @@
   <meta name="description" content="Private SABI Career Partner onboarding for client CL-2026-001.">
   <link rel="icon" href="/images/favicon.png" type="image/png">
   <link rel="stylesheet" href="./onboarding.css">
+  <link rel="stylesheet" href="./responsive-nav.css">
   <script src="./config.js" defer></script>
   <script src="./onboarding.js" defer></script>
 </head>
@@ -27,9 +28,9 @@
   <main id="main">
     <section class="hero">
       <div>
-        <p class="eyebrow">YOUR CAREER PARTNER ONBOARDING</p>
+        <p class="eyebrow">PACKAGE AGREED · PAYMENT COMPLETE · ONBOARDING</p>
         <h1>Welcome, Bronagh.</h1>
-        <p class="lead">This is a calm place to tell me about your work so far, what you want next and what would make the process easier. You do not need polished answers.</p>
+        <p class="lead">Your Career Partner package is confirmed. This is the final step before we begin: a calm place to tell me about your work so far, what you want next and what would make the process easier. You do not need polished answers.</p>
         <div class="reassurance"><span aria-hidden="true">✓</span> Your answers save automatically on this device.</div>
       </div>
       <aside class="package-card" aria-label="Package summary">
@@ -52,6 +53,7 @@
         <p class="eyebrow">YOUR PROGRESS</p>
         <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
         <p id="progress-text" aria-live="polite">Step 1 of 9</p>
+        <button class="step-menu-toggle" id="step-menu-toggle" type="button" aria-expanded="false" aria-controls="step-list">Show all steps <span aria-hidden="true">⌄</span></button>
         <ol id="step-list">
           <li class="active">Before we begin</li><li>About you</li><li>Your situation</li><li>Your experience</li><li>What comes next</li><li>Applications</li><li>Documents</li><li>Working together</li><li>Review and send</li>
         </ol>
@@ -72,7 +74,7 @@
           <div class="info-box"><h3>A few useful things to know</h3><ul><li>Most people take around 30–45 minutes, but there is no timer.</li><li>You can skip optional questions and return later on this device.</li><li>Approximate dates and rough notes are completely fine.</li><li>Please do not include information you do not want SABI to receive.</li></ul></div>
           <fieldset><legend>Are you aged 16 or over? <span>*</span></legend><label class="choice"><input type="radio" name="ageEligible" value="yes" required> Yes</label><label class="choice"><input type="radio" name="ageEligible" value="no"> No</label></fieldset>
           <div id="under-16" class="notice hidden" role="alert">SABI’s Career Support route is currently available from age 16. A school, college or local careers service may be able to help you now. This form will not collect further details.</div>
-          <div class="privacy-note"><strong>How your information is used</strong><p>SABI will use the information you provide to understand your goals, check the service is suitable and deliver your Career Partner package. Detailed answers and documents should only be sent when you are comfortable proceeding.</p></div>
+          <div class="privacy-note"><strong>How your information is used</strong><p>SABI will use the information you provide to understand your goals and deliver your confirmed Career Partner package. Detailed answers and documents should only be sent when you are comfortable proceeding.</p></div>
         </section>
 
         <section class="form-step" data-step="1">
@@ -118,7 +120,7 @@
           <label>Are there example jobs or organisations that interest you?<textarea name="exampleJobs" rows="4"></textarea></label>
           <fieldset><legend>Do you already have a substantially completed application or supporting statement for the included review?</legend><label class="choice"><input type="radio" name="applicationDraft" value="yes"> Yes</label><label class="choice"><input type="radio" name="applicationDraft" value="not-yet"> Not yet</label><label class="choice"><input type="radio" name="applicationDraft" value="from-scratch"> I would need it written mainly from scratch</label></fieldset>
           <label>Is there a vacancy, interview or other deadline? <small>Optional</small><input type="date" name="deadline"></label>
-          <div id="urgent-warning" class="notice hidden" role="status">This appears to be within 10 working days. Sam will need to confirm the deadline and scope before payment or urgent work is promised.</div>
+          <div id="urgent-warning" class="notice hidden" role="status">This appears to be within 10 working days. Sam will need to confirm what can realistically be completed by the deadline before urgent work is promised.</div>
           <label>What would make this service feel successful for you?<textarea name="successOutcome" rows="5"></textarea></label>
         </section>
 
@@ -140,7 +142,7 @@
           </div>
           <fieldset><legend>How would you prefer the consultation and follow-up questions?</legend><label class="choice"><input type="radio" name="consultationRoute" value="written" checked> Written-first by email</label><label class="choice"><input type="radio" name="consultationRoute" value="call-if-useful"> Written-first, with a short call if useful</label><label class="choice"><input type="radio" name="consultationRoute" value="discuss"> I would like to discuss this</label></fieldset>
           <label>Anything else that would help me work well with you?<textarea name="workingPreferences" rows="4"></textarea></label>
-          <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no" checked> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else may pay, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
+          <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no" checked> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
         </section>
 
         <section class="form-step" data-step="8">
@@ -152,7 +154,7 @@
           <label class="choice consent"><input type="checkbox" name="clientDeclaration" required value="yes"> I confirm that the information I have provided is accurate to the best of my knowledge and I will check final documents before using them. <span>*</span></label>
           <div id="submit-message" class="notice hidden" role="status" tabindex="-1"></div>
           <button class="primary submit" type="submit">Send my onboarding</button>
-          <p class="small-print">Payment is not taken on this page yet. After submission, you will see a confirmation and Sam can provide the next step.</p>
+          <p class="small-print">No payment is taken on this page. Your package is already confirmed; submitting this form gives Sam what she needs to begin.</p>
         </section>
 
         <div id="error-summary" class="error-summary hidden" role="alert" tabindex="-1"></div>

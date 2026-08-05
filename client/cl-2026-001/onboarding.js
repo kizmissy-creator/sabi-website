@@ -6,12 +6,21 @@
   const next = document.getElementById('next');
   const progressBar = document.getElementById('progress-bar');
   const progressText = document.getElementById('progress-text');
+  const stepMenuToggle = document.getElementById('step-menu-toggle');
+  const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
   const storageKey = 'sabi-onboarding-cl-2026-001-v1';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   let current = 0;
   let saveTimer;
+
+  stepMenuToggle?.addEventListener('click', () => {
+    const isOpen = stepMenuToggle.getAttribute('aria-expanded') === 'true';
+    stepMenuToggle.setAttribute('aria-expanded', String(!isOpen));
+    stepMenuToggle.firstChild.textContent = isOpen ? 'Show all steps ' : 'Hide all steps ';
+    stepList?.classList.toggle('open', !isOpen);
+  });
 
   const makeId = () => window.crypto?.randomUUID?.() || `CL-2026-001-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   document.getElementById('submission-id').value = makeId();

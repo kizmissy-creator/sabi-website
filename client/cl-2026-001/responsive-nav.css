@@ -1,0 +1,57 @@
+.step-menu-toggle {
+  display: none;
+  width: 100%;
+  margin: .7rem 0 0;
+  padding: .65rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--teal-soft);
+  color: var(--teal-dark);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.step-menu-toggle span {
+  float: right;
+  font-size: 1.1rem;
+  transition: transform .2s;
+}
+
+.step-menu-toggle[aria-expanded="true"] span {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 850px) {
+  .progress-panel {
+    position: sticky;
+    top: 68px;
+    z-index: 15;
+    padding: 1rem 1.1rem;
+  }
+
+  .progress-panel .eyebrow {
+    margin-bottom: .55rem;
+  }
+
+  .progress-panel #progress-text {
+    display: inline-block;
+    margin: .65rem 0 0;
+  }
+
+  .step-menu-toggle {
+    display: block;
+  }
+
+  .progress-panel ol.open {
+    display: block;
+    margin: .75rem 0 .2rem;
+    max-height: 40vh;
+    overflow: auto;
+  }
+
+  .save-state,
+  .progress-panel .text-button {
+    display: none;
+  }
+}
