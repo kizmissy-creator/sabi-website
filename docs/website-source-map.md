@@ -107,6 +107,7 @@ There must be no universal mixed intake record containing Career, Admin, and Wri
 | `career-partner-onboarding/src/ServicePages.tsx` | Admin & Systems and Writing & Clarity public development page shells | Brief-enquiry routing only; no private intake, submission or payment |
 | `career-partner-onboarding/src/ServiceEnquiry.tsx` | Admin & Systems and Writing & Clarity Stage 1 development enquiries | In-memory review only; no upload, persistence, endpoint, submission or payment |
 | `form-contracts/` | Versioned Admin & Systems and Writing & Clarity data, routing and storage boundaries | Development-disabled; contains no production IDs, endpoints, recipients or credentials |
+| `docs/development-acceptance-plan.md` | Automated, manual, accessibility, regression and blocked-backend acceptance matrix | Plan created; manual and backend evidence not yet completed |
 | `.github/workflows/sync-main-to-google-drive.yml` | Controlled GitHub-to-Drive snapshot automation | Snapshot only; Drive copies must not become code authority |
 | `docs/google-drive-snapshot-setup.md` | Snapshot integration instructions | Operational setup reference |
 | `docs/website-source-map.md` | This control document | Update whenever a source, route, approval state or implementation owner changes |
@@ -142,7 +143,7 @@ Drive contains older Career onboarding notes, earlier field maps, older service 
 - owner and approval state for each public page;
 - final Privacy, Terms, Cookies and Accessibility content;
 - public enquiry end-to-end acceptance record;
-- service-specific form acceptance tests, including branching and uploads;
+- completed service-specific form acceptance evidence, including branching and uploads; the development plan exists but most manual and backend tests remain unrun or blocked;
 - keyboard, screen-reader, zoom, mobile and error-state accessibility evidence;
 - deployment and domain-control record;
 - data retention, restricted-access and deletion verification for every service;
