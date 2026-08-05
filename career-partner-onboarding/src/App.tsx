@@ -15,6 +15,7 @@ import {
   type ServiceId,
 } from './framework'
 import { createDevelopmentControlRecord, type ControlKey, type DevelopmentControlRecord } from './developmentRecords'
+import { ServiceLandingPage } from './ServicePages'
 
 type Answers = Record<string, string | string[] | boolean>
 type RepeatItem = Record<string, string>
@@ -39,7 +40,7 @@ const singleOptions: Record<string, string[]> = {
 }
 
 function App() {
-  const [journey, setJourney] = useState<'router' | 'career'>('router')
+  const [journey, setJourney] = useState<'router' | 'career' | 'admin' | 'writing'>('router')
   const [answers, setAnswers] = useState<Answers>(initialAnswers)
   const [step, setStep] = useState(0)
   const [saveMessage, setSaveMessage] = useState('Development mode: fictional data only. Nothing is submitted.')
@@ -195,7 +196,8 @@ function App() {
     true, true, true, true,
   ]
 
-  if (journey === 'router') return <StartingPointRouter onStartCareer={() => setJourney('career')} />
+  if (journey === 'router') return <StartingPointRouter onOpenJourney={setJourney} />
+  if (journey === 'admin' || journey === 'writing') return <ServiceLandingPage kind={journey} onBack={() => setJourney('router')} />
 
   return <div className="min-h-screen">
     <PageHeader currentStep={step + 1} totalSteps={sections.length} stepLabel={sections[step][1]} />
@@ -340,7 +342,7 @@ const startingStyles: Array<{ id: StartingStyle, title: string, description: str
   { id: 'enquiry', title: 'I only want to ask a brief question first', description: 'Use the short general enquiry rather than a detailed service form.' },
 ]
 
-function StartingPointRouter({ onStartCareer }: { onStartCareer: () => void }) {
+function StartingPointRouter({ onOpenJourney }: { onOpenJourney: (journey: 'career' | 'admin' | 'writing') => void }) {
   const [area, setArea] = useState<StartingArea | ''>('')
   const [style, setStyle] = useState<StartingStyle | ''>('')
   const result = useMemo(() => {
@@ -360,14 +362,14 @@ function StartingPointRouter({ onStartCareer }: { onStartCareer: () => void }) {
     if (area === 'admin') return {
       eyebrow: 'Admin & Systems route',
       title: 'Admin & Systems Support is the closest starting point',
-      body: 'Its dedicated public page and separate intake are still being built. Use the brief enquiry for now; do not enter Admin information into the Career form.',
-      action: 'enquiry' as const,
+      body: 'Review the two launch offers, then use the brief enquiry. The private Admin intake is still being built and remains separate from Career records.',
+      action: 'admin' as const,
     }
     return {
       eyebrow: 'Writing & Clarity route',
       title: 'Writing & Clarity is the closest starting point',
-      body: 'Its dedicated public page and separate intake are still being built. Use the brief enquiry for now; do not enter Writing information into the Career form.',
-      action: 'enquiry' as const,
+      body: 'Review the four launch routes, then use the brief enquiry. The private Writing intake is still being built and remains separate from Career records.',
+      action: 'writing' as const,
     }
   }, [area, style])
 
@@ -380,7 +382,7 @@ function StartingPointRouter({ onStartCareer }: { onStartCareer: () => void }) {
         <fieldset className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><legend className="px-2 font-display text-2xl font-semibold text-teal-900">1. Which area is closest to what you need?</legend><div className="mt-5 grid gap-3 sm:grid-cols-2">{startingAreas.map((item) => <label key={item.id} className={`block cursor-pointer rounded-2xl border-2 p-4 transition ${area === item.id ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white hover:border-teal-400'}`}><span className="flex gap-3"><input type="radio" name="starting-area" value={item.id} checked={area === item.id} onChange={() => setArea(item.id)} className="mt-1 h-5 w-5 shrink-0 accent-teal-800" /><span><strong className="block text-lg text-teal-900">{item.title}</strong><span className="mt-1 block leading-6 text-slate-600">{item.description}</span></span></span></label>)}</div></fieldset>
         <fieldset className="rounded-3xl border border-teal-200 bg-white p-5 shadow-card sm:p-7"><legend className="px-2 font-display text-2xl font-semibold text-teal-900">2. How clear is the help you need?</legend><div className="mt-5 grid gap-3">{startingStyles.map((item) => <label key={item.id} className={`block cursor-pointer rounded-2xl border-2 p-4 transition ${style === item.id ? 'border-teal-700 bg-teal-50' : 'border-teal-100 bg-white hover:border-teal-400'}`}><span className="flex gap-3"><input type="radio" name="starting-style" value={item.id} checked={style === item.id} onChange={() => setStyle(item.id)} className="mt-1 h-5 w-5 shrink-0 accent-teal-800" /><span><strong className="block text-lg text-teal-900">{item.title}</strong><span className="mt-1 block leading-6 text-slate-600">{item.description}</span></span></span></label>)}</div></fieldset>
         {!result && <aside aria-live="polite" className="rounded-2xl border border-teal-200 bg-teal-50 p-5 text-teal-950"><strong>Choose one answer in each section.</strong><p className="mt-1">Your suggested starting point will appear here.</p></aside>}
-        {result && <section aria-live="polite" aria-labelledby="starting-result" className="rounded-3xl border-2 border-teal-700 bg-teal-50 p-6 sm:p-8"><p className="eyebrow">{result.eyebrow}</p><h2 id="starting-result" className="mt-2 font-display text-3xl font-semibold text-teal-900">{result.title}</h2><p className="mt-3 max-w-3xl leading-7 text-slate-700">{result.body}</p><div className="mt-6 flex flex-col gap-3 sm:flex-row">{result.action === 'career' ? <button type="button" onClick={onStartCareer} className="rounded-xl bg-teal-800 px-6 py-3 font-extrabold text-white">Continue to the Career development journey →</button> : <a href="../index.html#contact" className="rounded-xl bg-teal-800 px-6 py-3 text-center font-extrabold text-white">Go to the brief enquiry →</a>}<button type="button" onClick={() => { setArea(''); setStyle('') }} className="rounded-xl border-2 border-teal-700 px-6 py-3 font-bold text-teal-800">Start again</button></div></section>}
+        {result && <section aria-live="polite" aria-labelledby="starting-result" className="rounded-3xl border-2 border-teal-700 bg-teal-50 p-6 sm:p-8"><p className="eyebrow">{result.eyebrow}</p><h2 id="starting-result" className="mt-2 font-display text-3xl font-semibold text-teal-900">{result.title}</h2><p className="mt-3 max-w-3xl leading-7 text-slate-700">{result.body}</p><div className="mt-6 flex flex-col gap-3 sm:flex-row">{result.action === 'enquiry' ? <a href="../index.html#contact" className="rounded-xl bg-teal-800 px-6 py-3 text-center font-extrabold text-white">Go to the brief enquiry →</a> : <button type="button" onClick={() => onOpenJourney(result.action)} className="rounded-xl bg-teal-800 px-6 py-3 font-extrabold text-white">{result.action === 'career' ? 'Continue to the Career development journey' : 'View this service area'} →</button>}<button type="button" onClick={() => { setArea(''); setStyle('') }} className="rounded-xl border-2 border-teal-700 px-6 py-3 font-bold text-teal-800">Start again</button></div></section>}
         <p className="text-sm leading-6 text-slate-600">This tool suggests where to begin. It does not decide eligibility, create a booking, agree scope or enable payment.</p>
       </section>
     </main>

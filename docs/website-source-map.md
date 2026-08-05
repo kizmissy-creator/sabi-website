@@ -50,9 +50,9 @@ Anything labelled `Superseded`, `Archive`, an older version number, or a working
 | Find Your Starting Point | Website Master Plan + Form Architecture | Umbrella router that directs a visitor into one service journey | Missing; build before treating the three service journeys as connected |
 | Career & Job Support | Career Services Framework | Dedicated public service page and service comparison | Prototype work exists; public route incomplete |
 | Career intake | Field Map + On-Site Form Build Specification | `career-partner-onboarding/` shared shell and Career-only schema/handler | Development prototype; fictional data only |
-| Admin & Systems Support | Admin & Systems Framework v10 | Dedicated public page | Missing |
+| Admin & Systems Support | Admin & Systems Framework v10 | Dedicated public page | Development page shell added; production route and acceptance review remain |
 | Admin & Systems intake | Admin framework + Form Architecture + Approved Systems Register | Separate form schema, endpoint, storage and notifications | Missing; must not reuse Career records |
-| Writing & Clarity | Writing & Clarity Portfolio Framework | Dedicated public page | Missing |
+| Writing & Clarity | Writing & Clarity Portfolio Framework | Dedicated public page | Development page shell added; production route and acceptance review remain |
 | Writing & Clarity intake | Writing enquiry specification + Form Architecture | Separate form schema, endpoint, storage and notifications | Missing; must not reuse Career records |
 | General enquiry | Website Master Plan + Form Architecture | Brief contact form handled by `google-workspace/contact-form/` | Implemented in code; needs end-to-end acceptance record |
 | Privacy | Approved website privacy notice | Dedicated versioned page linked from every relevant form | Current public placeholder; source is still a working draft |
@@ -104,6 +104,7 @@ There must be no universal mixed intake record containing Career, Admin, and Wri
 | `netlify.toml` | Netlify build/deployment configuration | GitHub-controlled; do not replace with old manual package |
 | `google-workspace/contact-form/` | Public enquiry Apps Script source and setup | Private data belongs in Google Workspace, not GitHub |
 | `career-partner-onboarding/` | Career Support development prototype | Fictional-data development only; not merged to `main` |
+| `career-partner-onboarding/src/ServicePages.tsx` | Admin & Systems and Writing & Clarity public development page shells | Brief-enquiry routing only; no private intake, submission or payment |
 | `.github/workflows/sync-main-to-google-drive.yml` | Controlled GitHub-to-Drive snapshot automation | Snapshot only; Drive copies must not become code authority |
 | `docs/google-drive-snapshot-setup.md` | Snapshot integration instructions | Operational setup reference |
 | `docs/website-source-map.md` | This control document | Update whenever a source, route, approval state or implementation owner changes |
