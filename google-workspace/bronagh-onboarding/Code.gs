@@ -14,8 +14,11 @@ function configureBronaghOnboarding() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet) throw new Error('Open this script from the dedicated onboarding spreadsheet.');
   ensureSheet_(spreadsheet);
-  const folder = DriveApp.createFolder('CL-2026-001 - Bronagh - Onboarding uploads');
-  PropertiesService.getScriptProperties().setProperty(ONBOARDING_CONFIG.folderProperty, folder.getId());
+  const folder = Drive.Files.create({
+    name: 'CL-2026-001 - Bronagh - Onboarding uploads',
+    mimeType: 'application/vnd.google-apps.folder'
+  });
+  PropertiesService.getScriptProperties().setProperty(ONBOARDING_CONFIG.folderProperty, folder.id);
   return 'Configured. Keep the spreadsheet and upload folder Restricted.';
 }
 
@@ -59,28 +62,33 @@ function save_(input) {
   if (existing) return;
   const folderId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
   if (!folderId) throw new Error('Upload folder not configured.');
-  const root = DriveApp.getFolderById(folderId);
-  const submissionFolder = root.createFolder(input.submissionId);
+  const submissionFolder = Drive.Files.create({
+    name: input.submissionId,
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: [folderId]
+  });
   const uploadRows = [];
   try {
     (input.files || []).forEach(file => {
       const bytes = Utilities.base64Decode(file.base64);
       if (bytes.length > ONBOARDING_CONFIG.maxFileBytes) throw new Error('Decoded file too large.');
       const safeName = String(file.name).replace(/[^a-z0-9._ -]/gi, '_').slice(0, 180);
-      const created = submissionFolder.createFile(Utilities.newBlob(bytes, file.type || 'application/octet-stream', safeName));
-      uploadRows.push({field: file.field, name: safeName, id: created.getId(), url: created.getUrl()});
+      const blob = Utilities.newBlob(bytes, file.type || 'application/octet-stream', safeName);
+      const created = Drive.Files.create({name: safeName, parents: [submissionFolder.id]}, blob);
+      uploadRows.push({field: file.field, name: safeName, id: created.id, url: driveUrl_(created.id)});
     });
     const snapshot = Object.assign({}, input, {files: uploadRows});
-    submissionFolder.createFile('onboarding-response.json', JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT);
+    const snapshotBlob = Utilities.newBlob(JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT, 'onboarding-response.json');
+    Drive.Files.create({name: 'onboarding-response.json', parents: [submissionFolder.id]}, snapshotBlob);
     sheet.appendRow([
       new Date(), safeCell_(input.submissionId), safeCell_(input.clientReference), safeCell_(input.firstName),
       safeCell_(input.lastName), safeCell_(String(input.email).toLowerCase()), safeCell_(input.preferredContact),
       safeCell_(input.deadline), safeCell_(input.broadDirection), safeCell_(input.targetedDocuments),
       includesYes_(input.specialCategoryConsent) ? 'Yes' : 'No', includesYes_(input.earlyStart) ? 'Requested' : 'Not requested',
-      safeCell_(submissionFolder.getUrl()), 'New'
+      safeCell_(driveUrl_(submissionFolder.id)), 'New'
     ]);
   } catch (error) {
-    submissionFolder.setTrashed(true);
+    Drive.Files.update({trashed: true}, submissionFolder.id);
     throw error;
   }
 }
@@ -98,4 +106,5 @@ function ensureSheet_(spreadsheet) {
 function includesYes_(value) { return value === 'yes' || value === true || (Array.isArray(value) && value.includes('yes')); }
 function clean_(value, limit) { return String(value == null ? '' : value).replace(/\u0000/g, '').trim().slice(0, limit); }
 function safeCell_(value) { const text = clean_(value, 50000); return /^[=+\-@]/.test(text) ? "'" + text : text; }
+function driveUrl_(id) { return 'https://drive.google.com/open?id=' + encodeURIComponent(id); }
 function json_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }
