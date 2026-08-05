@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sabigroup.co.uk/schemas/service-form-contract.schema.json",
+  "title": "SABI service form contract",
+  "type": "object",
+  "required": ["contractId", "status", "serviceFamily", "routes", "reference", "stage1", "stage2", "endpoint", "storage", "uploads", "notifications", "retention", "controls", "acceptance"],
+  "properties": {
+    "contractId": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["development-disabled", "acceptance", "approved-disabled", "production"] },
+    "serviceFamily": { "type": "string", "minLength": 1 },
+    "routes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+    "endpoint": {
+      "type": "object",
+      "required": ["enabled", "url", "deployment", "scriptPropertyKey"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "url": { "type": ["string", "null"] },
+        "deployment": { "type": "string" },
+        "scriptPropertyKey": { "type": "string" }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "required": ["sheetId", "driveFolderId", "crossServiceStorageAllowed"],
+      "properties": {
+        "crossServiceStorageAllowed": { "const": false }
+      },
+      "additionalProperties": true
+    },
+    "uploads": { "type": "object", "required": ["enabled", "allowedStage", "requiresApprovedRoute"] },
+    "controls": { "type": "object", "required": ["privacyVersion", "termsVersion", "payment"] },
+    "acceptance": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+    "source": { "type": "object" },
+    "reference": { "type": "object" },
+    "stage1": { "type": "object" },
+    "stage2": { "type": "object" },
+    "notifications": { "type": "object" },
+    "retention": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "development-disabled" } } },
+      "then": {
+        "properties": {
+          "endpoint": { "properties": { "enabled": { "const": false }, "url": { "type": "null" } } },
+          "uploads": { "properties": { "enabled": { "const": false } } },
+          "controls": { "properties": { "payment": { "properties": { "enabled": { "const": false } } } } }
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 [build]
+  command = "corepack enable && pnpm --dir career-partner-onboarding install --frozen-lockfile && pnpm --dir career-partner-onboarding run build"
   publish = "."
 
 [[headers]]
