@@ -145,7 +145,12 @@ function App() {
     if (step === 3) requireValue(Boolean(answers.workHistoryMethod), 'workHistoryMethod', 'Choose how you would like to provide your work history.')
     if (step === 4) {
       requireValue(Boolean(answers.clarity), 'clarity', 'Choose how clear you feel about your next role.')
-      requireValue(Boolean(answers.preferenceDetail), 'preferenceDetail', 'Choose whether to add practical preferences now.')
+      requireValue((answers.priorities as string[] ?? []).length > 0, 'priorities', 'Choose at least one priority for your next role.')
+      requireValue((answers.arrangements as string[] ?? []).length > 0, 'arrangements', 'Choose at least one working arrangement.')
+      requireValue((answers.hours as string[] ?? []).length > 0, 'hours', 'Choose at least one working pattern.')
+      requireValue((answers.travel as string[] ?? []).length > 0, 'travel', 'Choose at least one realistic travel option.')
+      requireValue(Boolean(answers.commuteLimit), 'commuteLimit', 'Add your usual maximum journey or choose Remote work only.')
+      requireValue(Boolean(answers.payMinimum), 'payMinimum', 'Choose whether you have a minimum pay requirement.')
     }
     if (step === 5) requireValue(((answers.evidenceSources as string[]) ?? []).length > 0, 'evidenceSources', 'Choose at least one possible source of skills evidence.')
     if (step === 6) {
@@ -191,7 +196,7 @@ function App() {
     Boolean(answers.firstName && answers.lastName && answers.email && answers.location),
     (answers.employmentStatus as string[]).length > 0 && Boolean(answers.currentRoleApplies),
     Boolean(answers.workHistoryMethod),
-    Boolean(answers.clarity && answers.preferenceDetail),
+    Boolean(answers.clarity && (answers.priorities as string[] ?? []).length && (answers.arrangements as string[] ?? []).length && (answers.hours as string[] ?? []).length && (answers.travel as string[] ?? []).length && answers.commuteLimit && answers.payMinimum),
     ((answers.evidenceSources as string[]) ?? []).length > 0,
     Boolean(answers.searchStage && answers.applicationSupportNow),
     true, true, true, true,
@@ -260,17 +265,24 @@ function App() {
             {choices('workHistoryMethod', 'What is the easiest way to give SABI your work history?', ['Upload a reasonably complete CV or work-history document', 'Upload a document, then add or correct missing details', 'Enter the relevant history here', 'I am not sure or would prefer to discuss it'], false, 'Manual history is only needed when an uploaded document is absent or incomplete.', false)}
             {(answers.workHistoryMethod === 'Upload a reasonably complete CV or work-history document' || answers.workHistoryMethod === 'Upload a document, then add or correct missing details') && <SimulatedUpload label="Existing CV or work-history document" files={simulatedFiles} onFiles={addSimulatedFiles} onRemove={(name) => setSimulatedFiles((items) => items.filter((item) => item !== name))} />}
             {(answers.workHistoryMethod === 'Upload a document, then add or correct missing details' || answers.workHistoryMethod === 'Enter the relevant history here') && <Repeating title="Work, self-employment or substantial roles" items={roles} onChange={(index, key, value) => updateRepeat(setRoles, index, key, value)} onAdd={() => setRoles((items) => [...items, { title: '', organisation: '', dates: '', responsibilities: '', achievements: '', leaving: '' }])} onRemove={(index) => setRoles((items) => items.filter((_, itemIndex) => itemIndex !== index))} fields={[['title','Role or activity'],['organisation','Organisation or setting'],['dates','Approximate dates and hours/type'],['responsibilities','Responsibilities'],['achievements','Achievements'],['leaving','Reason for leaving, optional']]} />}
-            {answers.workHistoryMethod && answers.workHistoryMethod !== 'Upload a reasonably complete CV or work-history document' && area('employmentGaps', 'Is there any gap or transition that you would like help presenting?', 'Not every gap needs to appear on a CV. SABI will not invent dates or activities.')}
+            {answers.workHistoryMethod && area('employmentGaps', 'Is there any gap or transition that you would like help presenting?', 'Optional. Not every gap needs to appear on a CV. SABI will not invent dates or activities.')}
             {answers.workHistoryMethod === 'I am not sure or would prefer to discuss it' && <Info title="That is fine">SABI can agree a written or discussion-based way to collect only the history needed for your service.</Info>}
           </>}
 
           {step === 4 && <>
             {choices('clarity', 'How clear do you currently feel about what you would like to do next?', singleOptions.clarity, false, undefined, false)}
-            {answers.clarity && answers.clarity !== 'I am completely unsure' && area('roleIdeas', 'Are there any roles, sectors or types of work you are considering?')}
+            {answers.clarity && area('roleIdeas', 'Are there any roles, sectors or types of work you are considering?', 'Include possibilities even where you are not sure they fit. You can answer Not sure yet.')}
             {answers.clarity === 'I am completely unsure' && <Info title="You do not need a finished career idea">The Career Change route can explore realistic directions before a CV target is agreed.</Info>}
-            {choices('preferenceDetail', 'Would you like to add practical preferences and limits now?', ['Yes, show the detailed questions', 'No, I have no important limits to add', 'I would prefer to discuss these'], false, 'These details help rule in realistic work rather than making assumptions.', false)}
-            {answers.preferenceDetail === 'Yes, show the detailed questions' && <>{choices('priorities', 'What matters most to you in your next role?', priorityOptions, true)}{choices('arrangements', 'What working arrangements would you consider?', arrangementOptions, true)}{choices('hours', 'What hours or working pattern could work for you?', hoursOptions, true)}{area('availabilityLimits', 'Are there days, times or practical limits SABI should take into account?')}{choices('travel', 'How are you able to travel for work?', travelOptions, true)}{text('commuteLimit', 'What is the longest journey you would usually consider for work?', 'Give a time, distance, area or Remote work only.', false)}{choices('payMinimum', 'Do you have a minimum level of pay you need?', singleOptions.payMinimum)}{(answers.payMinimum === 'Yes' || answers.payMinimum === 'Not sure') && text('payDetail', 'What pay level or range should SABI use as a practical guide?', 'State whether this is annual, hourly, daily or another basis.')}{area('avoidWork', 'Is there any work, environment or condition you know you do not want?')}</>}
-            {answers.preferenceDetail === 'I would prefer to discuss these' && <Info title="Practical preferences can be discussed">A written alternative remains available; choosing discussion here does not require video.</Info>}
+            <Info title="Why these practical questions appear">They help SABI compare realistic options without making assumptions. Choose Not sure or use a short answer where your position is not fixed.</Info>
+            {choices('priorities', 'What matters most to you in your next role?', priorityOptions, true, undefined, false)}
+            {choices('arrangements', 'What working arrangements would you consider?', arrangementOptions, true, undefined, false)}
+            {choices('hours', 'What hours or working pattern could work for you?', hoursOptions, true, undefined, false)}
+            {area('availabilityLimits', 'Are there days, times or practical limits SABI should take into account?', 'Only include information that affects realistic work options or delivery of your support.')}
+            {choices('travel', 'How are you able to travel for work?', travelOptions, true, undefined, false)}
+            {text('commuteLimit', 'What is the longest journey you would usually consider for work?', 'Give a time, distance, area or Remote work only.', false)}
+            {choices('payMinimum', 'Do you have a minimum level of pay you need?', singleOptions.payMinimum, false, undefined, false)}
+            {(answers.payMinimum === 'Yes' || answers.payMinimum === 'Not sure') && text('payDetail', 'What pay level or range should SABI use as a practical guide?', 'State whether this is annual, hourly, daily or another basis.')}
+            {area('avoidWork', 'Is there any work, environment or condition you know you do not want?', 'This can prevent SABI suggesting options that are unsuitable for you.')}
           </>}
 
           {step === 5 && <>
