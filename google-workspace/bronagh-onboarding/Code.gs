@@ -7,7 +7,8 @@ const ONBOARDING_CONFIG = {
   allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
   allowedClientReference: 'CL-2026-001',
   allowedServiceCode: 'career_partner_bespoke',
-  folderProperty: 'BRONAGH_UPLOAD_FOLDER_ID'
+  folderProperty: 'BRONAGH_UPLOAD_FOLDER_ID',
+  submissionSecretProperty: 'BRONAGH_SUBMISSION_SECRET'
 };
 
 function configureBronaghOnboarding() {
@@ -20,6 +21,13 @@ function configureBronaghOnboarding() {
   });
   PropertiesService.getScriptProperties().setProperty(ONBOARDING_CONFIG.folderProperty, folder.id);
   return 'Configured. Keep the spreadsheet and upload folder Restricted.';
+}
+
+function setBronaghSubmissionSecret(secret) {
+  const value = String(secret || '').trim();
+  if (value.length < 32) throw new Error('Use a randomly generated secret of at least 32 characters.');
+  PropertiesService.getScriptProperties().setProperty(ONBOARDING_CONFIG.submissionSecretProperty, value);
+  return 'Submission secret saved.';
 }
 
 function doPost(e) {
@@ -42,6 +50,7 @@ function validate_(input) {
   if (input.clientReference !== ONBOARDING_CONFIG.allowedClientReference) throw new Error('Wrong client reference.');
   if (input.serviceCode !== ONBOARDING_CONFIG.allowedServiceCode) throw new Error('Wrong service code.');
   if (!/^[a-z0-9-]{20,80}$/i.test(String(input.submissionId || ''))) throw new Error('Invalid submission ID.');
+  verifySubmissionToken_(input.submissionToken, input);
   if (!clean_(input.firstName, 120) || !clean_(input.lastName, 120)) throw new Error('Name required.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input.email || ''))) throw new Error('Email required.');
   if (input.ageEligible !== 'yes') throw new Error('Age eligibility required.');
@@ -54,6 +63,41 @@ function validate_(input) {
     if (!Number.isFinite(Number(file.size)) || Number(file.size) > ONBOARDING_CONFIG.maxFileBytes) throw new Error('File too large.');
     if (!file.base64) throw new Error('Missing file data.');
   });
+}
+
+function verifySubmissionToken_(token, input) {
+  const secret = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.submissionSecretProperty);
+  if (!secret) throw new Error('Submission secret not configured.');
+  const parts = String(token || '').split('.');
+  if (parts.length !== 2) throw new Error('Missing submission token.');
+
+  const encodedClaims = parts[0];
+  const suppliedSignature = parts[1];
+  const expectedBytes = Utilities.computeHmacSha256Signature(encodedClaims, secret, Utilities.Charset.UTF_8);
+  const expectedSignature = Utilities.base64EncodeWebSafe(expectedBytes).replace(/=+$/g, '');
+  if (!constantTimeEqual_(suppliedSignature, expectedSignature)) throw new Error('Invalid submission token.');
+
+  let claims;
+  try {
+    const decoded = Utilities.newBlob(Utilities.base64DecodeWebSafe(encodedClaims)).getDataAsString();
+    claims = JSON.parse(decoded);
+  } catch (error) {
+    throw new Error('Invalid token claims.');
+  }
+
+  if (!Number.isFinite(Number(claims.exp)) || Number(claims.exp) < Date.now()) throw new Error('Expired submission token.');
+  if (claims.submissionId !== input.submissionId) throw new Error('Submission token mismatch.');
+  if (claims.clientReference !== input.clientReference) throw new Error('Client token mismatch.');
+  if (claims.serviceCode !== input.serviceCode) throw new Error('Service token mismatch.');
+}
+
+function constantTimeEqual_(left, right) {
+  left = String(left || '');
+  right = String(right || '');
+  if (left.length !== right.length) return false;
+  let result = 0;
+  for (let i = 0; i < left.length; i++) result |= left.charCodeAt(i) ^ right.charCodeAt(i);
+  return result === 0;
 }
 
 function save_(input) {
@@ -78,6 +122,7 @@ function save_(input) {
       uploadRows.push({field: file.field, name: safeName, id: created.id, url: driveUrl_(created.id)});
     });
     const snapshot = Object.assign({}, input, {files: uploadRows});
+    delete snapshot.submissionToken;
     const snapshotBlob = Utilities.newBlob(JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT, 'onboarding-response.json');
     Drive.Files.create({name: 'onboarding-response.json', parents: [submissionFolder.id]}, snapshotBlob);
     sheet.appendRow([
