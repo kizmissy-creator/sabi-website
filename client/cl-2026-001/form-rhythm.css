@@ -5,6 +5,13 @@
   gap: 1.5rem;
 }
 
+.hero-support {
+  max-width: 680px;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: .98rem;
+}
+
 .progress-panel {
   padding: 1.2rem;
 }
