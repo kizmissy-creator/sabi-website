@@ -4,11 +4,28 @@
 }
 
 .compact-details .grid {
-  gap: .75rem;
+  gap: .65rem;
 }
 
 .compact-details label:not(.choice) {
-  margin: .9rem 0;
+  margin: .65rem 0;
+}
+
+.compact-details label small {
+  display: inline;
+  margin-left: .3rem;
+  font-size: .78rem;
+}
+
+.compact-details .grid + .grid,
+.compact-details .grid + .compact-choices,
+.compact-details .compact-choices + label {
+  margin-top: .55rem;
+}
+
+.contact-row {
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, .85fr);
+  align-items: end;
 }
 
 .compact-details input:not([type="radio"]):not([type="checkbox"]),
@@ -44,6 +61,10 @@
 }
 
 @media (max-width: 600px) {
+  .contact-row {
+    grid-template-columns: 1fr;
+  }
+
   .compact-choices {
     grid-template-columns: 1fr;
   }
