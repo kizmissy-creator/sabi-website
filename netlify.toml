@@ -2,9 +2,10 @@
   publish = "client/cl-2026-001"
   command = "mkdir -p client/cl-2026-001/images && cp images/favicon.png images/sabi-mark-complete.png client/cl-2026-001/images/"
   edge_functions = "netlify/edge-functions"
+  functions = "netlify/functions"
 
 [[edge_functions]]
-  function = "client-auth"
+  function = "client-auth-30d"
   path = "/*"
 
 [[headers]]
