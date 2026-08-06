@@ -26,13 +26,16 @@
 }
 
 .progress-panel li button:hover {
-  background: #fff8dc;
+  background: transparent;
   color: var(--teal-dark);
+  text-decoration: underline;
+  text-underline-offset: .18em;
 }
 
 .progress-panel li.active button {
-  background: #fff8dc;
+  background: transparent;
   color: var(--teal-dark);
+  text-decoration: none;
 }
 
 .choice:has(input:checked) {
@@ -100,20 +103,13 @@ textarea[rows="7"] { height: 150px; }
   margin: 1.35rem 0;
 }
 
-/* The opening check should feel light, not like a stack of coloured cards. */
-.form-step[data-step="0"] .info-box {
-  background: #fffdf5;
-  border: 1px solid #eadfb9;
-  border-left: 4px solid var(--yellow);
-  border-radius: 0 10px 10px 0;
-}
-
-.form-step[data-step="0"] .privacy-note {
-  background: transparent;
-  border: 0;
+.form-privacy {
+  max-width: 560px;
+  margin: 1.2rem 0 0;
+  padding-top: .85rem;
   border-top: 1px solid var(--line);
-  border-radius: 0;
-  padding: 1rem 0 0;
+  color: var(--muted);
+  font-size: .78rem;
 }
 
 .form-actions {

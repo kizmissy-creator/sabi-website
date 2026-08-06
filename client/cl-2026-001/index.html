@@ -54,10 +54,10 @@
       <aside class="progress-panel">
         <p class="eyebrow">YOUR PROGRESS</p>
         <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
-        <p id="progress-text" aria-live="polite">Step 1 of 9</p>
+        <p id="progress-text" aria-live="polite">Step 1 of 8</p>
         <button class="step-menu-toggle" id="step-menu-toggle" type="button" aria-expanded="false" aria-controls="step-list">Show all steps <span aria-hidden="true">⌄</span></button>
         <ol id="step-list">
-          <li class="active"><button type="button" data-go-to-step="0">Quick check</button></li><li><button type="button" data-go-to-step="1">About you</button></li><li><button type="button" data-go-to-step="2">Your situation</button></li><li><button type="button" data-go-to-step="3">Your experience</button></li><li><button type="button" data-go-to-step="4">What comes next</button></li><li><button type="button" data-go-to-step="5">Applications</button></li><li><button type="button" data-go-to-step="6">Documents</button></li><li><button type="button" data-go-to-step="7">Working together</button></li><li><button type="button" data-go-to-step="8">Review and send</button></li>
+          <li class="active"><button type="button" data-go-to-step="0">About you</button></li><li><button type="button" data-go-to-step="1">Your situation</button></li><li><button type="button" data-go-to-step="2">Your experience</button></li><li><button type="button" data-go-to-step="3">What comes next</button></li><li><button type="button" data-go-to-step="4">Applications</button></li><li><button type="button" data-go-to-step="5">Documents</button></li><li><button type="button" data-go-to-step="6">Working together</button></li><li><button type="button" data-go-to-step="7">Review and send</button></li>
         </ol>
         <p class="save-state" id="save-state" aria-live="polite">Ready to save</p>
         <button class="text-button" id="download-draft" type="button">Download a backup</button>
@@ -71,41 +71,34 @@
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
 
-        <section class="form-step active" data-step="0">
-          <p class="eyebrow">STEP 1</p><h2 id="form-title">A quick check</h2>
-          <div class="info-box"><h3>A few useful things to know</h3><ul><li>Most people take around 30–45 minutes, but there is no timer.</li><li>You can skip optional questions and return later on this device.</li><li>Approximate dates and rough notes are completely fine.</li><li>Please do not include information you do not want SABI to receive.</li></ul></div>
-          <fieldset><legend>Are you aged 16 or over? <span>*</span></legend><label class="choice"><input type="radio" name="ageEligible" value="yes" required> Yes</label><label class="choice"><input type="radio" name="ageEligible" value="no"> No</label></fieldset>
-          <div id="under-16" class="notice hidden" role="alert">SABI’s Career Support route is currently available from age 16. A school, college or local careers service may be able to help you now. This form will not collect further details.</div>
-          <div class="privacy-note"><strong>How your information is used</strong><p>SABI will use the information you provide to understand your goals and deliver your confirmed Career Partner package. Detailed answers and documents should only be sent when you are comfortable proceeding.</p></div>
-        </section>
-
-        <section class="form-step compact-details" data-step="1">
-          <p class="eyebrow">STEP 2</p><h2>About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p>
+        <section class="form-step compact-details active" data-step="0">
+          <p class="eyebrow">STEP 1</p><h2 id="form-title">About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p>
           <div class="grid two"><label>First name <span>*</span><input name="firstName" autocomplete="given-name" required value="Bronagh"></label><label>Last name <span>*</span><input name="lastName" autocomplete="family-name" required></label></div>
           <div class="grid two"><label>Preferred name <small>Optional</small><input name="preferredName" autocomplete="nickname"></label><label>Pronouns <small>Optional</small><input name="pronouns"></label></div>
           <div class="grid contact-row"><label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required></label><label>Telephone number <small>Optional</small><input type="tel" name="telephone" autocomplete="tel"></label></div>
           <fieldset class="compact-choices"><legend>How would you usually like me to contact you? <span>*</span></legend><label class="choice"><input type="radio" name="preferredContact" value="email" required> Email</label><label class="choice"><input type="radio" name="preferredContact" value="whatsapp"> WhatsApp for brief practical messages</label><label class="choice"><input type="radio" name="preferredContact" value="phone"> Telephone</label><label class="choice"><input type="radio" name="preferredContact" value="video"> Video call</label></fieldset>
           <label class="field-medium">Town, city or postcode area <small>Optional — no full address needed</small><input name="location"></label>
+          <p class="form-privacy">SABI uses these details and your answers to deliver your confirmed Career Partner package.</p>
         </section>
 
-        <section class="form-step" data-step="2">
-          <p class="eyebrow">STEP 3</p><h2>Your situation now</h2>
+        <section class="form-step" data-step="1">
+          <p class="eyebrow">STEP 2</p><h2>Your situation now</h2>
           <fieldset><legend>Which of these describe your current situation? <span>*</span></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="currentSituation" value="employed"> Employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="self-employed"> Self-employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="not-working"> Not currently working</label><label class="choice"><input type="checkbox" name="currentSituation" value="education"> Studying or training</label><label class="choice"><input type="checkbox" name="currentSituation" value="caring"> Caring responsibilities</label><label class="choice"><input type="checkbox" name="currentSituation" value="returning"> Returning after a break</label><label class="choice"><input type="checkbox" name="currentSituation" value="other"> Something else</label></div></fieldset>
           <label>What is your current or most recent role?<textarea name="currentRole" rows="3" placeholder="Job title, organisation or setting, and approximate dates are enough."></textarea></label>
           <label>What do you like, value or want to keep from your current or previous work?<textarea name="whatWorks" rows="4"></textarea></label>
           <label>What would you most like to change?<textarea name="whatToChange" rows="4"></textarea></label>
         </section>
 
-        <section class="form-step" data-step="3">
-          <p class="eyebrow">STEP 4</p><h2>Your experience and evidence</h2><p class="intro">Paid work is only one source of useful evidence. Include education, volunteering, caring, advocacy, projects, hobbies and everyday responsibilities where relevant.</p>
+        <section class="form-step" data-step="2">
+          <p class="eyebrow">STEP 3</p><h2>Your experience and evidence</h2><p class="intro">Paid work is only one source of useful evidence. Include education, volunteering, caring, advocacy, projects, hobbies and everyday responsibilities where relevant.</p>
           <label>Tell me about the roles or experiences that matter most<textarea name="workHistory" rows="7" placeholder="For each one, you can include a title or description, place, approximate dates, responsibilities and anything you achieved."></textarea></label>
           <label>Qualifications, training, licences or certificates<textarea name="qualifications" rows="4"></textarea></label>
           <label>Skills or strengths you want employers to notice<textarea name="skills" rows="5" placeholder="For example: organising, explaining, customer care, research, problem-solving, practical work, supporting people or learning quickly."></textarea></label>
           <label>Achievements, positive feedback or examples you are proud of<textarea name="achievements" rows="5"></textarea></label>
         </section>
 
-        <section class="form-step" data-step="4">
-          <p class="eyebrow">STEP 5</p><h2>What comes next</h2>
+        <section class="form-step" data-step="3">
+          <p class="eyebrow">STEP 4</p><h2>What comes next</h2>
           <label>What broad direction, roles or sectors are you considering? <span>*</span><textarea name="broadDirection" rows="5" required placeholder="It is fine to list a few related possibilities or say what you know you do not want."></textarea></label>
           <label>What matters most in your next role?<textarea name="priorities" rows="5" placeholder="Pay, meaning, stability, progression, flexibility, environment, hours, location, pace…"></textarea></label>
           <div class="grid two"><label>Preferred working arrangement<select name="workplace"><option value="">No fixed preference</option><option>Remote</option><option>Hybrid</option><option>Workplace-based</option><option>Open to several</option></select></label><label>Hours or working pattern<textarea name="hours" rows="3"></textarea></label></div>
@@ -114,8 +107,8 @@
           <label>What should the included targeted CV and cover letter focus on?<textarea name="targetedDocuments" rows="4" placeholder="A vacancy, job type, organisation or clearly defined direction. This can be confirmed later if needed."></textarea></label>
         </section>
 
-        <section class="form-step" data-step="5">
-          <p class="eyebrow">STEP 6</p><h2>Applications and support</h2>
+        <section class="form-step" data-step="4">
+          <p class="eyebrow">STEP 5</p><h2>Applications and support</h2>
           <label>Where are you in your job search now?<textarea name="searchStage" rows="4"></textarea></label>
           <label>Which parts of searching or applying feel hardest?<textarea name="difficultParts" rows="5"></textarea></label>
           <label>Are there example jobs or organisations that interest you?<textarea name="exampleJobs" rows="4"></textarea></label>
@@ -125,8 +118,8 @@
           <label>What would make this service feel successful for you?<textarea name="successOutcome" rows="5"></textarea></label>
         </section>
 
-        <section class="form-step" data-step="6">
-          <p class="eyebrow">STEP 7</p><h2>Documents</h2><p class="intro">Upload only documents that are relevant. You can also paste a link or explain what you will send later.</p>
+        <section class="form-step" data-step="5">
+          <p class="eyebrow">STEP 6</p><h2>Documents</h2><p class="intro">Upload only documents that are relevant. You can also paste a link or explain what you will send later.</p>
           <label>Existing CV or work-history document <small>Optional · PDF, Word or text · 8 MB maximum</small><input type="file" name="existingCv" accept=".pdf,.doc,.docx,.txt"></label>
           <label>Vacancy advert, job description or person specification <small>Optional · 8 MB maximum</small><input type="file" name="vacancyDocument" accept=".pdf,.doc,.docx,.txt"></label>
           <label>Application draft <small>Optional · 8 MB maximum</small><input type="file" name="applicationDocument" accept=".pdf,.doc,.docx,.txt"></label>
@@ -134,8 +127,8 @@
           <div class="notice">Files are not stored in your browser draft. They are attached only when you make the final submission. If you leave this page, you will need to select them again.</div>
         </section>
 
-        <section class="form-step" data-step="7">
-          <p class="eyebrow">STEP 8</p><h2>Working together</h2>
+        <section class="form-step" data-step="6">
+          <p class="eyebrow">STEP 7</p><h2>Working together</h2>
           <fieldset><legend>Would you like to tell me about any accessibility, communication or practical needs?</legend><label class="choice"><input type="radio" name="accessibilityGate" value="no"> No</label><label class="choice"><input type="radio" name="accessibilityGate" value="yes"> Yes</label><label class="choice"><input type="radio" name="accessibilityGate" value="private"> Prefer to discuss privately</label></fieldset>
           <div id="accessibility-details" class="conditional hidden">
             <label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes"> I explicitly consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. I understand that these questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</label>
@@ -146,8 +139,8 @@
           <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no" checked> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
         </section>
 
-        <section class="form-step" data-step="8">
-          <p class="eyebrow">STEP 9</p><h2>Review and send</h2><p class="intro">Check the summary below. You can go back to change anything; your detailed answers are included with the final submission.</p>
+        <section class="form-step" data-step="7">
+          <p class="eyebrow">STEP 8</p><h2>Review and send</h2><p class="intro">Check the summary below. You can go back to change anything; your detailed answers are included with the final submission.</p>
           <div id="review-summary" class="review-summary"></div>
           <div class="privacy-note"><strong>Privacy reminder</strong><p>SABI will use this information to assess and deliver your Career Partner support and keep the records needed to manage the service. Optional sensitive information is used only where you have explicitly consented.</p></div>
           <label class="choice consent"><input type="checkbox" name="termsAccepted" required value="yes"> I have read and agree to the SABI Career Support Terms and the Service Schedule for this purchase. <span>*</span></label>

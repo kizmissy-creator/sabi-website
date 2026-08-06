@@ -65,8 +65,6 @@
   }
 
   function updateConditional() {
-    const eligible = form.elements.ageEligible.value;
-    document.getElementById('under-16').classList.toggle('hidden', eligible !== 'no');
     const gate = form.elements.accessibilityGate.value;
     const details = document.getElementById('accessibility-details');
     details.classList.toggle('hidden', gate !== 'yes');
@@ -105,8 +103,6 @@
   function validateStep() {
     const fields = [...steps[current].querySelectorAll('[required]')].filter(el => !el.disabled);
     const invalid = fields.filter(el => !el.checkValidity());
-    const ageNo = current === 0 && form.elements.ageEligible.value === 'no';
-    if (ageNo) { errorSummary.innerHTML = '<strong>This route is available from age 16.</strong><br>Please use the signposting above.'; errorSummary.classList.remove('hidden'); errorSummary.focus(); return false; }
     document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
     if (!invalid.length) return true;
     invalid.forEach(el => el.classList.add('invalid'));
