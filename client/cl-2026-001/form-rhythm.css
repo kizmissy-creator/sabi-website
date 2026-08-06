@@ -1,0 +1,113 @@
+/* A task-focused rhythm: compact controls, clear grouping, room where writing needs it. */
+.form-shell {
+  max-width: 1040px;
+  grid-template-columns: 230px minmax(0, 760px);
+  gap: 1.5rem;
+}
+
+.progress-panel {
+  padding: 1.2rem;
+}
+
+.progress-panel li {
+  padding: 0;
+}
+
+.progress-panel li button {
+  display: block;
+  width: 100%;
+  padding: .42rem 0 .42rem .85rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.progress-panel li button:hover {
+  background: var(--teal-soft);
+  color: var(--teal-dark);
+}
+
+form {
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.form-step h2,
+.info-box h2 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.intro {
+  margin-bottom: 1.25rem;
+}
+
+label:not(.choice) {
+  margin: .95rem 0;
+}
+
+fieldset {
+  margin: 1.2rem 0;
+}
+
+input:not([type="radio"]):not([type="checkbox"]),
+select,
+textarea {
+  margin-top: .3rem;
+  padding: .65rem .8rem;
+  line-height: 1.4;
+}
+
+textarea[rows="3"] { height: 88px; }
+textarea[rows="4"] { height: 105px; }
+textarea[rows="5"] { height: 120px; }
+textarea[rows="7"] { height: 150px; }
+
+.choice {
+  padding: .62rem .75rem;
+  margin: .35rem 0;
+}
+
+.choice-grid {
+  gap: .15rem .55rem;
+}
+
+.info-box,
+.privacy-note,
+.notice,
+.review-summary {
+  padding: 1rem 1.15rem;
+  margin: 1.1rem 0;
+}
+
+.privacy-note {
+  margin: 1.35rem 0;
+}
+
+.form-actions {
+  margin-top: 1.35rem;
+  padding-top: 1.1rem;
+}
+
+.package-card {
+  padding: 1.5rem;
+}
+
+.package-card strong {
+  font-size: 1.75rem;
+}
+
+.price {
+  font-size: 2.25rem;
+}
+
+@media (max-width: 850px) {
+  .form-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-panel {
+    padding: .9rem 1rem;
+  }
+}

@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./onboarding.css">
   <link rel="stylesheet" href="./responsive-nav.css">
   <link rel="stylesheet" href="./compact-form.css">
+  <link rel="stylesheet" href="./form-rhythm.css">
   <script src="./config.js" defer></script>
   <script src="./onboarding.js" defer></script>
 </head>
@@ -56,7 +57,7 @@
         <p id="progress-text" aria-live="polite">Step 1 of 9</p>
         <button class="step-menu-toggle" id="step-menu-toggle" type="button" aria-expanded="false" aria-controls="step-list">Show all steps <span aria-hidden="true">⌄</span></button>
         <ol id="step-list">
-          <li class="active">Quick check</li><li>About you</li><li>Your situation</li><li>Your experience</li><li>What comes next</li><li>Applications</li><li>Documents</li><li>Working together</li><li>Review and send</li>
+          <li class="active"><button type="button" data-go-to-step="0">Quick check</button></li><li><button type="button" data-go-to-step="1">About you</button></li><li><button type="button" data-go-to-step="2">Your situation</button></li><li><button type="button" data-go-to-step="3">Your experience</button></li><li><button type="button" data-go-to-step="4">What comes next</button></li><li><button type="button" data-go-to-step="5">Applications</button></li><li><button type="button" data-go-to-step="6">Documents</button></li><li><button type="button" data-go-to-step="7">Working together</button></li><li><button type="button" data-go-to-step="8">Review and send</button></li>
         </ol>
         <p class="save-state" id="save-state" aria-live="polite">Ready to save</p>
         <button class="text-button" id="download-draft" type="button">Download a backup</button>

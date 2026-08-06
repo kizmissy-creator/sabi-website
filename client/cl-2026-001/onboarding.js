@@ -59,7 +59,7 @@
           else el.value = value;
         });
       }
-      current = Math.min(Number(draft.current) || 0, steps.length - 1);
+      current = 0;
       saveState.textContent = `Draft restored from ${new Date(draft.savedAt).toLocaleString()}`;
     } catch { localStorage.removeItem(storageKey); }
   }
@@ -92,6 +92,15 @@
     errorSummary.classList.add('hidden'); updateConditional(); scheduleSave();
     document.querySelector('.form-shell').scrollIntoView({behavior:'smooth', block:'start'});
   }
+
+  stepItems.forEach((item, index) => {
+    item.querySelector('button')?.addEventListener('click', () => {
+      showStep(index);
+      stepMenuToggle?.setAttribute('aria-expanded', 'false');
+      stepMenuToggle && (stepMenuToggle.firstChild.textContent = 'Show all steps ');
+      stepList?.classList.remove('open');
+    });
+  });
 
   function validateStep() {
     const fields = [...steps[current].querySelectorAll('[required]')].filter(el => !el.disabled);
