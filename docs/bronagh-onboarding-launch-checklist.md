@@ -2,36 +2,63 @@
 
 ## Current position
 
-- Private route: `/client/cl-2026-001/`
-- Not linked from the homepage or public navigation.
-- Page and Netlify headers both instruct search engines not to index, follow, cache or archive the route.
-- The repository's `netlify.toml` publishes the repository root and contains security headers, but it does not identify a Netlify site ID or prove that Git-based continuous deployment is connected.
-- The existing Google Apps Script contact receiver still refers to `https://celadon-melomakarona-a77f9d.netlify.app/`, which appears to be the earlier Netlify site URL.
-- `sabigroup.co.uk` currently resolves to the existing Squarespace website and redirects to `www.sabigroup.co.uk`.
-- Internal SABI records say Squarespace is the customer-facing domain provider, Tucows is the underlying registrar and Google Domains nameservers currently provide DNS. Confirm these values in the live account before changing DNS.
+- Dedicated branch: `feat/bronagh-onboarding`.
+- This branch must not be merged into `main`.
+- It is intended for a separate one-off Netlify site for client `CL-2026-001` only.
+- The Netlify publish directory is `client/cl-2026-001`, so the SABI homepage and unfinished public website are not deployed with it.
+- The site contains only Bronagh's onboarding, confirmation page and required static assets.
+- The route is not linked from the public website.
+- Page and Netlify headers instruct search engines not to index, follow, cache or archive the site.
+- A password gate protects every route and remembers access for up to 30 days on that browser and device.
+- Unfinished text answers stay in the browser's local storage on that device.
+- Uploaded files are not retained in the browser draft and must be selected again before submission.
+- The final submission goes directly from the browser to the dedicated Google receiver.
+- Netlify issues a 15-minute signed pass but does not receive or retain the completed answers or files.
+- Google rejects submissions without a valid pass bound to the client reference, service code and submission ID.
+- Final answers and files are stored only in the restricted SABI Google Workspace record.
 
-## Safest order for Bronagh
+## Private Netlify environment variables required
 
-1. Configure and fictionally test the dedicated Google Apps Script receiver in `google-workspace/bronagh-onboarding/SETUP.md`.
-2. Put its deployed `/exec` URL in `client/cl-2026-001/config.js`.
-3. Commit and push this feature branch, then create a Netlify branch deploy or Deploy Preview. Do not merge to `main` yet.
-4. Test the exact preview URL on phone and desktop with fictional data. Confirm automatic saving, backup download, conditional questions, private uploads, duplicate protection and confirmation.
-5. If Bronagh needs access before the main domain moves, send only the exact branch/deploy-preview client URL. Keep the route unlinked.
-6. Add payment later only after the Stripe product/payment link, amount, refund route, Service Schedule and early-start records have been tested. A reusable public payment link is weaker than a client-specific invoice or single-use route for this bespoke package.
+- `BRONAGH_PAGE_PASSWORD`
+- `BRONAGH_COOKIE_SECRET`
+- `BRONAGH_SUBMISSION_SECRET`
+- `BRONAGH_APPS_SCRIPT_ENDPOINT`
 
-## Connecting `sabigroup.co.uk` later
+None of these values should be committed to GitHub or included in the client email.
 
-Do not change nameservers merely to launch this client page.
+## Safest activation order
 
-1. Confirm the Netlify production site is connected to this GitHub repository and that production deploys come only from `main`.
-2. In Netlify, add both `sabigroup.co.uk` and `www.sabigroup.co.uk` as custom domains and choose one canonical hostname.
-3. Copy the exact DNS records Netlify displays. Do not guess them.
-4. In the current authoritative DNS manager, lower the TTL in advance if the interface permits, then replace only the web-host records for the apex and `www`. Preserve Google Workspace MX, SPF, DKIM, DMARC and verification records.
-5. Keep the old Squarespace site available until Netlify shows a valid TLS certificate and both hostnames work over HTTPS.
-6. Test apex-to-`www` (or the chosen reverse) redirect, the homepage, private onboarding route, public enquiry submission and thank-you route.
-7. Update the Apps Script contact receiver's success URL from the old Netlify hostname to the chosen production domain and redeploy it.
-8. Only after a stable rollback window should the Squarespace website subscription or old web records be removed. Domain registration and Google Workspace DNS must remain intact.
+1. Create the restricted dedicated Google Sheet and configure the Apps Script receiver using `google-workspace/bronagh-onboarding/SETUP.md`.
+2. Generate the shared submission secret and save the same value in Apps Script and the Bronagh Netlify site's `BRONAGH_SUBMISSION_SECRET` variable.
+3. Deploy the Apps Script web app and save its `/exec` URL only in `BRONAGH_APPS_SCRIPT_ENDPOINT` on Netlify.
+4. Create a separate Netlify site from `feat/bronagh-onboarding`. Do not connect this branch to the public SABI production site.
+5. Add the page password and separate cookie secret in Netlify.
+6. Deploy the isolated client site.
+7. Test the exact client URL on phone and desktop with entirely fictional data.
+8. Confirm password access, 30-day cookie behaviour, local save and restore, backup download, conditional questions, private uploads, duplicate protection and confirmation.
+9. Confirm files larger than 8 MB individually or 15 MB in total are rejected before submission.
+10. Confirm changing the URL does not reveal any public SABI pages.
+11. Confirm no Google endpoint or private secret appears in the deployed JavaScript or GitHub branch.
+12. Confirm the saved Google JSON does not contain the short-lived submission token.
+13. Only after all tests pass, send Bronagh the exact client URL and send the password separately.
 
-## Important privacy limit
+## Payment
 
-An obscure, unlinked URL plus `noindex` is private-by-discovery, not authenticated access. It is appropriate only if the link is sent directly and contains no pre-filled sensitive data. For stronger access control, add Netlify access protection or a verified one-time-link flow before collecting live information.
+Add payment only after the Stripe product or client-specific payment route, amount, cancellation wording, Service Schedule and early-start records have been checked together.
+
+The onboarding can be tested before payment is activated. Do not imply the service has started merely because the form was submitted.
+
+## Main SABI domain
+
+Do not change nameservers or move `sabigroup.co.uk` merely to launch this one-off client site. The client deployment can use its own Netlify hostname or a dedicated subdomain later without changing or publishing the unfinished main website.
+
+Any future domain connection must preserve Google Workspace MX, SPF, DKIM, DMARC and verification records.
+
+## Privacy limits
+
+- The password protects access but is not individual identity verification.
+- The remembered login belongs to that browser and device. It will not follow Bronagh to another device.
+- Browser drafts can be lost if site data is cleared, private browsing is used or the device is lost.
+- The downloadable JSON backup is readable and should be used only when needed and handled securely.
+- Do not reuse the site, password, secrets, Google receiver or client route for another person.
+- Retire the one-off Netlify site and its environment variables when the onboarding route is no longer needed, following the recorded retention decision.
