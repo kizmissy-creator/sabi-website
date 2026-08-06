@@ -26,8 +26,23 @@
 }
 
 .progress-panel li button:hover {
-  background: var(--teal-soft);
+  background: #fff8dc;
   color: var(--teal-dark);
+}
+
+.progress-panel li.active button {
+  background: #fff8dc;
+  color: var(--teal-dark);
+}
+
+.choice:has(input:checked) {
+  background: #fff8dc;
+  border-color: #d3a619;
+  color: var(--ink);
+}
+
+.choice input {
+  accent-color: #b98900;
 }
 
 form {
