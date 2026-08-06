@@ -3,12 +3,24 @@ window.SABI_ONBOARDING_CONFIG = {
   sessionEndpoint: "/api/onboarding-session",
   confirmationUrl: "./confirmation.html",
   maxFileBytes: 8 * 1024 * 1024,
+  maxTotalFileBytes: 15 * 1024 * 1024,
   acceptedExtensions: ["pdf", "doc", "docx", "txt"]
 };
 
 (() => {
   const nativeFetch = window.fetch.bind(window);
   const config = window.SABI_ONBOARDING_CONFIG;
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const fileInputs = [...document.querySelectorAll('input[type="file"]')];
+    const existingNotice = fileInputs.at(-1)?.closest("section")?.querySelector(".notice");
+    if (existingNotice && !existingNotice.textContent.includes("15 MB")) {
+      existingNotice.insertAdjacentText(
+        "afterbegin",
+        "The combined size of all selected files must be 15 MB or less. "
+      );
+    }
+  });
 
   window.fetch = async (resource, options = {}) => {
     const requestedUrl = typeof resource === "string" ? resource : resource?.url;
@@ -21,6 +33,14 @@ window.SABI_ONBOARDING_CONFIG = {
       submission = JSON.parse(String(options.body || "{}"));
     } catch {
       throw new Error("The form could not prepare the secure submission.");
+    }
+
+    const totalFileBytes = (submission.files || []).reduce(
+      (total, file) => total + Number(file.size || 0),
+      0
+    );
+    if (totalFileBytes > config.maxTotalFileBytes) {
+      throw new Error("The selected files are more than 15 MB in total. Remove one or send the additional document separately.");
     }
 
     const sessionResponse = await nativeFetch(config.sessionEndpoint, {
