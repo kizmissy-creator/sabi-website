@@ -1,17 +1,19 @@
 [build]
-  publish = "."
+  publish = "client/cl-2026-001"
+  command = "mkdir -p client/cl-2026-001/images && cp images/favicon.png images/sabi-mark-complete.png client/cl-2026-001/images/"
+  edge_functions = "netlify/edge-functions"
+
+[[edge_functions]]
+  function = "client-auth"
+  path = "/*"
 
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Frame-Options = "SAMEORIGIN"
-
-[[headers]]
-  for = "/client/*"
-  [headers.values]
     X-Robots-Tag = "noindex, nofollow, noarchive, nosnippet, noimageindex"
     Cache-Control = "private, no-store, max-age=0"
+    Pragma = "no-cache"
+    X-Content-Type-Options = "nosniff"
     Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
