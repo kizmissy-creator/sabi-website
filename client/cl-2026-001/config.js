@@ -12,6 +12,16 @@ window.SABI_ONBOARDING_CONFIG = {
   const config = window.SABI_ONBOARDING_CONFIG;
 
   window.addEventListener("DOMContentLoaded", () => {
+    for (const fieldName of ["termsAccepted", "earlyStart"]) {
+      const field = document.querySelector(`[name="${fieldName}"]`);
+      field?.closest("label")?.remove();
+    }
+
+    const privacyReminder = document.querySelector(".form-step[data-step='7'] .privacy-note");
+    if (privacyReminder) {
+      privacyReminder.innerHTML = "<strong>Privacy reminder</strong><p>Your Terms and Conditions, Privacy Policy and any early-start request were dealt with at checkout. This final step is only for checking and sending your onboarding information.</p>";
+    }
+
     const fileInputs = [...document.querySelectorAll('input[type="file"]')];
     const existingNotice = fileInputs.at(-1)?.closest("section")?.querySelector(".notice");
     if (existingNotice && !existingNotice.textContent.includes("15 MB")) {
