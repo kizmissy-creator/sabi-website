@@ -4,8 +4,17 @@
   edge_functions = "netlify/edge-functions"
   functions = "netlify/functions"
 
-# The password gate is intentionally not attached while the visible onboarding
-# pages are being reviewed. Re-enable client-auth-30d before live client use.
+[[edge_functions]]
+  function = "client-auth-30d"
+  path = "/"
+
+[[edge_functions]]
+  function = "client-auth-30d"
+  path = "/index.html"
+
+[[edge_functions]]
+  function = "client-auth-30d"
+  path = "/confirmation.html"
 
 [[headers]]
   for = "/*"
