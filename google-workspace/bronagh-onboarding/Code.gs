@@ -55,7 +55,7 @@ function validate_(input) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input.email || ''))) throw new Error('Email required.');
   if (input.ageEligible !== 'yes') throw new Error('Age eligibility required.');
   if (!clean_(input.broadDirection, 5000)) throw new Error('Broad direction required.');
-  if (!includesYes_(input.termsAccepted) || !includesYes_(input.clientDeclaration)) throw new Error('Required declarations missing.');
+  if (!includesYes_(input.clientDeclaration)) throw new Error('Client declaration missing.');
   if (clean_(input.accessibilityNeeds, 5000) && !includesYes_(input.specialCategoryConsent)) throw new Error('Sensitive information supplied without consent.');
   (input.files || []).forEach(file => {
     const ext = String(file.name || '').split('.').pop().toLowerCase();
@@ -129,7 +129,7 @@ function save_(input) {
       new Date(), safeCell_(input.submissionId), safeCell_(input.clientReference), safeCell_(input.firstName),
       safeCell_(input.lastName), safeCell_(String(input.email).toLowerCase()), safeCell_(input.preferredContact),
       safeCell_(input.deadline), safeCell_(input.broadDirection), safeCell_(input.targetedDocuments),
-      includesYes_(input.specialCategoryConsent) ? 'Yes' : 'No', includesYes_(input.earlyStart) ? 'Requested' : 'Not requested',
+      includesYes_(input.specialCategoryConsent) ? 'Yes' : 'No', 'Recorded at checkout',
       safeCell_(driveUrl_(submissionFolder.id)), 'New'
     ]);
   } catch (error) {
@@ -142,7 +142,7 @@ function ensureSheet_(spreadsheet) {
   let sheet = spreadsheet.getSheetByName(ONBOARDING_CONFIG.sheetName);
   if (!sheet) sheet = spreadsheet.insertSheet(ONBOARDING_CONFIG.sheetName);
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['received_at','submission_id','client_reference','first_name','last_name','email','preferred_contact','deadline','broad_direction','targeted_documents','sensitive_consent','early_start','submission_folder','status']);
+    sheet.appendRow(['received_at','submission_id','client_reference','first_name','last_name','email','preferred_contact','deadline','broad_direction','targeted_documents','sensitive_consent','checkout_consent','submission_folder','status']);
     sheet.setFrozenRows(1);
   }
   return sheet;
