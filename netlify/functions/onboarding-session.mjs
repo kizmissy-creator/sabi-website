@@ -1,4 +1,4 @@
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 const COOKIE_NAME = "sabi_client_access";
 const CLIENT_REFERENCE = "CL-2026-001";
@@ -34,26 +34,40 @@ function secureEqual(a, b) {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
+function verifyAccessToken(token, secret) {
+  const parts = String(token || "").split(".");
+  if (parts.length !== 2) return false;
+
+  let payload;
+  try {
+    payload = Buffer.from(parts[0], "base64url").toString("utf8");
+  } catch {
+    return false;
+  }
+
+  const expected = createHmac("sha256", secret).update(payload).digest("base64url");
+  if (!secureEqual(expected, parts[1])) return false;
+
+  const [clientReference, sessionId, expiresText] = payload.split(".");
+  const expires = Number(expiresText);
+  return clientReference === CLIENT_REFERENCE && sessionId.startsWith("cs_") && Number.isFinite(expires) && expires >= Math.floor(Date.now() / 1000);
+}
+
 export default async function onboardingSession(request) {
   if (request.method !== "POST") {
     return json({ ok: false, error: "Method not allowed." }, 405);
   }
 
-  const pagePassword = process.env.BRONAGH_PAGE_PASSWORD;
-  const cookieSecret = process.env.BRONAGH_COOKIE_SECRET;
+  const accessSecret = process.env.BRONAGH_ACCESS_SECRET;
   const submissionSecret = process.env.BRONAGH_SUBMISSION_SECRET;
   const endpoint = process.env.BRONAGH_APPS_SCRIPT_ENDPOINT;
 
-  if (!pagePassword || !cookieSecret || !submissionSecret || !endpoint) {
+  if (!accessSecret || !submissionSecret || !endpoint) {
     return json({ ok: false, error: "The secure submission connection is not active yet." }, 503);
   }
 
-  const expectedAccess = createHash("sha256")
-    .update(`${pagePassword}:${cookieSecret}`)
-    .digest("hex");
-
-  if (!secureEqual(cookieValue(request, COOKIE_NAME), expectedAccess)) {
-    return json({ ok: false, error: "Your private-page access needs to be renewed." }, 401);
+  if (!verifyAccessToken(cookieValue(request, COOKIE_NAME), accessSecret)) {
+    return json({ ok: false, error: "Your onboarding access needs to be renewed." }, 401);
   }
 
   let input;
