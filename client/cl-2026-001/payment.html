@@ -9,6 +9,7 @@
   <meta name="description" content="Private payment page for a bespoke SABI Career Partner package.">
   <link rel="icon" href="./images/favicon.png" type="image/png">
   <link rel="stylesheet" href="./payment.css">
+  <script src="./checkout.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to payment details</a>
@@ -25,7 +26,7 @@
         <p class="eyebrow">YOUR BESPOKE CAREER PARTNER PACKAGE</p>
         <h1>Ready when you are, Bronagh.</h1>
         <p class="lead">Review the package, read the Terms and Conditions and Privacy Policy, then confirm and pay.</p>
-        <div class="reassurance"><span aria-hidden="true">✓</span> Secure payment will be handled by Stripe</div>
+        <div class="reassurance"><span aria-hidden="true">✓</span> Secure payment is handled by Stripe</div>
       </div>
 
       <aside class="package-summary" aria-label="Package summary">
@@ -56,7 +57,7 @@
         <h2>What happens after payment</h2>
         <ol class="process-list">
           <li>Your payment is confirmed securely by Stripe.</li>
-          <li>You receive confirmation and access to your personal onboarding form.</li>
+          <li>This browser is given access to your personal onboarding form for 30 days.</li>
           <li>You can complete the form over more than one session on the same browser and device.</li>
           <li>Sam reviews your answers and sends any focused written follow-up questions.</li>
         </ol>
@@ -67,7 +68,7 @@
         <p>You normally have a 14-day cancellation period after the contract is formed.</p>
         <div class="notice-box">
           <p><strong>Starting work early is optional.</strong></p>
-          <p>Paying alone will not count as a request to begin during the cancellation period.</p>
+          <p>Paying alone does not count as a request to begin during the cancellation period.</p>
         </div>
         <p>The cancellation and early-start arrangements are explained in the Terms and Conditions.</p>
       </article>
@@ -90,24 +91,21 @@
         <p class="eyebrow">FINAL STEP</p>
         <h2>Confirm and pay</h2>
 
-        <div class="acceptance-preview" aria-label="Acceptance controls preview">
+        <div class="acceptance-preview" aria-label="Acceptance controls">
           <label>
-            <input type="checkbox" disabled>
+            <input id="accept-terms" type="checkbox">
             <span>I agree that I have read and accept the <a href="./documents/terms-and-conditions.html">Terms and Conditions</a> and have read the <a href="./documents/privacy-policy.html">Privacy Policy</a>.</span>
           </label>
           <label>
-            <input type="checkbox" disabled>
+            <input id="early-start" type="checkbox">
             <span>I would like SABI to begin work during the 14-day cancellation period. I understand that, if I cancel after work has begun, SABI may deduct a fair amount for work already completed, and I may lose the right to cancel once the service has been fully performed.</span>
           </label>
         </div>
 
         <span class="price">£135</span>
-        <button class="payment-button disabled-payment" type="button" disabled>Payment opens after final checks</button>
-        <p class="secure-note"><span aria-hidden="true">🔒</span><span>When activated, payment will take place on Stripe’s secure checkout page. SABI will not receive or store your full card details.</span></p>
-        <div class="notice-box">
-          <p><strong>Review mode.</strong></p>
-          <p>Payment remains disabled until the business correspondence address, final privacy checks, acceptance recording and post-payment access route are complete.</p>
-        </div>
+        <button id="pay-button" class="payment-button disabled-payment" type="button" disabled>Pay £135 securely</button>
+        <p class="secure-note"><span aria-hidden="true">🔒</span><span>Payment takes place on Stripe’s secure checkout page. SABI does not receive or store your full card details.</span></p>
+        <div id="checkout-message" class="notice-box hidden" role="alert"></div>
       </article>
     </section>
 
