@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const COOKIE_NAME = "sabi_client_access";
 const CLIENT_REFERENCE = "CL-2026-001";
-const SERVICE_CODE = "career_partner_bespoke";
+const PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
 const AMOUNT_PENCE = 13500;
 const ACCESS_SECONDS = 30 * 24 * 60 * 60;
 
@@ -35,7 +35,7 @@ function signAccess(secret, sessionId) {
 }
 
 function page(title, message) {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>${title} | SABI</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fdfd;color:#131d1d;font:16px/1.65 Arial,sans-serif}main{width:min(100%,650px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}h1{color:#156d6b;font:600 clamp(36px,8vw,54px)/1.05 Georgia,serif;margin:.2rem 0 1rem}a{display:inline-block;margin-top:1rem;padding:.8rem 1rem;border-radius:10px;background:#f2c94c;color:#0e5553;font-weight:700;text-decoration:none}</style></head><body><main><p>SABI CAREER SUPPORT</p><h1>${title}</h1><p>${message}</p><a href="/">Open my onboarding</a></main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>${title} | SABI</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fdfd;color:#131d1d;font:16px/1.65 Arial,sans-serif}main{width:min(100%,650px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}h1{color:#156d6b;font:600 clamp(36px,8vw,54px)/1.05 Georgia,serif;margin:.2rem 0 1rem}a{display:inline-block;margin-top:1rem;padding:.8rem 1rem;border-radius:10px;background:#f2c94c;color:#0e5553;font-weight:700;text-decoration:none}</style></head><body><main><p>SABI CAREER SUPPORT</p><h1>${title}</h1><p>${message}</p><a href="/payment.html">Return to the Career Partner page</a></main></body></html>`;
 }
 
 export default async function paymentSuccess(request) {
@@ -68,29 +68,39 @@ export default async function paymentSuccess(request) {
     return html(page("Payment could not be verified", "Please contact SABI with your Stripe receipt."), 502);
   }
 
-  const metadata = session.metadata || {};
   const valid =
     session.payment_status === "paid" &&
     Number(session.amount_total) === AMOUNT_PENCE &&
     String(session.currency || "").toLowerCase() === "gbp" &&
-    safeEqual(metadata.client_reference, CLIENT_REFERENCE) &&
-    safeEqual(metadata.service_code, SERVICE_CODE) &&
-    metadata.terms_accepted === "yes" &&
-    metadata.privacy_policy_provided === "yes";
+    safeEqual(session.client_reference_id, CLIENT_REFERENCE) &&
+    safeEqual(session.payment_link, PAYMENT_LINK_ID);
 
   if (!valid) {
-    console.error("Rejected checkout session", { id: session.id, payment_status: session.payment_status, amount_total: session.amount_total, currency: session.currency, metadata });
+    console.error("Rejected checkout session", {
+      id: session.id,
+      payment_status: session.payment_status,
+      amount_total: session.amount_total,
+      currency: session.currency,
+      client_reference_id: session.client_reference_id,
+      payment_link: session.payment_link
+    });
     return html(page("Payment could not be matched", "The payment did not match the expected Career Partner purchase. Please contact SABI before continuing."), 403);
   }
 
   const token = signAccess(accessSecret, session.id);
   const cookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; Path=/; Max-Age=${ACCESS_SECONDS}; HttpOnly; Secure; SameSite=Lax`;
 
-  return html(
-    page("Payment confirmed", "Thank you. Your £135 Career Partner payment has been verified and this browser now has access to your onboarding form for 30 days."),
-    200,
-    { "set-cookie": cookie }
-  );
+  return new Response(null, {
+    status: 303,
+    headers: {
+      location: `${url.origin}/payment-confirmation.html`,
+      "set-cookie": cookie,
+      "cache-control": "private, no-store, max-age=0",
+      "x-robots-tag": "noindex, nofollow, noarchive, nosnippet, noimageindex",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "no-referrer"
+    }
+  });
 }
 
 export const config = {
