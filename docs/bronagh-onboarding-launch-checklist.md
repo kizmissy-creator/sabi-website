@@ -44,7 +44,9 @@ None of these values should be committed to GitHub or included in the client ema
 
 ## Payment
 
-Add payment only after the Stripe product or client-specific payment route, amount, cancellation wording, Service Schedule and early-start records have been checked together.
+The payment button uses the active, live, single-use Stripe Payment Link for the SABI Bespoke Career Partner Package at £135. It includes the client reference in Stripe for reconciliation. The page records the required terms confirmation before opening Stripe and distinguishes an early-start request in the tracked checkout URL.
+
+Stripe currently shows its hosted payment confirmation. Send the private onboarding link after confirming the successful payment in Stripe; do not promise an automatic onboarding redirect until the server-side verification route has been activated and tested.
 
 The onboarding can be tested before payment is activated. Do not imply the service has started merely because the form was submitted.
 
@@ -62,3 +64,4 @@ Any future domain connection must preserve Google Workspace MX, SPF, DKIM, DMARC
 - The downloadable JSON backup is readable and should be used only when needed and handled securely.
 - Do not reuse the site, password, secrets, Google receiver or client route for another person.
 - Retire the one-off Netlify site and its environment variables when the onboarding route is no longer needed, following the recorded retention decision.
+
