@@ -45,28 +45,32 @@ function denied() {
 }
 
 export default async function clientAuth(request, context) {
-  const secret = Netlify.env.get("BRONAGH_ACCESS_SECRET");
-  if (!secret) return denied();
-
-  const token = context.cookies.get(COOKIE_NAME) || "";
-  const parts = token.split(".");
-  if (parts.length !== 2) return denied();
-
-  let payload;
   try {
-    payload = base64UrlDecode(parts[0]);
+    const secret = Netlify.env.get("BRONAGH_ACCESS_SECRET");
+    if (!secret) return denied();
+
+    const token = context.cookies.get(COOKIE_NAME) || "";
+    const parts = token.split(".");
+    if (parts.length !== 2) return denied();
+
+    let payload;
+    try {
+      payload = base64UrlDecode(parts[0]);
+    } catch {
+      return denied();
+    }
+
+    const signature = await hmac(secret, payload);
+    if (!constantTimeEqual(signature, parts[1])) return denied();
+
+    const [clientReference, sessionId, expiresText] = payload.split(".");
+    const expires = Number(expiresText);
+    if (clientReference !== CLIENT_REFERENCE || !sessionId.startsWith("cs_") || !Number.isFinite(expires) || expires < Math.floor(Date.now() / 1000)) {
+      return denied();
+    }
+
+    return;
   } catch {
     return denied();
   }
-
-  const signature = await hmac(secret, payload);
-  if (!constantTimeEqual(signature, parts[1])) return denied();
-
-  const [clientReference, sessionId, expiresText] = payload.split(".");
-  const expires = Number(expiresText);
-  if (clientReference !== CLIENT_REFERENCE || !sessionId.startsWith("cs_") || !Number.isFinite(expires) || expires < Math.floor(Date.now() / 1000)) {
-    return denied();
-  }
-
-  return;
 }
