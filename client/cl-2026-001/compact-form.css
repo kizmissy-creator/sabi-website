@@ -1,0 +1,81 @@
+/* Keep simple answers visually proportionate while leaving room for written ones. */
+.compact-details {
+  max-width: 720px;
+}
+
+.compact-details .grid {
+  gap: .65rem;
+}
+
+.compact-details label:not(.choice) {
+  margin: .65rem 0;
+}
+
+.compact-details label small {
+  display: inline;
+  margin-left: .3rem;
+  font-size: .78rem;
+}
+
+.compact-details .grid + .grid,
+.compact-details .grid + .compact-choices,
+.compact-details .compact-choices + label {
+  margin-top: .55rem;
+}
+
+.contact-row {
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, .85fr);
+  align-items: end;
+}
+
+.compact-details input:not([type="radio"]):not([type="checkbox"]),
+.compact-details select {
+  min-height: 44px;
+  padding: .65rem .8rem;
+}
+
+.field-short {
+  max-width: 320px;
+}
+
+.field-medium {
+  max-width: 480px;
+}
+
+.compact-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
+  max-width: 640px;
+  margin: 1.25rem 0;
+}
+
+.compact-choices legend {
+  margin-bottom: .7rem;
+}
+
+.compact-choices .choice {
+  margin: 0;
+  min-height: 46px;
+  padding: .65rem .75rem;
+}
+
+@media (max-width: 850px) {
+  .contact-row {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-details .grid.two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .compact-details .grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .compact-choices {
+    grid-template-columns: 1fr;
+  }
+}
