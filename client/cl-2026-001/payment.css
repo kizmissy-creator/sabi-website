@@ -22,6 +22,7 @@
 .included-list{display:grid;grid-template-columns:1fr 1fr;gap:.7rem 1.25rem;list-style:none;padding:0;margin:1.4rem 0 0}
 .included-list li{position:relative;padding-left:1.75rem}
 .included-list li::before{content:'✓';position:absolute;left:0;top:0;color:var(--teal);font-weight:800}
+.included-list li:last-child{grid-column:1/-1;justify-self:center}
 .process-list{counter-reset:steps;list-style:none;padding:0;margin:1.2rem 0 0}
 .process-list li{counter-increment:steps;display:grid;grid-template-columns:2.2rem 1fr;gap:.85rem;align-items:start;padding:.8rem 0;border-bottom:1px solid var(--line)}
 .process-list li:last-child{border:0}
@@ -42,6 +43,8 @@
 .acceptance-preview{max-width:760px;margin:1.5rem auto;text-align:left;background:#fff;color:var(--ink);padding:1.25rem 1.4rem;border-radius:14px}
 .acceptance-preview>label,.acceptance-preview fieldset label{display:flex;align-items:flex-start;gap:.7rem;margin:.7rem 0}
 .acceptance-preview input{width:1.15rem;height:1.15rem;margin:.2rem 0 0;flex:0 0 auto}
+.acceptance-preview a{color:var(--teal);font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.14em}
+.acceptance-preview a:hover{color:var(--teal-dark)}
 .acceptance-preview fieldset{border-top:1px solid var(--line);margin-top:1rem;padding-top:1rem}
 .acceptance-preview legend{font-weight:700;color:var(--teal-dark);padding-top:.4rem}
 .review-note{margin-top:2rem;text-align:center;color:var(--muted);font-size:.82rem}
