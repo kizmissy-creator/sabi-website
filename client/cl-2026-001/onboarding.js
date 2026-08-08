@@ -58,7 +58,7 @@
         entry[field.dataset.repeatField] = field.type === 'checkbox' ? field.checked : field.value.trim();
       });
       return entry;
-    }).filter(entry => Object.values(entry).some(value => value === true || String(value).trim()));
+    }).filter(entry => Object.values(entry).some(value => value === true || (typeof value === 'string' && value.trim())));
   }
 
   function summariseEntry(entry, labels) {
