@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Payment received | SABI</title>
+  <meta name="description" content="Private payment confirmation for a SABI Career Partner client.">
+  <link rel="icon" href="./images/favicon.png" type="image/png">
+  <link rel="stylesheet" href="./onboarding.css">
+  <style>
+    .payment-confirmation-card{border-top:5px solid var(--yellow)}
+    .payment-confirmation-card h1{font-size:clamp(2.8rem,7vw,4.6rem)}
+    .payment-confirmation-card .lead{margin:0 auto 1.8rem}
+    .payment-confirmation-card .info-box{margin:2rem 0}
+    .payment-confirmation-card .info-box h2{font-size:clamp(1.8rem,4vw,2.5rem)}
+    .payment-confirmation-card ol{margin:.8rem 0 0;padding-left:1.3rem}
+    .payment-confirmation-card li{padding:.35rem 0}
+    .confirmation-action{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;margin:1.8rem auto .9rem;border:2px solid var(--yellow);border-radius:11px;background:var(--yellow);color:var(--teal-dark);font-weight:800;text-decoration:none;transition:transform .15s ease,background .15s ease}
+    .confirmation-action:hover{background:#ebc246;transform:translateY(-1px)}
+    .confirmation-action:focus-visible{outline:3px solid rgba(21,109,107,.35);outline-offset:3px}
+    .receipt-note{color:var(--muted);font-size:.9rem;margin:.7rem 0 1.8rem}
+    .support-note{margin-bottom:0}
+    @media(prefers-reduced-motion:reduce){.confirmation-action{transition:none}.confirmation-action:hover{transform:none}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to confirmation</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand" aria-label="SABI">
+        <img src="./images/sabi-mark-complete.png" alt="" width="44" height="44">
+        <span>SABI</span>
+      </div>
+      <div class="client-ref">Private client page · CL-2026-001</div>
+    </div>
+  </header>
+
+  <main id="main" class="confirmation">
+    <div class="confirmation-card payment-confirmation-card">
+      <div class="success-mark" aria-hidden="true">✓</div>
+      <p class="eyebrow">PAYMENT RECEIVED</p>
+      <h1>Thank you, Bronagh.</h1>
+      <p class="lead">Your payment has been received. You’re ready to begin your SABI Career Partner onboarding.</p>
+
+      <div class="info-box">
+        <h2>What happens next</h2>
+        <ol>
+          <li>Open your private onboarding form using the button below.</li>
+          <li>Complete it in your own time — your answers save on this browser and device.</li>
+          <li>When you send it, Sam will review everything and email any focused follow-up questions.</li>
+        </ol>
+      </div>
+
+      <a class="confirmation-action" href="./index.html">Start your onboarding</a>
+      <p class="receipt-note">Stripe will send your payment receipt separately by email.</p>
+      <p class="support-note">If you need help, email <a href="mailto:hello@sabigroup.co.uk">hello@sabigroup.co.uk</a>.</p>
+    </div>
+  </main>
+</body>
+</html>
