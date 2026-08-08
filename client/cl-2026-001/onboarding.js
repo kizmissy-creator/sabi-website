@@ -10,8 +10,9 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v1';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v2';
   const config = window.SABI_ONBOARDING_CONFIG || {};
+  const repeaterNames = ['employmentHistory', 'qualifications', 'skillsEvidence', 'achievements', 'exampleOpportunities'];
   let current = 0;
   let saveTimer;
 
@@ -25,6 +26,67 @@
   const makeId = () => window.crypto?.randomUUID?.() || `CL-2026-001-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   document.getElementById('submission-id').value = makeId();
 
+  function renumberEntries(name) {
+    const cards = [...document.querySelector(`[data-repeater="${name}"]`).children];
+    cards.forEach((card, index) => {
+      const number = card.querySelector('[data-entry-number]');
+      if (number) number.textContent = String(index + 1);
+      const remove = card.querySelector('[data-remove-entry]');
+      if (remove) remove.hidden = cards.length === 1;
+    });
+  }
+
+  function addEntry(name, values = {}) {
+    const container = document.querySelector(`[data-repeater="${name}"]`);
+    const template = document.getElementById(`${name}-template`);
+    if (!container || !template) return;
+    const card = template.content.firstElementChild.cloneNode(true);
+    card.querySelectorAll('[data-repeat-field]').forEach(field => {
+      const value = values[field.dataset.repeatField];
+      if (field.type === 'checkbox') field.checked = value === true || value === 'yes';
+      else field.value = value || '';
+    });
+    container.appendChild(card);
+    renumberEntries(name);
+    syncCurrentRoleCards();
+  }
+
+  function collectRepeater(name) {
+    return [...document.querySelector(`[data-repeater="${name}"]`).children].map(card => {
+      const entry = {};
+      card.querySelectorAll('[data-repeat-field]').forEach(field => {
+        entry[field.dataset.repeatField] = field.type === 'checkbox' ? field.checked : field.value.trim();
+      });
+      return entry;
+    }).filter(entry => Object.values(entry).some(value => value === true || String(value).trim()));
+  }
+
+  function summariseEntry(entry, labels) {
+    return labels.map(([key, label]) => entry[key] ? `${label}: ${entry[key]}` : '').filter(Boolean).join('; ');
+  }
+
+  function addCompatibilityFields(data) {
+    const jobs = data.employmentHistory || [];
+    data.currentRole = jobs[0] ? summariseEntry(jobs[0], [['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
+    data.workHistory = jobs.map(entry => summariseEntry(entry, [['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving']])).join('\n\n');
+    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['name','Qualification'],['provider','Provider'],['result','Result'],['completed','Completed'],['expiry','Expiry']])).join('\n');
+    data.skills = (data.skillsEvidence || []).map(entry => summariseEntry(entry, [['skill','Skill'],['evidence','Evidence']])).join('\n');
+    data.achievementsSummary = (data.achievements || []).map(entry => summariseEntry(entry, [['title','Achievement'],['situation','Situation'],['action','Action'],['result','Result']])).join('\n\n');
+    data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
+    data.targetedDocuments = summariseEntry(data, [['targetRole','Role'],['targetOrganisation','Organisation'],['targetVacancyUrl','Vacancy link']]);
+    return data;
+  }
+
+  function syncCurrentRoleCards() {
+    document.querySelectorAll('[data-repeater="employmentHistory"] .repeat-card').forEach(card => {
+      const currentField = card.querySelector('[data-repeat-field="current"]');
+      const endField = card.querySelector('[data-repeat-field="endDate"]');
+      if (!currentField || !endField) return;
+      endField.disabled = currentField.checked;
+      if (currentField.checked) endField.value = '';
+    });
+  }
+
   function serialise() {
     const data = {};
     for (const el of form.elements) {
@@ -36,6 +98,8 @@
         if (el.checked) data[el.name] = el.value;
       } else data[el.name] = el.value;
     }
+    repeaterNames.forEach(name => { data[name] = collectRepeater(name); });
+    addCompatibilityFields(data);
     return { data, current, savedAt: new Date().toISOString() };
   }
 
@@ -51,6 +115,12 @@
   function restore() {
     try {
       const draft = JSON.parse(localStorage.getItem(storageKey)); if (!draft?.data) return;
+      repeaterNames.forEach(name => {
+        const container = document.querySelector(`[data-repeater="${name}"]`);
+        container.replaceChildren();
+        const entries = Array.isArray(draft.data[name]) && draft.data[name].length ? draft.data[name] : [{}];
+        entries.forEach(entry => addEntry(name, entry));
+      });
       for (const [name, value] of Object.entries(draft.data)) {
         const fields = [...form.elements].filter(el => el.name === name);
         fields.forEach(el => {
@@ -78,6 +148,7 @@
       urgent = date >= new Date() && days <= 10;
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
+    syncCurrentRoleCards();
   }
 
   function showStep(index) {
@@ -113,10 +184,14 @@
   function buildReview() {
     const f = form.elements;
     const text = value => value && String(value).trim() ? String(value).trim() : 'Not provided yet';
+    const data = serialise().data;
+    const roles = data.employmentHistory.length ? data.employmentHistory.map(entry => [entry.jobTitle, entry.organisation].filter(Boolean).join(' at ') || 'Untitled entry').join('; ') : 'Not provided yet';
+    const target = data.targetedDocuments || 'To be confirmed';
     const values = [
       ['Client', `${text(f.firstName.value)} ${text(f.lastName.value)}`], ['Email', text(f.email.value)],
       ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
-      ['Targeted documents', text(f.targetedDocuments.value)], ['Preferred contact', text(f.preferredContact.value)],
+      ['Roles and experience', roles], ['Qualifications added', String(data.qualifications.length)],
+      ['Skills added', String(data.skillsEvidence.length)], ['Targeted documents', target], ['Preferred contact', text(f.preferredContact.value)],
       ['Consultation', text(f.consultationRoute.value)], ['Deadline', text(f.deadline.value)],
       ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
     ];
@@ -139,13 +214,26 @@
 
   form.addEventListener('input', () => { updateConditional(); scheduleSave(); });
   form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
+  document.querySelectorAll('[data-add-entry]').forEach(button => button.addEventListener('click', () => {
+    addEntry(button.dataset.addEntry);
+    scheduleSave();
+  }));
+  form.addEventListener('click', event => {
+    const button = event.target.closest('[data-remove-entry]');
+    if (!button) return;
+    const container = button.closest('[data-repeater]');
+    button.closest('.repeat-card').remove();
+    if (!container.children.length) addEntry(container.dataset.repeater);
+    renumberEntries(container.dataset.repeater);
+    scheduleSave();
+  });
   next.addEventListener('click', () => { if (validateStep()) showStep(current + 1); });
   previous.addEventListener('click', () => showStep(current - 1));
   document.getElementById('download-draft').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', () => { if (confirm('Clear all answers saved on this device? This cannot be undone.')) { localStorage.removeItem(storageKey); form.reset(); document.getElementById('submission-id').value = makeId(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', () => { if (confirm('Clear all answers saved on this device? This cannot be undone.')) { localStorage.removeItem(storageKey); form.reset(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateStep()) return;
@@ -163,5 +251,6 @@
     }
   });
 
+  repeaterNames.forEach(name => addEntry(name));
   restore(); updateConditional(); showStep(current);
 })();
