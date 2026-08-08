@@ -9,9 +9,10 @@
 .payment-button:focus-visible{outline:3px solid rgba(21,109,107,.35);outline-offset:3px}
 .payment-button.disabled-payment{background:#d8dfde;border-color:#d8dfde;color:#667170;cursor:not-allowed;transform:none}
 .secure-note{display:flex;align-items:flex-start;gap:.55rem;color:var(--muted);font-size:.82rem;line-height:1.5;margin:1rem 0 0}
-.payment-content{margin-top:3.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem}
-.payment-section{background:#fff;border:1px solid var(--line);border-radius:20px;padding:clamp(1.5rem,3vw,2.4rem);box-shadow:0 12px 34px rgba(22,73,72,.07)}
+.payment-content{max-width:960px;margin-top:3.5rem;display:grid;grid-template-columns:1fr 1fr;gap:0}
+.payment-section{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:clamp(1.8rem,3vw,2.6rem) 0;box-shadow:none}
 .payment-section.wide{grid-column:1/-1}
+.payment-section:first-child{border-top:0}
 .payment-section h2{font:600 clamp(1.8rem,4vw,2.7rem)/1.05 Newsreader,serif;color:var(--teal);margin:0 0 1rem}
 .payment-section h3{font:600 1.25rem Newsreader,serif;color:var(--teal-dark);margin:1.5rem 0 .45rem}
 .included-columns{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:1.4rem 0 0}
@@ -30,12 +31,12 @@
 .document-link:hover{background:var(--teal-soft)}
 .document-link strong{display:block;font-size:1.05rem;margin-bottom:.25rem}
 .document-link span{display:block;color:var(--muted);font-size:.88rem}
-.payment-final{grid-column:1/-1;background:var(--teal);color:#fff;border-color:var(--teal);text-align:center}
-.payment-final h2{color:#fff}
-.payment-final .price{display:block;color:var(--yellow);font:600 3.6rem/1 Newsreader,serif;margin:1.5rem 0 1.2rem}
+.payment-final{grid-column:1/-1;background:var(--teal-soft);color:var(--ink);border:1px solid var(--line);border-top:4px solid var(--yellow);border-radius:20px;padding:clamp(1.5rem,4vw,2.8rem);text-align:center}
+.payment-final h2{color:var(--teal)}
+.payment-final .price{display:block;color:var(--teal-dark);font:600 3.6rem/1 Newsreader,serif;margin:1.5rem 0 1.2rem}
 .payment-final .payment-button{max-width:440px;margin:1.4rem auto 0}
-.payment-final .secure-note{justify-content:center;color:#d9eeee;max-width:620px;margin:1rem auto 0;text-align:left}
-.acceptance-preview{max-width:760px;margin:1.5rem auto;text-align:left;background:#fff;color:var(--ink);padding:1.25rem 1.4rem;border-radius:14px}
+.payment-final .secure-note{justify-content:center;color:var(--muted);max-width:620px;margin:1rem auto 0;text-align:left}
+.acceptance-preview{max-width:760px;margin:1.5rem auto;text-align:left;background:#fff;color:var(--ink);padding:1.25rem 1.4rem;border:1px solid var(--line);border-radius:14px}
 .acceptance-preview>label,.acceptance-preview fieldset label{display:flex;align-items:flex-start;gap:.7rem;margin:.7rem 0}
 .acceptance-preview input{width:1.15rem;height:1.15rem;margin:.2rem 0 0;flex:0 0 auto}
 .acceptance-preview label>span{color:var(--ink)}
