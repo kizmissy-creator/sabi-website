@@ -1,14 +1,9 @@
 @import url('./onboarding.css');
 
 .payment-main{max-width:1120px;margin:0 auto;padding:4rem 1.5rem 5rem}
-.payment-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:3rem;align-items:start}
+.payment-hero{max-width:820px}
 .payment-copy h1{font:600 clamp(3rem,7vw,5.4rem)/.96 Newsreader,serif;color:var(--teal);margin:0 0 1.4rem}
-.payment-copy .lead{max-width:700px;margin-bottom:1.2rem}
-.package-summary{background:#fff;border:1px solid var(--line);border-radius:24px;padding:2rem;box-shadow:var(--shadow)}
-.package-summary .package-label{color:var(--teal);font-weight:700}
-.package-summary h2{font:600 2rem/1.1 Newsreader,serif;color:var(--teal);margin:.45rem 0 .25rem}
-.package-summary .price{display:block;color:var(--teal-dark);font-size:3.4rem;line-height:1;margin:.35rem 0 .7rem}
-.package-summary .price small{font:600 .9rem Manrope,Arial,sans-serif;color:var(--muted)}
+.payment-copy .lead{max-width:760px;margin-bottom:1.2rem}
 .payment-button{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:11px;background:var(--yellow);color:var(--teal-dark);font-weight:800;text-decoration:none;padding:.9rem 1.2rem;border:2px solid var(--yellow);transition:transform .15s ease,background .15s ease}
 .payment-button:hover{background:#ebc246;transform:translateY(-1px)}
 .payment-button:focus-visible{outline:3px solid rgba(21,109,107,.35);outline-offset:3px}
@@ -50,5 +45,5 @@
 .acceptance-preview legend{font-weight:700;color:var(--teal-dark);padding-top:.4rem}
 .review-note{margin-top:2rem;text-align:center;color:var(--muted);font-size:.82rem}
 @media(max-width:900px){.document-links.three{grid-template-columns:1fr}}
-@media(max-width:850px){.payment-hero,.payment-content{grid-template-columns:1fr}.included-columns,.document-links{grid-template-columns:1fr}.payment-main{padding:2.8rem 1rem 4rem}.payment-section.wide,.payment-final{grid-column:auto}}
+@media(max-width:850px){.payment-content{grid-template-columns:1fr}.included-columns,.document-links{grid-template-columns:1fr}.payment-main{padding:2.8rem 1rem 4rem}.payment-section.wide,.payment-final{grid-column:auto}}
 @media(prefers-reduced-motion:reduce){.payment-button{transition:none}.payment-button:hover{transform:none}}
