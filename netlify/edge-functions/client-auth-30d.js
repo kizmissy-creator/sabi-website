@@ -1,5 +1,5 @@
 const COOKIE_NAME = "sabi_client_access";
-const CLIENT_REFERENCE = "CL-2026-001";
+const CLIENT_REFERENCE = "CL-2026-001";\nconst PREVIEW_HOST = "deploy-preview-2--celadon-melomakarona-a77f9d.netlify.app";\nconst PREVIEW_TOKEN = "8a110a28c4bf4032b74975e2a89d3b1f";\nconst PREVIEW_EXPIRES_AT = Date.parse("2026-08-10T00:00:00Z");
 
 function base64UrlDecode(value) {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
