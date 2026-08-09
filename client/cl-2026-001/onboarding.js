@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v14';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v15';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
@@ -222,6 +222,7 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
+    const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const showAccessibility = situations.includes('accessibility');
     const accessibilityStep = document.querySelector('.form-step[data-conditional-step="accessibility"]');
     const accessibilityItem = document.querySelector('#step-list [data-conditional-step="accessibility"]');
@@ -238,6 +239,7 @@
     setConditional('current-situation-other', situations.includes('other'));
     setConditional('current-study-details', situations.includes('education'));
     setConditional('caring-strengths', situations.includes('caring'));
+    setConditional('hours-other-detail', hourPatterns.includes('other'));
     syncCurrentRoleCards();
     syncQualificationCards();
     syncExperienceChoice();
@@ -316,7 +318,14 @@
     return {...draft.data, files, submittedAt: new Date().toISOString(), userAgent: navigator.userAgent};
   }
 
-  form.addEventListener('input', () => { updateConditional(); scheduleSave(); });
+  form.addEventListener('input', event => {
+    if (event.target.name === 'hours' && event.target.checked) {
+      const noPreference = form.querySelector('input[name="hours"][value="no-preference"]');
+      if (event.target.value === 'no-preference') form.querySelectorAll('input[name="hours"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (noPreference) noPreference.checked = false;
+    }
+    updateConditional(); scheduleSave();
+  });
   form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
   document.querySelectorAll('[data-add-entry]').forEach(button => button.addEventListener('click', () => {
     addEntry(button.dataset.addEntry);
