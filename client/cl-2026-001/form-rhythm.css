@@ -123,6 +123,36 @@ textarea[rows="7"] { height: 150px; }
   margin: 0;
 }
 
+.prompt-card {
+  background: #fff;
+}
+
+.prompt-card > label:first-child,
+.prompt-card > fieldset:first-child {
+  margin-top: 0;
+}
+
+.prompt-help {
+  margin: .75rem 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--teal-soft);
+}
+
+.prompt-help summary {
+  padding: .7rem .85rem;
+  color: var(--teal-dark);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.prompt-help p {
+  margin: 0;
+  padding: 0 .85rem .8rem;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
 .group-heading p,
 .group-help {
   margin: .25rem 0 .85rem;
