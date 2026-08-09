@@ -98,6 +98,15 @@ textarea[rows="7"] { height: 150px; }
   gap: .15rem .55rem;
 }
 
+.choice-grid .choice-accessibility {
+  grid-column: 1 / -1;
+}
+
+.choice-accessibility small {
+  margin-top: .2rem;
+  line-height: 1.45;
+}
+
 .info-box,
 .privacy-note,
 .notice,
