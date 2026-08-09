@@ -244,7 +244,7 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
-    const gapSituationSelected = situations.some(value => ['not-working', 'caring', 'returning', 'redundancy', 'leave'].includes(value));
+    const gapSituationSelected = situations.some(value => ['not-working', 'returning', 'redundancy', 'leave'].includes(value));
     const hasEmploymentGap = document.getElementById('has-employment-gap')?.checked;
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
