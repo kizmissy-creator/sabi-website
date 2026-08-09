@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v19';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v20';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'employmentGaps', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
@@ -112,6 +112,7 @@
     data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
+    data.successOutcome = cleanSummary_([Array.isArray(data.successOutcomes) ? data.successOutcomes.filter(value => value !== 'other').join(', ') : '', data.successOutcomeOther]);
     return data;
   }
 
@@ -245,6 +246,7 @@
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
+    const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
     const showAccessibility = situations.includes('accessibility');
     const accessibilityStep = document.querySelector('.form-step[data-conditional-step="accessibility"]');
     const accessibilityItem = document.querySelector('#step-list [data-conditional-step="accessibility"]');
@@ -262,6 +264,7 @@
     setConditional('caring-strengths', situations.includes('caring'));
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));
+    setConditional('success-outcome-other', successOutcomes.includes('other'));
     syncCurrentRoleCards();
     syncCurrentGapCards();
     syncQualificationCards();
