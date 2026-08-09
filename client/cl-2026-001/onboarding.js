@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v2';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v3';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'skillsEvidence', 'achievements', 'exampleOpportunities'];
   let current = 0;
@@ -41,6 +41,13 @@
     const template = document.getElementById(`${name}-template`);
     if (!container || !template) return;
     const card = template.content.firstElementChild.cloneNode(true);
+    card.querySelectorAll('[data-month-select]').forEach(select => {
+      select.innerHTML = '<option value="">Month</option>' + ['January','February','March','April','May','June','July','August','September','October','November','December'].map(month => `<option>${month}</option>`).join('');
+    });
+    card.querySelectorAll('[data-year-select]').forEach(select => {
+      const thisYear = new Date().getFullYear();
+      select.innerHTML = '<option value="">Year</option>' + Array.from({length: 70}, (_, index) => thisYear - index).map(year => `<option>${year}</option>`).join('');
+    });
     card.querySelectorAll('[data-repeat-field]').forEach(field => {
       const value = values[field.dataset.repeatField];
       if (field.type === 'checkbox') field.checked = value === true || value === 'yes';
@@ -52,6 +59,7 @@
   }
 
   function collectRepeater(name) {
+    if (name === 'employmentHistory' && document.getElementById('no-experience')?.checked) return [];
     return [...document.querySelector(`[data-repeater="${name}"]`).children].map(card => {
       const entry = {};
       card.querySelectorAll('[data-repeat-field]').forEach(field => {
@@ -67,8 +75,9 @@
 
   function addCompatibilityFields(data) {
     const jobs = data.employmentHistory || [];
-    data.currentRole = jobs[0] ? summariseEntry(jobs[0], [['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
-    data.workHistory = jobs.map(entry => summariseEntry(entry, [['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving']])).join('\n\n');
+    const datedJobs = jobs.map(entry => ({...entry, startDate: [entry.startMonth, entry.startYear].filter(Boolean).join(' '), endDate: entry.current ? 'Current' : [entry.endMonth, entry.endYear].filter(Boolean).join(' ')}));
+    data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
+    data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['name','Qualification'],['provider','Provider'],['result','Result'],['completed','Completed'],['expiry','Expiry']])).join('\n');
     data.skills = (data.skillsEvidence || []).map(entry => summariseEntry(entry, [['skill','Skill'],['evidence','Evidence']])).join('\n');
     data.achievementsSummary = (data.achievements || []).map(entry => summariseEntry(entry, [['title','Achievement'],['situation','Situation'],['action','Action'],['result','Result']])).join('\n\n');
@@ -80,11 +89,19 @@
   function syncCurrentRoleCards() {
     document.querySelectorAll('[data-repeater="employmentHistory"] .repeat-card').forEach(card => {
       const currentField = card.querySelector('[data-repeat-field="current"]');
-      const endField = card.querySelector('[data-repeat-field="endDate"]');
-      if (!currentField || !endField) return;
-      endField.disabled = currentField.checked;
-      if (currentField.checked) endField.value = '';
+      const endFields = card.querySelectorAll('[data-repeat-field="endMonth"], [data-repeat-field="endYear"]');
+      if (!currentField || !endFields.length) return;
+      endFields.forEach(field => {
+        field.disabled = currentField.checked;
+        if (currentField.checked) field.value = '';
+      });
     });
+  }
+
+  function syncExperienceChoice() {
+    const noExperience = document.getElementById('no-experience')?.checked;
+    const area = document.getElementById('experience-entry-area');
+    if (area) area.hidden = noExperience;
   }
 
   function serialise() {
@@ -149,6 +166,7 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     syncCurrentRoleCards();
+    syncExperienceChoice();
   }
 
   function showStep(index) {
@@ -185,7 +203,7 @@
     const f = form.elements;
     const text = value => value && String(value).trim() ? String(value).trim() : 'Not provided yet';
     const data = serialise().data;
-    const roles = data.employmentHistory.length ? data.employmentHistory.map(entry => [entry.jobTitle, entry.organisation].filter(Boolean).join(' at ') || 'Untitled entry').join('; ') : 'Not provided yet';
+    const roles = data.employmentHistory.length ? data.employmentHistory.map(entry => [entry.jobTitle, entry.organisation].filter(Boolean).join(' at ') || entry.experienceType || 'Experience added').join('; ') : (document.getElementById('no-experience')?.checked ? 'No experience to add' : 'Not provided yet');
     const target = data.targetedDocuments || 'To be confirmed';
     const values = [
       ['Client', `${text(f.firstName.value)} ${text(f.lastName.value)}`], ['Email', text(f.email.value)],
