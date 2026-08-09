@@ -99,7 +99,7 @@
     const jobs = data.employmentHistory || [];
     const datedJobs = jobs.map(entry => ({...entry, startDate: [entry.startMonth, entry.startYear].filter(Boolean).join(' '), endDate: entry.current ? 'Current' : [entry.endMonth, entry.endYear].filter(Boolean).join(' ')}));
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
-    data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
+    data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
     data.skills = cleanSummary_([data.skillsExamples, data.interests, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
