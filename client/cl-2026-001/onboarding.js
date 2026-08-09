@@ -262,7 +262,6 @@
     const activeStepCount = steps.filter(step => !step.matches('[data-conditional-step].hidden')).length;
     progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
     progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
-    setConditional('current-situation-other', situations.includes('other'));
     setConditional('employment-gap-gate', !gapSituationSelected);
     setConditional('employment-gap-area', gapSituationSelected || hasEmploymentGap);
     setConditional('caring-strengths', situations.includes('caring'));

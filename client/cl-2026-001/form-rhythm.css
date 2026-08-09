@@ -96,6 +96,7 @@ textarea[rows="7"] { height: 150px; }
 
 .choice-grid {
   gap: .15rem .55rem;
+  align-items: start;
 }
 
 .choice-grid .choice-accessibility {
