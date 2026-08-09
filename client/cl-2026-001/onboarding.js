@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v16';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v17';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
@@ -227,6 +227,7 @@
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
+    const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const showAccessibility = situations.includes('accessibility');
     const accessibilityStep = document.querySelector('.form-step[data-conditional-step="accessibility"]');
     const accessibilityItem = document.querySelector('#step-list [data-conditional-step="accessibility"]');
@@ -244,6 +245,7 @@
     setConditional('current-study-details', situations.includes('education'));
     setConditional('caring-strengths', situations.includes('caring'));
     setConditional('hours-other-detail', hourPatterns.includes('other'));
+    setConditional('difficult-parts-other', difficultParts.includes('other'));
     syncCurrentRoleCards();
     syncQualificationCards();
     syncExperienceChoice();
@@ -331,6 +333,11 @@
       const noPreference = form.querySelector('input[name="workplace"][value="no-preference"]');
       if (event.target.value === 'no-preference') form.querySelectorAll('input[name="workplace"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
       else if (noPreference) noPreference.checked = false;
+    }
+    if (event.target.name === 'difficultParts' && event.target.checked) {
+      const notSure = form.querySelector('input[name="difficultParts"][value="not-sure"]');
+      if (event.target.value === 'not-sure') form.querySelectorAll('input[name="difficultParts"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (notSure) notSure.checked = false;
     }
     updateConditional(); scheduleSave();
   });
