@@ -10,9 +10,21 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v9';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v10';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
+  const standardResults = ['Distinction', 'Merit', 'Pass', 'Completed', 'Pending', 'Not sure', 'Other'];
+  const qualificationGradeOptions = {
+    'GCSE or equivalent': ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'Pending', 'Not sure'],
+    'A level or equivalent': ['A*', 'A', 'B', 'C', 'D', 'E', 'U', 'Pass', 'Pending', 'Not sure'],
+    'BTEC': ['Distinction*', 'Distinction', 'Merit', 'Pass', 'Pending', 'Not sure'],
+    'T Level': ['Distinction*', 'Distinction', 'Merit', 'Pass', 'Pending', 'Not sure'],
+    'NVQ or SVQ': ['Pass', 'Competent', 'Completed', 'Pending', 'Not sure'],
+    'Apprenticeship': ['Distinction', 'Merit', 'Pass', 'Completed', 'Pending', 'Not sure'],
+    'HNC or HND': ['Distinction', 'Merit', 'Pass', 'Pending', 'Not sure'],
+    'Undergraduate degree': ['First', 'Upper second (2:1)', 'Lower second (2:2)', 'Third', 'Pass', 'Pending', 'Not sure'],
+    'Postgraduate degree': ['Distinction', 'Merit', 'Pass', 'Pending', 'Not sure']
+  };
   let current = 0;
   let saveTimer;
 
@@ -48,11 +60,16 @@
       const thisYear = new Date().getFullYear();
       select.innerHTML = '<option value="">Year</option>' + Array.from({length: 70}, (_, index) => thisYear - index).map(year => `<option>${year}</option>`).join('');
     });
+    card.querySelectorAll('[data-completion-year-select]').forEach(select => {
+      const thisYear = new Date().getFullYear();
+      select.innerHTML = '<option value="">Choose year</option>' + Array.from({length: 81}, (_, index) => thisYear + 10 - index).map(year => `<option>${year}</option>`).join('');
+    });
     card.querySelectorAll('[data-repeat-field]').forEach(field => {
       const value = values[field.dataset.repeatField];
       if (field.type === 'checkbox') field.checked = value === true || value === 'yes';
       else field.value = value || '';
     });
+    if (name === 'qualifications') syncQualificationCard(card, values.grade || '');
     container.appendChild(card);
     renumberEntries(name);
     syncCurrentRoleCards();
@@ -78,7 +95,7 @@
     const datedJobs = jobs.map(entry => ({...entry, startDate: [entry.startMonth, entry.startYear].filter(Boolean).join(' '), endDate: entry.current ? 'Current' : [entry.endMonth, entry.endYear].filter(Boolean).join(' ')}));
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
-    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['type','Type'],['name','Qualification'],['provider','Provider'],['result','Result'],['completed','Completed'],['expiry','Expiry']])).join('\n');
+    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade or result'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
     data.skills = cleanSummary_([data.skillsExamples, data.interests]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
@@ -104,6 +121,21 @@
     const noExperience = document.getElementById('no-experience')?.checked;
     const area = document.getElementById('experience-entry-area');
     if (area) area.hidden = noExperience;
+  }
+
+  function syncQualificationCard(card, selectedGrade = '') {
+    const typeField = card.querySelector('[data-repeat-field="qualificationType"]');
+    const gradeField = card.querySelector('[data-grade-select]');
+    if (!typeField || !gradeField) return;
+    const currentGrade = selectedGrade || gradeField.value;
+    const results = typeField.value ? (qualificationGradeOptions[typeField.value] || standardResults) : [];
+    gradeField.disabled = !typeField.value;
+    gradeField.innerHTML = `<option value="">${typeField.value ? 'Choose grade or result' : 'Choose qualification type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
+    gradeField.value = results.includes(currentGrade) ? currentGrade : '';
+  }
+
+  function syncQualificationCards() {
+    document.querySelectorAll('[data-repeater="qualifications"] .repeat-card').forEach(card => syncQualificationCard(card));
   }
 
   function cleanSummary_(values) {
@@ -184,6 +216,7 @@
     setConditional('current-study-details', situations.includes('education'));
     setConditional('interests-detail', sources.includes('projects-hobbies'));
     syncCurrentRoleCards();
+    syncQualificationCards();
     syncExperienceChoice();
   }
 
