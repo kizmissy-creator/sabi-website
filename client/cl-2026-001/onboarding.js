@@ -10,9 +10,9 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v18';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v19';
   const config = window.SABI_ONBOARDING_CONFIG || {};
-  const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
+  const repeaterNames = ['employmentHistory', 'employmentGaps', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
   const qualificationResultDetails = {
     'GCSE or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'In progress', 'Not sure'] },
@@ -78,6 +78,7 @@
     container.appendChild(card);
     renumberEntries(name);
     syncCurrentRoleCards();
+    syncCurrentGapCards();
   }
 
   function collectRepeater(name) {
@@ -85,6 +86,7 @@
     return [...document.querySelector(`[data-repeater="${name}"]`).children].map(card => {
       const entry = {};
       card.querySelectorAll('[data-repeat-field]').forEach(field => {
+        if (field.disabled) return;
         entry[field.dataset.repeatField] = field.type === 'checkbox' ? field.checked : field.value.trim();
       });
       return entry;
@@ -105,6 +107,7 @@
     const datedJobs = jobs.map(entry => ({...entry, startDate: formatMonth(entry.startDate || [entry.startMonth, entry.startYear].filter(Boolean).join(' ')), endDate: entry.current ? 'Current' : formatMonth(entry.endDate || [entry.endMonth, entry.endYear].filter(Boolean).join(' '))}));
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
+    data.employmentGapsSummary = (data.employmentGaps || []).map(entry => summariseEntry({...entry, startDate: formatMonth(entry.startDate), endDate: entry.current ? 'Ongoing' : formatMonth(entry.endDate)}, [['startDate','Start'],['endDate','End'],['reason','Reason']])).join('\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
     data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
@@ -123,6 +126,18 @@
         field.disabled = currentField.checked;
         if (currentField.checked) field.value = '';
       });
+    });
+  }
+
+  function syncCurrentGapCards() {
+    document.querySelectorAll('[data-repeater="employmentGaps"] .repeat-card').forEach(card => {
+      const currentField = card.querySelector('[data-repeat-field="current"]');
+      const endField = card.querySelector('[data-repeat-field="endDate"]');
+      const endGroup = card.querySelector('[data-gap-end-date]');
+      if (!currentField || !endField) return;
+      if (endGroup) endGroup.hidden = currentField.checked;
+      endField.disabled = currentField.checked;
+      if (currentField.checked) endField.value = '';
     });
   }
 
@@ -244,11 +259,11 @@
     progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
     progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
     setConditional('current-situation-other', situations.includes('other'));
-    setConditional('current-study-details', situations.includes('education'));
     setConditional('caring-strengths', situations.includes('caring'));
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));
     syncCurrentRoleCards();
+    syncCurrentGapCards();
     syncQualificationCards();
     syncExperienceChoice();
   }
@@ -303,7 +318,7 @@
     const values = [
       ['Client', `${text(f.firstName.value)} ${text(f.lastName.value)}`], ['Email', text(f.email.value)],
       ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
-      ['Roles and experience', roles], ['Qualifications added', String(data.qualifications.length)],
+      ['Roles and experience', roles], ['Employment gaps', data.employmentGaps.length ? `${data.employmentGaps.length} added` : 'None added'], ['Qualifications added', String(data.qualifications.length)],
       ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Preferred contact', text(f.preferredContact.value)],
       ['Consultation', text(f.consultationRoute.value)], ['Deadline', f.deadlineGate.value === 'yes' ? text(f.deadline.value) : (f.deadlineGate.value === 'no' ? 'No deadline' : (f.deadlineGate.value === 'not-sure' ? 'Not sure yet' : 'Not provided yet'))],
       ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
