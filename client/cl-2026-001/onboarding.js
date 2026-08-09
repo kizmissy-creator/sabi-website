@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v22';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v23';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'employmentGaps', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
@@ -109,7 +109,7 @@
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.employmentGapsSummary = (data.employmentGaps || []).map(entry => summariseEntry({...entry, startDate: formatMonth(entry.startDate), endDate: entry.current ? 'Ongoing' : formatMonth(entry.endDate)}, [['startDate','Start'],['endDate','End'],['reason','Reason']])).join('\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
-    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.caringStrengths]);
+    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
     data.successOutcome = cleanSummary_([Array.isArray(data.successOutcomes) ? data.successOutcomes.filter(value => value !== 'other').join(', ') : '', data.successOutcomeOther]);
@@ -244,6 +244,8 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
+    const gapSituationSelected = situations.some(value => ['not-working', 'caring', 'returning', 'redundancy', 'leave'].includes(value));
+    const hasEmploymentGap = document.getElementById('has-employment-gap')?.checked;
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
@@ -261,6 +263,8 @@
     progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
     progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
     setConditional('current-situation-other', situations.includes('other'));
+    setConditional('employment-gap-gate', !gapSituationSelected);
+    setConditional('employment-gap-area', gapSituationSelected || hasEmploymentGap);
     setConditional('caring-strengths', situations.includes('caring'));
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));

@@ -68,7 +68,7 @@
       <form id="onboarding-form" novalidate>
         <input type="hidden" name="clientReference" value="CL-2026-001">
         <input type="hidden" name="serviceCode" value="career_partner_bespoke">
-        <input type="hidden" name="formVersion" value="bronagh-2026-08-10-v22">
+        <input type="hidden" name="formVersion" value="bronagh-2026-08-10-v23">
         <input type="hidden" name="ageEligible" value="yes">
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
@@ -99,7 +99,7 @@
               <button class="add-button" type="button" data-add-entry="employmentHistory">+ Add another experience</button>
             </div>
           </div>
-          <div class="question-group"><div class="group-heading"><div><h3>Gaps in employment</h3><p>Add any periods you may want explained. Month and year are enough, and you only need to give a short reason. You do not need to share personal details.</p></div></div><div class="repeater" data-repeater="employmentGaps"></div><button class="add-button" type="button" data-add-entry="employmentGaps">+ Add another employment gap</button></div>
+          <div class="question-group"><div class="group-heading"><div><h3>Gaps in employment</h3><p>Add any periods you may want explained. Month and year are enough, and you only need to give a short reason. You do not need to share personal details.</p></div></div><div id="employment-gap-gate" class="conditional"><label class="choice none-choice"><input type="checkbox" name="hasEmploymentGap" value="yes" id="has-employment-gap"> I have had a gap in employment</label></div><div id="employment-gap-area" class="conditional hidden"><div class="repeater" data-repeater="employmentGaps"></div><button class="add-button" type="button" data-add-entry="employmentGaps">+ Add another employment gap</button></div></div>
           <div class="question-group"><div class="group-heading"><div><h3>Qualifications, training, licences or certificates</h3><p>Add these one at a time. Leave any detail blank if it does not apply.</p></div></div><div class="repeater" data-repeater="qualifications"></div><button class="add-button" type="button" data-add-entry="qualifications">+ Add another qualification or course</button></div>
         </section>
 
@@ -109,7 +109,8 @@
           <div class="question-group prompt-card"><label>If I asked someone who knows you well, what would they say about you? <small>Optional</small><textarea name="skillsExamples" rows="4"></textarea></label><details class="prompt-help"><summary>Need ideas? See some examples</summary><p>They might describe you as patient, dependable, thoughtful, organised, creative, calm in difficult situations or someone who supports other people.</p></details></div>
           <div class="question-group prompt-card"><label>Can you tell me about something you handled well? <small>Optional</small><textarea name="proudOf" rows="4"></textarea></label><details class="prompt-help"><summary>Need ideas? See some examples</summary><p>It could be solving a problem, organising something, learning a new skill, helping someone, managing several responsibilities or creating something.</p></details></div>
           <div class="question-group prompt-card"><label>What kinds of activities, subjects or tasks do you enjoy?<textarea name="interests" rows="3"></textarea></label><details class="prompt-help"><summary>Need ideas? See some examples</summary><p>This could include reading, cooking, gaming, crafts, music, sport, spending time outdoors, caring for animals, fixing or making things, organising activities or learning about subjects that interest you.</p></details></div>
-          <div id="caring-strengths" class="question-group prompt-card conditional hidden"><label>Would you like to tell me about any strengths or experience you have gained through caring for children or supporting someone else? <small>You do not need to share private details or identify the person you care for. Optional.</small><textarea name="caringStrengths" rows="4" disabled></textarea></label><details class="prompt-help"><summary>Need ideas? See some examples</summary><p>This could include organising, managing competing needs, communicating, advocating, budgeting, solving problems or staying calm.</p></details></div>
+          <div class="question-group prompt-card"><label>Do you have any hobbies or interests you would like to tell me about? <small>Optional</small><textarea name="hobbies" rows="3"></textarea></label></div>
+          <div id="caring-strengths" class="question-group prompt-card conditional hidden"><label>If you are comfortable, tell me briefly about any caring responsibilities you have had. <small>You can also share any strengths or weaknesses you feel these have shown, if anything comes to mind. If not, that is completely fine. This process is about finding what makes you shine. You do not need to share private details or identify anyone.</small><textarea name="caringStrengths" rows="4" disabled></textarea></label><details class="prompt-help"><summary>Need ideas? See some examples</summary><p>This could include organising, managing competing needs, communicating, advocating, budgeting, solving problems, patience or staying calm.</p></details></div>
         </section>
 
         <section class="form-step" data-step="4">
@@ -158,7 +159,7 @@
 
         <section class="form-step" data-step="8">
           <p class="eyebrow">STEP 8</p><h2>Working together</h2>
-          <fieldset><legend>How would you prefer the consultation and follow-up questions?</legend><label class="choice"><input type="radio" name="consultationRoute" value="written"> Written-first by email</label><label class="choice"><input type="radio" name="consultationRoute" value="call-if-useful"> Written-first, with a short call if useful</label><label class="choice"><input type="radio" name="consultationRoute" value="discuss"> I would like to discuss this</label></fieldset>
+          <fieldset><legend>How would you prefer to complete the consultation and any follow-up questions?</legend><label class="choice"><input type="radio" name="consultationRoute" value="written"> Written-first by email</label><label class="choice"><input type="radio" name="consultationRoute" value="call-if-useful"> Written-first, with a short call if useful</label><label class="choice"><input type="radio" name="consultationRoute" value="discuss"> I would like to discuss the consultation format with SABI before deciding</label></fieldset>
           <label>Anything else that would help me work well with you?<textarea name="workingPreferences" rows="4"></textarea></label>
           <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no"> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
         </section>
