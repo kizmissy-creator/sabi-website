@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v8';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v9';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
   let current = 0;
@@ -78,7 +78,7 @@
     const datedJobs = jobs.map(entry => ({...entry, startDate: [entry.startMonth, entry.startYear].filter(Boolean).join(' '), endDate: entry.current ? 'Current' : [entry.endMonth, entry.endYear].filter(Boolean).join(' ')}));
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
-    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['name','Qualification'],['provider','Provider'],['result','Result'],['completed','Completed'],['expiry','Expiry']])).join('\n');
+    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['type','Type'],['name','Qualification'],['provider','Provider'],['result','Result'],['completed','Completed'],['expiry','Expiry']])).join('\n');
     data.skills = cleanSummary_([data.skillsExamples, data.interests]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
@@ -90,7 +90,9 @@
     document.querySelectorAll('[data-repeater="employmentHistory"] .repeat-card').forEach(card => {
       const currentField = card.querySelector('[data-repeat-field="current"]');
       const endFields = card.querySelectorAll('[data-repeat-field="endMonth"], [data-repeat-field="endYear"]');
+      const endGroup = card.querySelector('[data-end-date-group]');
       if (!currentField || !endFields.length) return;
+      if (endGroup) endGroup.hidden = currentField.checked;
       endFields.forEach(field => {
         field.disabled = currentField.checked;
         if (currentField.checked) field.value = '';

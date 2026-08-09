@@ -153,6 +153,11 @@ textarea[rows="7"] { height: 150px; }
   font-size: 1rem;
 }
 
+.repeat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .remove-button,
 .add-button {
   border: 0;
@@ -198,6 +203,13 @@ textarea[rows="7"] { height: 150px; }
 .date-group legend {
   padding: 0 .25rem;
   font-weight: 700;
+}
+
+.date-group legend small {
+  display: block;
+  margin-top: .1rem;
+  color: var(--muted);
+  font-weight: 400;
 }
 
 .date-group label {
