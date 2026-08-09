@@ -109,7 +109,6 @@
     data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
-    data.targetedDocuments = summariseEntry(data, [['targetRole','Role'],['targetOrganisation','Organisation'],['targetVacancyUrl','Vacancy link']]);
     return data;
   }
 
@@ -297,12 +296,11 @@
     const text = value => value && String(value).trim() ? String(value).trim() : 'Not provided yet';
     const data = serialise().data;
     const roles = data.employmentHistory.length ? data.employmentHistory.map(entry => [entry.jobTitle, entry.organisation].filter(Boolean).join(' at ') || entry.experienceType || 'Experience added').join('; ') : (document.getElementById('no-experience')?.checked ? 'No experience to add' : 'Not provided yet');
-    const target = data.targetedDocuments || 'To be confirmed';
     const values = [
       ['Client', `${text(f.firstName.value)} ${text(f.lastName.value)}`], ['Email', text(f.email.value)],
       ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
       ['Roles and experience', roles], ['Qualifications added', String(data.qualifications.length)],
-      ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Targeted documents', target], ['Preferred contact', text(f.preferredContact.value)],
+      ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Preferred contact', text(f.preferredContact.value)],
       ['Consultation', text(f.consultationRoute.value)], ['Deadline', text(f.deadline.value)],
       ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
     ];
