@@ -134,12 +134,15 @@
     const gradeLabel = card.querySelector('[data-grade-label]');
     const expiryGroup = card.querySelector('[data-expiry-field]');
     const expiryField = card.querySelector('[data-repeat-field="expiry"]');
+    const providerField = card.querySelector('[data-repeat-field="provider"]');
     if (!typeField || !gradeField) return;
     const currentGrade = selectedGrade || gradeField.value;
     const details = qualificationResultDetails[typeField.value] || defaultResultDetails;
     const results = typeField.value ? details.options : [];
     if (gradeLabel) gradeLabel.textContent = typeField.value ? details.label : 'Grade, result or status';
     gradeField.disabled = !typeField.value;
+    const hasQualificationEntry = [...card.querySelectorAll('[data-repeat-field]')].some(field => !['provider', 'expiry'].includes(field.dataset.repeatField) && Boolean(field.value));
+    if (providerField) providerField.required = hasQualificationEntry;
     gradeField.innerHTML = `<option value="">${typeField.value ? details.prompt : 'Choose qualification type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
     gradeField.value = results.includes(currentGrade) ? currentGrade : '';
     const showExpiry = renewableQualificationTypes.has(typeField.value);
