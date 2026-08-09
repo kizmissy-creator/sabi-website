@@ -68,13 +68,13 @@
       <form id="onboarding-form" novalidate>
         <input type="hidden" name="clientReference" value="CL-2026-001">
         <input type="hidden" name="serviceCode" value="career_partner_bespoke">
-        <input type="hidden" name="formVersion" value="bronagh-2026-08-09-v3">
+        <input type="hidden" name="formVersion" value="bronagh-2026-08-09-v4">
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
 
         <section class="form-step compact-details active" data-step="0">
           <p class="eyebrow">STEP 1</p><h2 id="form-title">About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p>
-          <div class="grid two"><label>First name <span>*</span><input name="firstName" autocomplete="given-name" required value="Bronagh"></label><label>Last name <span>*</span><input name="lastName" autocomplete="family-name" required></label></div>
+          <div class="grid two"><label>First name <span>*</span><input name="firstName" autocomplete="given-name" required></label><label>Last name <span>*</span><input name="lastName" autocomplete="family-name" required></label></div>
           <div class="grid two"><label>Preferred name <small>Optional</small><input name="preferredName" autocomplete="nickname"></label><label>Pronouns <small>Optional</small><input name="pronouns"></label></div>
           <div class="grid contact-row"><label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required></label><label>Telephone number <small>Optional</small><input type="tel" name="telephone" autocomplete="tel"></label></div>
           <fieldset class="compact-choices"><legend>How would you usually like me to contact you? <span>*</span></legend><label class="choice"><input type="radio" name="preferredContact" value="email" required> Email</label><label class="choice"><input type="radio" name="preferredContact" value="whatsapp"> WhatsApp</label><label class="choice"><input type="radio" name="preferredContact" value="phone"> Telephone</label><label class="choice"><input type="radio" name="preferredContact" value="video"> Video call</label></fieldset>
@@ -148,9 +148,9 @@
             <label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes"> I explicitly consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. I understand that these questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</label>
             <label>What would help? <small>Optional; unlocked after consent</small><textarea name="accessibilityNeeds" rows="5" disabled></textarea></label>
           </div>
-          <fieldset><legend>How would you prefer the consultation and follow-up questions?</legend><label class="choice"><input type="radio" name="consultationRoute" value="written" checked> Written-first by email</label><label class="choice"><input type="radio" name="consultationRoute" value="call-if-useful"> Written-first, with a short call if useful</label><label class="choice"><input type="radio" name="consultationRoute" value="discuss"> I would like to discuss this</label></fieldset>
+          <fieldset><legend>How would you prefer the consultation and follow-up questions?</legend><label class="choice"><input type="radio" name="consultationRoute" value="written"> Written-first by email</label><label class="choice"><input type="radio" name="consultationRoute" value="call-if-useful"> Written-first, with a short call if useful</label><label class="choice"><input type="radio" name="consultationRoute" value="discuss"> I would like to discuss this</label></fieldset>
           <label>Anything else that would help me work well with you?<textarea name="workingPreferences" rows="4"></textarea></label>
-          <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no" checked> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
+          <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no"> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
         </section>
 
         <section class="form-step" data-step="7">
