@@ -75,7 +75,6 @@
 
         <section class="form-step compact-details active" data-step="0">
           <p class="eyebrow">STEP 1</p><h2 id="form-title">About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p>
-          <div class="notice"><strong>You choose what to share.</strong> Leave any optional question blank if you do not want Sam to know or use that information. Only include information you are comfortable with SABI using to provide your support.</div>
           <div class="grid two"><label>First name <span>*</span><input name="firstName" autocomplete="given-name" required></label><label>Last name <span>*</span><input name="lastName" autocomplete="family-name" required></label></div>
           <div class="grid two"><label>Preferred name <small>Optional</small><input name="preferredName" autocomplete="nickname"></label><label>Pronouns <small>Optional</small><input name="pronouns"></label></div>
           <div class="grid contact-row"><label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required></label><label>Telephone number <small>Optional</small><input type="tel" name="telephone" autocomplete="tel"></label></div>
@@ -108,7 +107,7 @@
           <p class="eyebrow">STEP 4</p><h2>What you bring</h2><p class="intro">You do not need to use CV language. A few words or an everyday example is useful, and you can leave any question blank.</p>
           <label>If I asked someone who knows you well, what would they say you are good at? <small>This could be something about how you work, communicate, solve problems or support other people. Optional.</small><textarea name="skillsExamples" rows="4"></textarea></label>
           <label>Can you think of something you have done that shows this? <small>It could come from work, education, volunteering, home life, caring, a project or a hobby. A small everyday example is useful. Optional.</small><textarea name="proudOf" rows="4"></textarea></label>
-          <label>What kinds of activities, subjects or tasks do you enjoy? <small>This does not need to be related to work. Personal interests, hobbies and everyday activities are especially useful. Optional, and it is fine if you are not sure yet.</small><textarea name="interests" rows="3"></textarea></label>
+          <label>What kinds of activities, subjects or tasks do you enjoy? <small>This does not need to be related to work. Personal interests, hobbies and everyday activities are especially useful. Only share interests you are comfortable having considered as part of your career support. Optional, and it is fine if you are not sure yet.</small><textarea name="interests" rows="3"></textarea></label>
           <div id="caring-strengths" class="conditional hidden"><label>Would you like to tell me about any strengths or experience you have gained through caring for children or supporting someone else? <small>This might include organising, managing competing needs, communicating, advocating, budgeting, solving problems or staying calm. You do not need to share private details or identify the person you care for. Optional.</small><textarea name="caringStrengths" rows="4" disabled></textarea></label></div>
         </section>
 
@@ -134,7 +133,7 @@
           <fieldset><legend>Do you already have a substantially completed application or supporting statement for the included review?</legend><label class="choice"><input type="radio" name="applicationDraft" value="yes"> Yes</label><label class="choice"><input type="radio" name="applicationDraft" value="not-yet"> Not yet</label><label class="choice"><input type="radio" name="applicationDraft" value="from-scratch"> I would need it written mainly from scratch</label></fieldset>
           <div class="grid two"><label>Deadline type <small>Optional</small><select name="deadlineType"><option value="">Choose one</option><option>Application deadline</option><option>Interview</option><option>Assessment</option><option>Other</option></select></label><label>Deadline date <small>Optional</small><input type="date" name="deadline"></label></div>
           <label>Deadline notes <small>Optional</small><input name="deadlineNotes" placeholder="For example, time of day or what must be submitted"></label>
-          <div id="urgent-warning" class="notice hidden" role="status">This appears to be within 10 working days. Sam will need to confirm what can realistically be completed by the deadline before urgent work is promised.</div>
+          <div id="urgent-warning" class="notice hidden" role="status">This appears to be within 10 working days. SABI will need to confirm what can realistically be completed by the deadline before urgent work is promised.</div>
           <label>What would make this service feel successful for you?<textarea name="successOutcome" rows="5"></textarea></label>
         </section>
 
@@ -152,7 +151,7 @@
           <p class="eyebrow">STEP 8</p><h2>Accessibility and support</h2><p class="intro">This section is about anything that could make the process easier, clearer, more comfortable or more manageable. You do not need a diagnosis or formal label.</p>
           <label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes" disabled> I consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. These questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</label>
           <label>What would make this process easier for you? <small>You can describe practical preferences without naming a condition or diagnosis. Optional.</small><textarea name="accessibilityNeeds" rows="5" data-accessibility-detail disabled></textarea></label>
-          <fieldset><legend>Who would you like to discuss your needs or possible adjustments with?</legend><label class="choice"><input type="radio" name="accessibilityDiscussion" value="sabi" data-accessibility-detail disabled> Sam at SABI</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="employer" data-accessibility-detail disabled> A current or potential employer</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="both" data-accessibility-detail disabled> Both</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-sure" data-accessibility-detail disabled> I am not sure yet</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-now" data-accessibility-detail disabled> I would prefer not to discuss this now</label></fieldset>
+          <fieldset><legend>Who would you like to discuss your needs or possible adjustments with?</legend><label class="choice"><input type="radio" name="accessibilityDiscussion" value="sabi" data-accessibility-detail disabled> SABI</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="employer" data-accessibility-detail disabled> A current or potential employer</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="both" data-accessibility-detail disabled> Both</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-sure" data-accessibility-detail disabled> I am not sure yet</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-now" data-accessibility-detail disabled> I would prefer not to discuss this now</label></fieldset>
         </section>
 
         <section class="form-step" data-step="8">
@@ -171,7 +170,7 @@
           <label class="choice consent"><input type="checkbox" name="clientDeclaration" required value="yes"> I confirm that the information I have provided is accurate to the best of my knowledge and I will check final documents before using them. <span>*</span></label>
           <div id="submit-message" class="notice hidden" role="status" tabindex="-1"></div>
           <button class="primary submit" type="submit">Send my onboarding</button>
-          <p class="small-print">No payment is taken on this page. Your package is already confirmed; submitting this form gives Sam what she needs to begin.</p>
+          <p class="small-print">No payment is taken on this page. Your package is already confirmed; submitting this form gives SABI the information needed to begin.</p>
         </section>
 
         <div id="error-summary" class="error-summary hidden" role="alert" tabindex="-1"></div>

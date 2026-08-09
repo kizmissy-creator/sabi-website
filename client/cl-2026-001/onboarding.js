@@ -342,7 +342,7 @@
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateStep()) return;
     const button = form.querySelector('[type=submit]'); const message = document.getElementById('submit-message');
-    if (!config.endpoint) { message.textContent = 'The secure submission connection is not live yet. Your answers remain saved on this device; please do not send real documents until Sam confirms the page is ready.'; message.classList.remove('hidden'); message.focus(); return; }
+    if (!config.endpoint) { message.textContent = 'The secure submission connection is not live yet. Your answers remain saved on this device; please do not send real documents until SABI confirms the page is ready.'; message.classList.remove('hidden'); message.focus(); return; }
     button.disabled = true; button.textContent = 'Sending securely…';
     try {
       const body = await payload();
