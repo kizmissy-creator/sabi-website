@@ -133,22 +133,26 @@ textarea[rows="7"] { height: 150px; }
 }
 
 .prompt-help {
-  margin: .75rem 0;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--teal-soft);
+  margin: .25rem 0 .55rem;
 }
 
 .prompt-help summary {
-  padding: .7rem .85rem;
+  width: fit-content;
+  margin-left: 1rem;
+  padding: .1rem 0;
   color: var(--teal-dark);
   font-weight: 700;
+  font-size: .84rem;
+  text-decoration: underline;
+  text-underline-offset: .16em;
   cursor: pointer;
 }
 
 .prompt-help p {
-  margin: 0;
-  padding: 0 .85rem .8rem;
+  margin: .4rem 0 0;
+  padding: .65rem .75rem;
+  border-left: 3px solid var(--yellow);
+  background: var(--teal-soft);
   color: var(--muted);
   font-size: .9rem;
 }
