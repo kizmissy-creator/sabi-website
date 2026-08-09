@@ -10,9 +10,9 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v7';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v8';
   const config = window.SABI_ONBOARDING_CONFIG || {};
-  const repeaterNames = ['employmentHistory', 'qualifications', 'skillsEvidence', 'achievements', 'exampleOpportunities'];
+  const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
   let current = 0;
   let saveTimer;
 
@@ -79,8 +79,8 @@
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['name','Qualification'],['provider','Provider'],['result','Result'],['completed','Completed'],['expiry','Expiry']])).join('\n');
-    data.skills = (data.skillsEvidence || []).map(entry => summariseEntry(entry, [['skill','Skill'],['evidence','Evidence']])).join('\n');
-    data.achievementsSummary = (data.achievements || []).map(entry => summariseEntry(entry, [['title','Achievement'],['situation','Situation'],['action','Action'],['result','Result']])).join('\n\n');
+    data.skills = cleanSummary_([data.skillsExamples, data.interests]);
+    data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
     data.targetedDocuments = summariseEntry(data, [['targetRole','Role'],['targetOrganisation','Organisation'],['targetVacancyUrl','Vacancy link']]);
     return data;
@@ -102,6 +102,17 @@
     const noExperience = document.getElementById('no-experience')?.checked;
     const area = document.getElementById('experience-entry-area');
     if (area) area.hidden = noExperience;
+  }
+
+  function cleanSummary_(values) {
+    return values.filter(value => value && String(value).trim()).join('\n');
+  }
+
+  function setConditional(id, visible) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.classList.toggle('hidden', !visible);
+    element.querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !visible; });
   }
 
   function serialise() {
@@ -165,6 +176,11 @@
       urgent = date >= new Date() && days <= 10;
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
+    const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
+    const sources = [...form.querySelectorAll('input[name="evidenceSources"]:checked')].map(field => field.value);
+    setConditional('current-situation-other', situations.includes('other'));
+    setConditional('current-study-details', situations.includes('education'));
+    setConditional('interests-detail', sources.includes('projects-hobbies'));
     syncCurrentRoleCards();
     syncExperienceChoice();
   }
@@ -209,7 +225,7 @@
       ['Client', `${text(f.firstName.value)} ${text(f.lastName.value)}`], ['Email', text(f.email.value)],
       ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
       ['Roles and experience', roles], ['Qualifications added', String(data.qualifications.length)],
-      ['Skills added', String(data.skillsEvidence.length)], ['Targeted documents', target], ['Preferred contact', text(f.preferredContact.value)],
+      ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Targeted documents', target], ['Preferred contact', text(f.preferredContact.value)],
       ['Consultation', text(f.consultationRoute.value)], ['Deadline', text(f.deadline.value)],
       ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
     ];
