@@ -29,6 +29,7 @@
     'Short course or training': { label: 'Status', prompt: 'Choose status', options: ['Completed', 'In progress', 'Attended', 'Passed', 'No grade or result applies', 'Not sure'] },
     'Not listed': defaultResultDetails
   };
+  const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate', 'Short course or training']);
   let current = 0;
   let saveTimer;
 
@@ -131,6 +132,8 @@
     const typeField = card.querySelector('[data-repeat-field="qualificationType"]');
     const gradeField = card.querySelector('[data-grade-select]');
     const gradeLabel = card.querySelector('[data-grade-label]');
+    const expiryGroup = card.querySelector('[data-expiry-field]');
+    const expiryField = card.querySelector('[data-repeat-field="expiry"]');
     if (!typeField || !gradeField) return;
     const currentGrade = selectedGrade || gradeField.value;
     const details = qualificationResultDetails[typeField.value] || defaultResultDetails;
@@ -139,6 +142,12 @@
     gradeField.disabled = !typeField.value;
     gradeField.innerHTML = `<option value="">${typeField.value ? details.prompt : 'Choose qualification type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
     gradeField.value = results.includes(currentGrade) ? currentGrade : '';
+    const showExpiry = renewableQualificationTypes.has(typeField.value);
+    expiryGroup?.classList.toggle('hidden', !showExpiry);
+    if (expiryField) {
+      expiryField.disabled = !showExpiry;
+      if (!showExpiry) expiryField.value = '';
+    }
   }
 
   function syncQualificationCards() {
