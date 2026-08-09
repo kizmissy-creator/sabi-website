@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v12';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v13';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
@@ -168,7 +168,7 @@
   function serialise() {
     const data = {};
     for (const el of form.elements) {
-      if (!el.name || el.type === 'file' || el.name === 'company') continue;
+      if (!el.name || el.disabled || el.type === 'file' || el.name === 'company') continue;
       if (el.type === 'checkbox') {
         if (!data[el.name]) data[el.name] = [];
         if (el.checked) data[el.name].push(el.value);
@@ -213,11 +213,6 @@
   }
 
   function updateConditional() {
-    const gate = form.elements.accessibilityGate.value;
-    const details = document.getElementById('accessibility-details');
-    details.classList.toggle('hidden', gate !== 'yes');
-    const consent = form.elements.specialCategoryConsent;
-    form.elements.accessibilityNeeds.disabled = gate !== 'yes' || !consent.checked;
     const deadline = form.elements.deadline.value;
     let urgent = false;
     if (deadline) {
@@ -227,6 +222,19 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
+    const showAccessibility = situations.includes('accessibility');
+    const accessibilityStep = document.querySelector('.form-step[data-conditional-step="accessibility"]');
+    const accessibilityItem = document.querySelector('#step-list [data-conditional-step="accessibility"]');
+    const consent = form.elements.specialCategoryConsent;
+    accessibilityStep?.classList.toggle('hidden', !showAccessibility);
+    accessibilityItem?.classList.toggle('hidden', !showAccessibility);
+    if (consent) consent.disabled = !showAccessibility;
+    accessibilityStep?.querySelectorAll('[data-accessibility-detail]').forEach(field => {
+      field.disabled = !showAccessibility || !consent?.checked;
+    });
+    const activeStepCount = steps.filter(step => !step.matches('[data-conditional-step].hidden')).length;
+    progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
+    progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
     setConditional('current-situation-other', situations.includes('other'));
     setConditional('current-study-details', situations.includes('education'));
     setConditional('caring-strengths', situations.includes('caring'));
@@ -236,19 +244,30 @@
   }
 
   function showStep(index) {
-    current = index; steps.forEach((step, i) => step.classList.toggle('active', i === current));
-    stepItems.forEach((item, i) => { item.classList.toggle('active', i === current); item.classList.toggle('done', i < current); });
-    progressBar.style.width = `${((current + 1) / steps.length) * 100}%`;
-    progressText.textContent = `Step ${current + 1} of ${steps.length}`;
-    previous.hidden = current === 0; next.hidden = current === steps.length - 1;
-    if (current === steps.length - 1) buildReview();
+    const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+    const activeItems = stepItems.filter(item => !item.matches('[data-conditional-step].hidden'));
+    current = Math.max(0, Math.min(index, activeSteps.length - 1));
+    steps.forEach(step => step.classList.remove('active'));
+    activeSteps[current].classList.add('active');
+    stepItems.forEach(item => item.classList.remove('active', 'done'));
+    activeItems.forEach((item, i) => { item.classList.toggle('active', i === current); item.classList.toggle('done', i < current); });
+    const eyebrow = activeSteps[current].querySelector(':scope > .eyebrow');
+    if (eyebrow) eyebrow.textContent = `STEP ${current + 1}`;
+    progressBar.style.width = `${((current + 1) / activeSteps.length) * 100}%`;
+    progressText.textContent = `Step ${current + 1} of ${activeSteps.length}`;
+    previous.hidden = current === 0; next.hidden = current === activeSteps.length - 1;
+    if (current === activeSteps.length - 1) buildReview();
     errorSummary.classList.add('hidden'); updateConditional(); scheduleSave();
     document.querySelector('.form-shell').scrollIntoView({behavior:'smooth', block:'start'});
   }
 
   stepItems.forEach((item, index) => {
     item.querySelector('button')?.addEventListener('click', () => {
-      showStep(index);
+      const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+      const target = steps[index];
+      const targetIndex = activeSteps.indexOf(target);
+      if (targetIndex < 0) return;
+      showStep(targetIndex);
       stepMenuToggle?.setAttribute('aria-expanded', 'false');
       stepMenuToggle && (stepMenuToggle.firstChild.textContent = 'Show all steps ');
       stepList?.classList.remove('open');
@@ -256,7 +275,8 @@
   });
 
   function validateStep() {
-    const fields = [...steps[current].querySelectorAll('[required]')].filter(el => !el.disabled);
+    const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+    const fields = [...activeSteps[current].querySelectorAll('[required]')].filter(el => !el.disabled);
     const invalid = fields.filter(el => !el.checkValidity());
     document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
     if (!invalid.length) return true;

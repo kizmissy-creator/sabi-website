@@ -58,7 +58,7 @@
         <p id="progress-text" aria-live="polite">Step 1 of 9</p>
         <button class="step-menu-toggle" id="step-menu-toggle" type="button" aria-expanded="false" aria-controls="step-list">Show all steps <span aria-hidden="true">⌄</span></button>
         <ol id="step-list">
-          <li class="active"><button type="button" data-go-to-step="0">About you</button></li><li><button type="button" data-go-to-step="1">Your situation</button></li><li><button type="button" data-go-to-step="2">Your experience</button></li><li><button type="button" data-go-to-step="3">What you bring</button></li><li><button type="button" data-go-to-step="4">What comes next</button></li><li><button type="button" data-go-to-step="5">Applications</button></li><li><button type="button" data-go-to-step="6">Documents</button></li><li><button type="button" data-go-to-step="7">Working together</button></li><li><button type="button" data-go-to-step="8">Review and send</button></li>
+          <li class="active"><button type="button" data-go-to-step="0">About you</button></li><li><button type="button" data-go-to-step="1">Your situation</button></li><li><button type="button" data-go-to-step="2">Your experience</button></li><li><button type="button" data-go-to-step="3">What you bring</button></li><li><button type="button" data-go-to-step="4">What comes next</button></li><li><button type="button" data-go-to-step="5">Applications</button></li><li><button type="button" data-go-to-step="6">Documents</button></li><li class="hidden" data-conditional-step="accessibility"><button type="button" data-go-to-step="7">Accessibility and support</button></li><li><button type="button" data-go-to-step="8">Working together</button></li><li><button type="button" data-go-to-step="9">Review and send</button></li>
         </ol>
         <p class="save-state" id="save-state" aria-live="polite">Ready to save</p>
         <button class="text-button" id="download-draft" type="button">Download a backup</button>
@@ -68,7 +68,7 @@
       <form id="onboarding-form" novalidate>
         <input type="hidden" name="clientReference" value="CL-2026-001">
         <input type="hidden" name="serviceCode" value="career_partner_bespoke">
-        <input type="hidden" name="formVersion" value="bronagh-2026-08-09-v12">
+        <input type="hidden" name="formVersion" value="bronagh-2026-08-09-v13">
         <input type="hidden" name="ageEligible" value="yes">
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
@@ -85,7 +85,7 @@
 
         <section class="form-step" data-step="1">
           <p class="eyebrow">STEP 2</p><h2>Your situation now</h2><p class="intro">Tell me what best describes where you are now.</p>
-          <fieldset><legend>Which of these describe your current situation? <span>*</span></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="currentSituation" value="employed"> Employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="self-employed"> Self-employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="not-working"> Not currently working</label><label class="choice"><input type="checkbox" name="currentSituation" value="education"> Studying or training</label><label class="choice"><input type="checkbox" name="currentSituation" value="caring"> Caring responsibilities</label><label class="choice"><input type="checkbox" name="currentSituation" value="returning"> Returning after a break</label><label class="choice"><input type="checkbox" name="currentSituation" value="other"> Something else</label></div></fieldset>
+          <fieldset><legend>Which of these describe your current situation? <span>*</span></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="currentSituation" value="employed"> Employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="self-employed"> Self-employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="not-working"> Not currently working</label><label class="choice"><input type="checkbox" name="currentSituation" value="first-job"> Looking for my first job</label><label class="choice"><input type="checkbox" name="currentSituation" value="education"> Studying or training</label><label class="choice"><input type="checkbox" name="currentSituation" value="caring"> Caring responsibilities</label><label class="choice"><input type="checkbox" name="currentSituation" value="returning"> Returning after a break</label><label class="choice"><input type="checkbox" name="currentSituation" value="redundancy"> At risk of redundancy or recently made redundant</label><label class="choice"><input type="checkbox" name="currentSituation" value="leave"> On parental, sickness or other leave</label><label class="choice"><input type="checkbox" name="currentSituation" value="accessibility"><div>I have accessibility or support needs I would like SABI to consider<small>You do not need a diagnosis or formal label. Select this for anything that could make the process easier, clearer, more comfortable or more manageable for you.</small></div></label><label class="choice"><input type="checkbox" name="currentSituation" value="other"> Something else</label></div></fieldset>
           <div id="current-situation-other" class="conditional hidden"><label>Please tell me a little about your current situation<textarea name="currentSituationOther" rows="3" disabled></textarea></label></div>
         </section>
 
@@ -147,19 +147,21 @@
           <div class="notice">Files are not stored in your browser draft. They are attached only when you make the final submission. If you leave this page, you will need to select them again.</div>
         </section>
 
-        <section class="form-step" data-step="7">
+        <section class="form-step hidden" data-step="7" data-conditional-step="accessibility">
+          <p class="eyebrow">STEP 8</p><h2>Accessibility and support</h2><p class="intro">This section is about anything that could make the process easier, clearer, more comfortable or more manageable. You do not need a diagnosis or formal label.</p>
+          <label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes" disabled> I consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. These questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</label>
+          <label>What would make this process easier for you? <small>You can describe practical preferences without naming a condition or diagnosis. Optional.</small><textarea name="accessibilityNeeds" rows="5" data-accessibility-detail disabled></textarea></label>
+          <fieldset><legend>Who would you like to discuss your needs or possible adjustments with?</legend><label class="choice"><input type="radio" name="accessibilityDiscussion" value="sabi" data-accessibility-detail disabled> Sam at SABI</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="employer" data-accessibility-detail disabled> A current or potential employer</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="both" data-accessibility-detail disabled> Both</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-sure" data-accessibility-detail disabled> I am not sure yet</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-now" data-accessibility-detail disabled> I would prefer not to discuss this now</label></fieldset>
+        </section>
+
+        <section class="form-step" data-step="8">
           <p class="eyebrow">STEP 8</p><h2>Working together</h2>
-          <fieldset><legend>Would you like to tell me about any accessibility, communication or practical needs?</legend><label class="choice"><input type="radio" name="accessibilityGate" value="no"> No</label><label class="choice"><input type="radio" name="accessibilityGate" value="yes"> Yes</label><label class="choice"><input type="radio" name="accessibilityGate" value="private"> Prefer to discuss privately</label></fieldset>
-          <div id="accessibility-details" class="conditional hidden">
-            <label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes"> I explicitly consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. I understand that these questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</label>
-            <label>What would help? <small>Optional; unlocked after consent</small><textarea name="accessibilityNeeds" rows="5" disabled></textarea></label>
-          </div>
           <fieldset><legend>How would you prefer the consultation and follow-up questions?</legend><label class="choice"><input type="radio" name="consultationRoute" value="written"> Written-first by email</label><label class="choice"><input type="radio" name="consultationRoute" value="call-if-useful"> Written-first, with a short call if useful</label><label class="choice"><input type="radio" name="consultationRoute" value="discuss"> I would like to discuss this</label></fieldset>
           <label>Anything else that would help me work well with you?<textarea name="workingPreferences" rows="4"></textarea></label>
           <fieldset><legend>Will anyone else be involved?</legend><label class="choice"><input type="radio" name="supporter" value="no"> No</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but will not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree the details separately</label></fieldset>
         </section>
 
-        <section class="form-step" data-step="8">
+        <section class="form-step" data-step="9">
           <p class="eyebrow">STEP 9</p><h2>Review and send</h2><p class="intro">Check the summary below. You can go back to change anything; your detailed answers are included with the final submission.</p>
           <div id="review-summary" class="review-summary"></div>
           <div class="privacy-note"><strong>Privacy reminder</strong><p>SABI will use this information to assess and deliver your Career Partner support and keep the records needed to manage the service. Optional sensitive information is used only where you have explicitly consented.</p></div>
