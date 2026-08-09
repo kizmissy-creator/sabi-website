@@ -10,20 +10,24 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v10';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v11';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
-  const standardResults = ['Distinction', 'Merit', 'Pass', 'Completed', 'Pending', 'Not sure', 'Other'];
-  const qualificationGradeOptions = {
-    'GCSE or equivalent': ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'Pending', 'Not sure'],
-    'A level or equivalent': ['A*', 'A', 'B', 'C', 'D', 'E', 'U', 'Pass', 'Pending', 'Not sure'],
-    'BTEC': ['Distinction*', 'Distinction', 'Merit', 'Pass', 'Pending', 'Not sure'],
-    'T Level': ['Distinction*', 'Distinction', 'Merit', 'Pass', 'Pending', 'Not sure'],
-    'NVQ or SVQ': ['Pass', 'Competent', 'Completed', 'Pending', 'Not sure'],
-    'Apprenticeship': ['Distinction', 'Merit', 'Pass', 'Completed', 'Pending', 'Not sure'],
-    'HNC or HND': ['Distinction', 'Merit', 'Pass', 'Pending', 'Not sure'],
-    'Undergraduate degree': ['First', 'Upper second (2:1)', 'Lower second (2:2)', 'Third', 'Pass', 'Pending', 'Not sure'],
-    'Postgraduate degree': ['Distinction', 'Merit', 'Pass', 'Pending', 'Not sure']
+  const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
+  const qualificationResultDetails = {
+    'GCSE or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'In progress', 'Not sure'] },
+    'A level or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['A*', 'A', 'B', 'C', 'D', 'E', 'U', 'Pass', 'In progress', 'Not sure'] },
+    'BTEC': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction*', 'Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'T Level': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction*', 'Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'NVQ or SVQ': { label: 'Outcome or status', prompt: 'Choose outcome or status', options: ['Competent', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure'] },
+    'Apprenticeship': { label: 'Outcome or status', prompt: 'Choose outcome or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure'] },
+    'HNC or HND': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'Undergraduate degree': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['First', 'Upper second (2:1)', 'Lower second (2:2)', 'Third', 'Pass', 'In progress', 'Not sure'] },
+    'Postgraduate degree': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'Professional qualification': { label: 'Outcome or status', prompt: 'Choose outcome or status', options: ['Passed', 'Completed', 'In progress', 'Not yet taken', 'No grade or result applies', 'Not sure'] },
+    'Licence or certificate': { label: 'Status', prompt: 'Choose status', options: ['Valid or current', 'Passed', 'Completed', 'In progress', 'Expired', 'No grade or result applies', 'Not sure'] },
+    'Short course or training': { label: 'Status', prompt: 'Choose status', options: ['Completed', 'In progress', 'Attended', 'Passed', 'No grade or result applies', 'Not sure'] },
+    'Not listed': defaultResultDetails
   };
   let current = 0;
   let saveTimer;
@@ -95,7 +99,7 @@
     const datedJobs = jobs.map(entry => ({...entry, startDate: [entry.startMonth, entry.startYear].filter(Boolean).join(' '), endDate: entry.current ? 'Current' : [entry.endMonth, entry.endYear].filter(Boolean).join(' ')}));
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','Evidence'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
-    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade or result'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
+    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
     data.skills = cleanSummary_([data.skillsExamples, data.interests]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
@@ -126,11 +130,14 @@
   function syncQualificationCard(card, selectedGrade = '') {
     const typeField = card.querySelector('[data-repeat-field="qualificationType"]');
     const gradeField = card.querySelector('[data-grade-select]');
+    const gradeLabel = card.querySelector('[data-grade-label]');
     if (!typeField || !gradeField) return;
     const currentGrade = selectedGrade || gradeField.value;
-    const results = typeField.value ? (qualificationGradeOptions[typeField.value] || standardResults) : [];
+    const details = qualificationResultDetails[typeField.value] || defaultResultDetails;
+    const results = typeField.value ? details.options : [];
+    if (gradeLabel) gradeLabel.textContent = typeField.value ? details.label : 'Grade, result or status';
     gradeField.disabled = !typeField.value;
-    gradeField.innerHTML = `<option value="">${typeField.value ? 'Choose grade or result' : 'Choose qualification type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
+    gradeField.innerHTML = `<option value="">${typeField.value ? details.prompt : 'Choose qualification type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
     gradeField.value = results.includes(currentGrade) ? currentGrade : '';
   }
 
