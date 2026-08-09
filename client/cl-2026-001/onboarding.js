@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v15';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v16';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'exampleOpportunities'];
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
@@ -97,10 +97,15 @@
 
   function addCompatibilityFields(data) {
     const jobs = data.employmentHistory || [];
-    const datedJobs = jobs.map(entry => ({...entry, startDate: [entry.startMonth, entry.startYear].filter(Boolean).join(' '), endDate: entry.current ? 'Current' : [entry.endMonth, entry.endYear].filter(Boolean).join(' ')}));
+    const formatMonth = value => {
+      if (!/^\d{4}-\d{2}$/.test(value || '')) return value || '';
+      const [year, month] = value.split('-').map(Number);
+      return new Intl.DateTimeFormat('en-GB', {month:'long', year:'numeric'}).format(new Date(year, month - 1, 1));
+    };
+    const datedJobs = jobs.map(entry => ({...entry, startDate: formatMonth(entry.startDate || [entry.startMonth, entry.startYear].filter(Boolean).join(' ')), endDate: entry.current ? 'Current' : formatMonth(entry.endDate || [entry.endMonth, entry.endYear].filter(Boolean).join(' '))}));
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
-    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry(entry, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
+    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
     data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
@@ -111,7 +116,7 @@
   function syncCurrentRoleCards() {
     document.querySelectorAll('[data-repeater="employmentHistory"] .repeat-card').forEach(card => {
       const currentField = card.querySelector('[data-repeat-field="current"]');
-      const endFields = card.querySelectorAll('[data-repeat-field="endMonth"], [data-repeat-field="endYear"]');
+      const endFields = card.querySelectorAll('[data-repeat-field="endDate"], [data-repeat-field="endMonth"], [data-repeat-field="endYear"]');
       const endGroup = card.querySelector('[data-end-date-group]');
       if (!currentField || !endFields.length) return;
       if (endGroup) endGroup.hidden = currentField.checked;
@@ -322,6 +327,11 @@
     if (event.target.name === 'hours' && event.target.checked) {
       const noPreference = form.querySelector('input[name="hours"][value="no-preference"]');
       if (event.target.value === 'no-preference') form.querySelectorAll('input[name="hours"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (noPreference) noPreference.checked = false;
+    }
+    if (event.target.name === 'workplace' && event.target.checked) {
+      const noPreference = form.querySelector('input[name="workplace"][value="no-preference"]');
+      if (event.target.value === 'no-preference') form.querySelectorAll('input[name="workplace"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
       else if (noPreference) noPreference.checked = false;
     }
     updateConditional(); scheduleSave();
