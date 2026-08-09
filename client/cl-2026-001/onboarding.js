@@ -10,7 +10,7 @@
   const stepList = document.getElementById('step-list');
   const saveState = document.getElementById('save-state');
   const errorSummary = document.getElementById('error-summary');
-  const storageKey = 'sabi-onboarding-cl-2026-001-v4';
+  const storageKey = 'sabi-onboarding-cl-2026-001-v5';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'qualifications', 'skillsEvidence', 'achievements', 'exampleOpportunities'];
   let current = 0;

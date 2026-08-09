@@ -68,7 +68,7 @@
       <form id="onboarding-form" novalidate>
         <input type="hidden" name="clientReference" value="CL-2026-001">
         <input type="hidden" name="serviceCode" value="career_partner_bespoke">
-        <input type="hidden" name="formVersion" value="bronagh-2026-08-09-v4">
+        <input type="hidden" name="formVersion" value="bronagh-2026-08-09-v5">
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
 
@@ -84,10 +84,8 @@
         </section>
 
         <section class="form-step" data-step="1">
-          <p class="eyebrow">STEP 2</p><h2>Your situation now</h2><p class="intro">Tell me what best describes where you are now and what you would like to keep or change.</p>
+          <p class="eyebrow">STEP 2</p><h2>Your situation now</h2><p class="intro">Tell me what best describes where you are now.</p>
           <fieldset><legend>Which of these describe your current situation? <span>*</span></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="currentSituation" value="employed"> Employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="self-employed"> Self-employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="not-working"> Not currently working</label><label class="choice"><input type="checkbox" name="currentSituation" value="education"> Studying or training</label><label class="choice"><input type="checkbox" name="currentSituation" value="caring"> Caring responsibilities</label><label class="choice"><input type="checkbox" name="currentSituation" value="returning"> Returning after a break</label><label class="choice"><input type="checkbox" name="currentSituation" value="other"> Something else</label></div></fieldset>
-          <label>What do you like, value or want to keep from your current or previous work?<textarea name="whatWorks" rows="4"></textarea></label>
-          <label>What would you most like to change?<textarea name="whatToChange" rows="4"></textarea></label>
         </section>
 
         <section class="form-step" data-step="2">
@@ -101,6 +99,7 @@
             </div>
           </div>
           <div class="question-group"><div class="group-heading"><div><h3>Qualifications, training, licences or certificates</h3><p>Add these one at a time. Leave any detail blank if it does not apply.</p></div></div><div class="repeater" data-repeater="qualifications"></div><button class="add-button" type="button" data-add-entry="qualifications">+ Add another qualification or course</button></div>
+          <div class="question-group"><div class="group-heading"><div><h3>Interests, hobbies and activities</h3><p>These can show useful knowledge, strengths and experience that may not appear in your work history.</p></div></div><label>What do you enjoy doing outside work or study? <small>Optional</small><textarea name="hobbiesInterests" rows="4" placeholder="For example, sport, creative activities, clubs, gaming, practical projects or community activities"></textarea></label><label>What skills, knowledge or responsibilities are involved? <small>Optional</small><textarea name="hobbiesEvidence" rows="3" placeholder="For example, organising events, teamwork, research, budgeting or creating content"></textarea></label></div>
           <div class="question-group"><div class="group-heading"><div><h3>Skills and strengths</h3><p>Name the skill, then give an example that helps show it.</p></div></div><div class="repeater" data-repeater="skillsEvidence"></div><button class="add-button" type="button" data-add-entry="skillsEvidence">+ Add another skill or strength</button></div>
           <div class="question-group"><div class="group-heading"><div><h3>Achievements and evidence</h3><p>This could be a result, improvement, positive comment, problem solved or something you are proud of.</p></div></div><div class="repeater" data-repeater="achievements"></div><button class="add-button" type="button" data-add-entry="achievements">+ Add another achievement</button></div>
         </section>
