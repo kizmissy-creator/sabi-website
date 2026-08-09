@@ -217,7 +217,9 @@
   }
 
   function updateConditional() {
-    const deadline = form.elements.deadline.value;
+    const deadlineGate = form.elements.deadlineGate.value;
+    setConditional('deadline-details', deadlineGate === 'yes');
+    const deadline = deadlineGate === 'yes' ? form.elements.deadline.value : '';
     let urgent = false;
     if (deadline) {
       const date = new Date(`${deadline}T12:00:00`); const cursor = new Date(); let days = 0;
@@ -303,7 +305,7 @@
       ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
       ['Roles and experience', roles], ['Qualifications added', String(data.qualifications.length)],
       ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Preferred contact', text(f.preferredContact.value)],
-      ['Consultation', text(f.consultationRoute.value)], ['Deadline', text(f.deadline.value)],
+      ['Consultation', text(f.consultationRoute.value)], ['Deadline', f.deadlineGate.value === 'yes' ? text(f.deadline.value) : (f.deadlineGate.value === 'no' ? 'No deadline' : (f.deadlineGate.value === 'not-sure' ? 'Not sure yet' : 'Not provided yet'))],
       ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
     ];
     document.getElementById('review-summary').innerHTML = `<dl>${values.map(([k,v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`).join('')}</dl>`;
