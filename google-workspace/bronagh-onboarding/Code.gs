@@ -4,7 +4,7 @@ const ONBOARDING_CONFIG = {
   sheetName: 'Bronagh Onboarding',
   maxRequestBytes: 26000000,
   maxFileBytes: 8 * 1024 * 1024,
-  allowedExtensions: ['pdf', 'doc', 'docx', 'txt'],
+  allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'webm', 'm4a', 'ogg'],
   allowedClientReference: 'CL-2026-001',
   allowedServiceCode: 'career_partner_bespoke',
   folderProperty: 'BRONAGH_UPLOAD_FOLDER_ID',
@@ -74,25 +74,51 @@ function doPost(e) {
 
 function sendPaymentConfirmation_(input) {
   validatePaymentConfirmation_(input);
-  const sheet = ensurePaymentConfirmationSheet_(SpreadsheetApp.getActiveSpreadsheet());
-  const existing = sheet.getRange('A:A').createTextFinder(String(input.deliveryId)).matchEntireCell(true).findNext();
-  if (existing) return json_({ok: true, duplicate: true});
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const sheet = ensurePaymentConfirmationSheet_(SpreadsheetApp.getActiveSpreadsheet());
+    const existing = sheet.getRange('A:A').createTextFinder(String(input.deliveryId)).matchEntireCell(true).findNext();
+    if (existing) return json_({ok: true, duplicate: true});
 
-  const earlyStartText = input.earlyStart
-    ? 'You asked SABI to begin work before the end of the cancellation period. If you later cancel before the service is fully completed, a fair and proportionate amount may be deducted for work already supplied.'
-    : 'SABI will not begin substantive personalised work until the 14-day cancellation period has ended, unless you separately ask for an earlier start.';
-  const safeName = html_(input.firstName || 'there');
-  const htmlBody = '<p>Hello ' + safeName + ',</p>'
-    + '<p>Thank you for your payment of £135 for the SABI Bespoke Career Partner Package.</p>'
-    + '<p><a href="' + html_(input.onboardingUrl) + '">Open your private onboarding form</a></p>'
-    + '<p>Please use the access password sent separately and do not forward the link or password. You can complete the form in your own time.</p>'
-    + '<p>' + html_(earlyStartText) + '</p>'
-    + '<p>Your Stripe payment receipt will arrive separately. You can save the <a href="' + html_(input.termsUrl) + '">Terms and Conditions</a>, <a href="' + html_(input.privacyUrl) + '">Privacy Policy</a> and <a href="' + html_(input.cancellationUrl) + '">cancellation form</a> from the links provided.</p>'
-    + '<p>Once your onboarding is sent, SABI will review it and email any focused follow-up questions.</p>'
-    + '<p>Kind regards,<br>SABI Career Support<br><a href="mailto:hello@sabigroup.co.uk">hello@sabigroup.co.uk</a></p>';
-  MailApp.sendEmail({to: String(input.recipient), subject: 'Your SABI Career Support payment and onboarding', body: 'Thank you for your £135 payment for the SABI Bespoke Career Partner Package. Open your private onboarding form: ' + input.onboardingUrl, htmlBody: htmlBody, name: 'SABI Career Support'});
-  sheet.appendRow([String(input.deliveryId), new Date(), String(input.checkoutSessionId), String(input.recipient), input.earlyStart ? 'Early start requested' : 'Standard start', 'Sent']);
-  return json_({ok: true});
+    const earlyStartText = input.earlyStart
+      ? 'You asked SABI to begin work before the end of the cancellation period. If you later cancel before the service is fully completed, a fair and proportionate amount may be deducted for work already supplied.'
+      : 'SABI will not begin substantive personalised work until the 14-day cancellation period has ended, unless you separately ask for an earlier start.';
+    const safeName = html_(input.firstName || 'there');
+    const safeOnboardingUrl = html_(input.onboardingUrl);
+    const htmlBody = '<div style="font-family:Arial,sans-serif;color:#173b3b;line-height:1.6;max-width:640px">'
+      + '<p>Hello ' + safeName + ',</p>'
+      + '<p>Thank you for your payment of £135 for the SABI Bespoke Career Partner Package.</p>'
+      + '<table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px 0"><tr><td style="border-radius:8px;background:#f2c94c">'
+      + '<a href="' + safeOnboardingUrl + '" style="display:inline-block;padding:14px 22px;color:#063f3f;font-weight:bold;text-decoration:none">Open your private onboarding form</a>'
+      + '</td></tr></table>'
+      + '<p>If the button does not open, copy and paste this link into your browser:<br><a href="' + safeOnboardingUrl + '">' + safeOnboardingUrl + '</a></p>'
+      + '<p>Please use the access password sent separately and do not forward the link or password. You can complete the form in your own time.</p>'
+      + '<p>' + html_(earlyStartText) + '</p>'
+      + '<p>Your Stripe payment receipt will arrive separately. You can save the <a href="' + html_(input.termsUrl) + '">Terms and Conditions</a>, <a href="' + html_(input.privacyUrl) + '">Privacy Policy</a> and <a href="' + html_(input.cancellationUrl) + '">cancellation form</a> from the links provided.</p>'
+      + '<p>Once your onboarding is sent, SABI will review it and email any focused follow-up questions.</p>'
+      + '<p>Kind regards,<br>SABI Career Support<br><a href="mailto:hello@sabigroup.co.uk">hello@sabigroup.co.uk</a></p>'
+      + '</div>';
+
+    sheet.appendRow([String(input.deliveryId), new Date(), String(input.checkoutSessionId), String(input.recipient), input.earlyStart ? 'Early start requested' : 'Standard start', 'Sending']);
+    const recordRow = sheet.getLastRow();
+    try {
+      MailApp.sendEmail({
+        to: String(input.recipient),
+        subject: 'Your SABI Career Support payment and onboarding',
+        body: 'Thank you for your £135 payment for the SABI Bespoke Career Partner Package. Open your private onboarding form: ' + input.onboardingUrl,
+        htmlBody: htmlBody,
+        name: 'SABI Career Support'
+      });
+      sheet.getRange(recordRow, 6).setValue('Sent');
+    } catch (error) {
+      sheet.deleteRow(recordRow);
+      throw error;
+    }
+    return json_({ok: true});
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function validatePaymentConfirmation_(input) {

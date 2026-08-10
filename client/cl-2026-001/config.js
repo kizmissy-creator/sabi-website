@@ -4,7 +4,7 @@ window.SABI_ONBOARDING_CONFIG = {
   confirmationUrl: "./confirmation.html",
   maxFileBytes: 8 * 1024 * 1024,
   maxTotalFileBytes: 15 * 1024 * 1024,
-  acceptedExtensions: ["pdf", "doc", "docx", "txt"]
+  acceptedExtensions: ["pdf", "doc", "docx", "txt", "webm", "m4a", "ogg"]
 };
 
 (() => {

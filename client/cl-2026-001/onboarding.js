@@ -32,6 +32,215 @@
   const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate', 'Short course or training']);
   let current = 0;
   let saveTimer;
+  const voiceQuestionNames = ['hobbies', 'interests', 'caringStrengths', 'skillsExamples', 'proudOf'];
+  const voiceRecordings = new Map();
+  const voiceDatabaseName = 'sabi-onboarding-voice-cl-2026-001';
+  const voiceStoreName = 'recordings';
+  const maxVoiceSeconds = 180;
+  let activeVoiceRecording = null;
+
+  function openVoiceDatabase() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) return reject(new Error('Browser storage is not available.'));
+      const request = indexedDB.open(voiceDatabaseName, 1);
+      request.onupgradeneeded = () => request.result.createObjectStore(voiceStoreName, {keyPath: 'field'});
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function useVoiceStore(mode, action) {
+    const database = await openVoiceDatabase();
+    try {
+      return await new Promise((resolve, reject) => {
+        const transaction = database.transaction(voiceStoreName, mode);
+        const request = action(transaction.objectStore(voiceStoreName));
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    } finally {
+      database.close();
+    }
+  }
+
+  const saveVoiceToBrowser = recording => useVoiceStore('readwrite', store => store.put(recording));
+  const removeVoiceFromBrowser = field => useVoiceStore('readwrite', store => store.delete(field));
+  const clearSavedVoice = () => useVoiceStore('readwrite', store => store.clear()).catch(() => {});
+
+  function voiceFileExtension(type) {
+    if (type.includes('ogg')) return 'ogg';
+    if (type.includes('mp4')) return 'm4a';
+    return 'webm';
+  }
+
+  function voiceTime(seconds) {
+    const remaining = Math.max(0, maxVoiceSeconds - seconds);
+    return `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+  }
+
+  function renderVoiceRecording(field) {
+    const controls = document.querySelector(`[data-voice-controls="${field}"]`);
+    if (!controls) return;
+    const recording = voiceRecordings.get(field);
+    const audio = controls.querySelector('audio');
+    const start = controls.querySelector('[data-voice-start]');
+    const remove = controls.querySelector('[data-voice-delete]');
+    const saveChoice = controls.querySelector('[data-voice-save]');
+    if (audio.dataset.objectUrl) URL.revokeObjectURL(audio.dataset.objectUrl);
+    audio.hidden = !recording;
+    remove.hidden = !recording;
+    saveChoice.closest('label').hidden = !recording;
+    start.textContent = recording ? 'Record again' : 'Record an answer';
+    if (recording) {
+      const objectUrl = URL.createObjectURL(recording.blob);
+      audio.src = objectUrl;
+      audio.dataset.objectUrl = objectUrl;
+      saveChoice.checked = Boolean(recording.saved);
+    } else {
+      audio.removeAttribute('src');
+      delete audio.dataset.objectUrl;
+      saveChoice.checked = false;
+    }
+  }
+
+  function stopActiveVoiceRecording() {
+    if (activeVoiceRecording?.recorder?.state === 'recording') activeVoiceRecording.recorder.stop();
+  }
+
+  function discardActiveVoiceRecording() {
+    if (!activeVoiceRecording) return;
+    activeVoiceRecording.discard = true;
+    stopActiveVoiceRecording();
+  }
+
+  async function beginVoiceRecording(field) {
+    const controls = document.querySelector(`[data-voice-controls="${field}"]`);
+    const status = controls.querySelector('[data-voice-status]');
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      status.textContent = 'Voice recording is not supported in this browser. You can still type your answer.';
+      return;
+    }
+    if (activeVoiceRecording) {
+      status.textContent = 'Please stop the other recording before starting this one.';
+      return;
+    }
+    try {
+      status.textContent = 'Waiting for microphone permission...';
+      const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+      const preferredTypes = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'];
+      const mimeType = preferredTypes.find(type => MediaRecorder.isTypeSupported?.(type));
+      const options = {audioBitsPerSecond: 64000};
+      if (mimeType) options.mimeType = mimeType;
+      let recorder;
+      try { recorder = new MediaRecorder(stream, options); }
+      catch { recorder = new MediaRecorder(stream); }
+      const chunks = [];
+      const startedAt = Date.now();
+      const start = controls.querySelector('[data-voice-start]');
+      const stop = controls.querySelector('[data-voice-stop]');
+      const timer = controls.querySelector('[data-voice-timer]');
+      start.hidden = true;
+      stop.hidden = false;
+      timer.textContent = voiceTime(0);
+      status.textContent = 'Recording. You can stop whenever you have finished.';
+      recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
+      recorder.onstop = async () => {
+        const active = activeVoiceRecording;
+        clearInterval(active?.interval);
+        stream.getTracks().forEach(track => track.stop());
+        const type = recorder.mimeType || chunks[0]?.type || 'audio/webm';
+        const blob = new Blob(chunks, {type});
+        activeVoiceRecording = null;
+        start.hidden = false;
+        stop.hidden = true;
+        timer.textContent = voiceTime(0);
+        if (active?.discard) {
+          status.textContent = 'Recording discarded.';
+          return;
+        }
+        if (!blob.size) {
+          status.textContent = 'No audio was recorded. Please try again or type your answer.';
+          return;
+        }
+        const previous = voiceRecordings.get(field);
+        if (previous?.saved) await removeVoiceFromBrowser(field).catch(() => {});
+        voiceRecordings.set(field, {
+          field,
+          blob,
+          type,
+          saved: false,
+          name: `voice-${field}-${Date.now()}.${voiceFileExtension(type)}`
+        });
+        renderVoiceRecording(field);
+        status.textContent = 'Recording ready. Listen back, record again or delete it.';
+      };
+      recorder.start(1000);
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        timer.textContent = voiceTime(elapsed);
+        if (elapsed >= maxVoiceSeconds) stopActiveVoiceRecording();
+      }, 250);
+      activeVoiceRecording = {field, recorder, interval};
+    } catch (error) {
+      status.textContent = error?.name === 'NotAllowedError'
+        ? 'Microphone access was not allowed. You can change the browser permission or type your answer.'
+        : 'The microphone could not start. Please try again or type your answer.';
+    }
+  }
+
+  function createVoiceControls() {
+    voiceQuestionNames.forEach(field => {
+      const textarea = form.elements[field];
+      const card = textarea?.closest('.question-group');
+      if (!card || card.querySelector('[data-voice-controls]')) return;
+      const controls = document.createElement('div');
+      controls.className = 'voice-answer';
+      controls.dataset.voiceControls = field;
+      controls.innerHTML = `<p class="voice-intro"><strong>Prefer to speak?</strong> Record an answer of up to three minutes. You can listen back before sending.</p><div class="voice-actions"><button type="button" class="voice-button" data-voice-start>Record an answer</button><button type="button" class="voice-button voice-stop" data-voice-stop hidden>Stop recording</button><span class="voice-timer" data-voice-timer>3:00</span></div><p class="voice-status" data-voice-status aria-live="polite">Nothing is recorded yet.</p><audio controls preload="metadata" hidden></audio><div class="voice-recorded-actions"><button type="button" class="voice-delete" data-voice-delete hidden>Delete recording</button><label class="voice-save-choice" hidden><input type="checkbox" data-voice-save> Save this recording on this device so I can return to it later</label></div><p class="voice-privacy">If you do not choose to save it, the recording stays only in this open page. It uploads to SABI only when you send the completed form.</p>`;
+      card.insertBefore(controls, card.querySelector('.prompt-help'));
+      controls.querySelector('[data-voice-start]').addEventListener('click', () => beginVoiceRecording(field));
+      controls.querySelector('[data-voice-stop]').addEventListener('click', stopActiveVoiceRecording);
+      controls.querySelector('[data-voice-delete]').addEventListener('click', async () => {
+        const recording = voiceRecordings.get(field);
+        if (recording?.saved) await removeVoiceFromBrowser(field).catch(() => {});
+        voiceRecordings.delete(field);
+        renderVoiceRecording(field);
+        controls.querySelector('[data-voice-status]').textContent = 'Recording deleted.';
+      });
+      controls.querySelector('[data-voice-save]').addEventListener('change', async event => {
+        const recording = voiceRecordings.get(field);
+        if (!recording) return;
+        try {
+          if (event.target.checked) {
+            recording.saved = true;
+            await saveVoiceToBrowser(recording);
+            controls.querySelector('[data-voice-status]').textContent = 'Recording saved on this device.';
+          } else {
+            recording.saved = false;
+            await removeVoiceFromBrowser(field);
+            controls.querySelector('[data-voice-status]').textContent = 'Recording removed from browser storage. It remains in this open page.';
+          }
+        } catch {
+          recording.saved = false;
+          event.target.checked = false;
+          controls.querySelector('[data-voice-status]').textContent = 'This browser could not save the recording. It remains in this open page.';
+        }
+      });
+    });
+  }
+
+  async function restoreVoiceRecordings() {
+    try {
+      const saved = await useVoiceStore('readonly', store => store.getAll());
+      saved.forEach(recording => {
+        recording.saved = true;
+        voiceRecordings.set(recording.field, recording);
+        renderVoiceRecording(recording.field);
+        const status = document.querySelector(`[data-voice-controls="${recording.field}"] [data-voice-status]`);
+        if (status) status.textContent = 'Saved recording restored from this device.';
+      });
+    } catch {}
+  }
 
   stepMenuToggle?.addEventListener('click', () => {
     const isOpen = stepMenuToggle.getAttribute('aria-expanded') === 'true';
@@ -325,7 +534,8 @@
       ['Roles and experience', roles], ['Employment gaps', data.employmentGaps.length ? `${data.employmentGaps.length} added` : 'None added'], ['Qualifications added', String(data.qualifications.length)],
       ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Preferred contact', text(f.preferredContact.value)],
       ['Deadline', f.deadlineGate.value === 'yes' ? text(f.deadline.value) : (f.deadlineGate.value === 'no' ? 'No deadline' : (f.deadlineGate.value === 'not-sure' ? 'Not sure yet' : 'Not provided yet'))],
-      ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
+      ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None'],
+      ['Voice answers', voiceRecordings.size ? `${voiceRecordings.size} recorded` : 'None']
     ];
     document.getElementById('review-summary').innerHTML = `<dl>${values.map(([k,v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`).join('')}</dl>`;
   }
@@ -340,6 +550,17 @@
       const ext = file.name.split('.').pop().toLowerCase();
       if (file.size > config.maxFileBytes || !config.acceptedExtensions.includes(ext)) throw new Error(`${file.name} is not an accepted file or is larger than 8 MB.`);
       files.push({ field: input.name, name: file.name, type: file.type || 'application/octet-stream', size: file.size, base64: await readFile(file) });
+    }
+    for (const recording of voiceRecordings.values()) {
+      const ext = recording.name.split('.').pop().toLowerCase();
+      if (recording.blob.size > config.maxFileBytes || !config.acceptedExtensions.includes(ext)) throw new Error('A voice answer is larger than 8 MB or is not in an accepted audio format. Delete it and record it again.');
+      files.push({
+        field: `voice_${recording.field}`,
+        name: recording.name,
+        type: recording.type || 'application/octet-stream',
+        size: recording.blob.size,
+        base64: await readFile(recording.blob)
+      });
     }
     return {...draft.data, files, submittedAt: new Date().toISOString(), userAgent: navigator.userAgent};
   }
@@ -382,7 +603,7 @@
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', () => { if (confirm('Clear all answers saved on this device? This cannot be undone.')) { localStorage.removeItem(storageKey); form.reset(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateStep()) return;
@@ -395,6 +616,7 @@
       const result = await response.json().catch(() => ({}));
       if (!response.ok || !result.ok || result.submissionId !== body.submissionId) throw new Error(result.error || 'The form could not be confirmed as received. Your answers are still saved on this device. Please try again.');
       localStorage.removeItem(storageKey);
+      await clearSavedVoice();
       location.assign(`${config.confirmationUrl}?submission=${encodeURIComponent(body.submissionId)}`);
     } catch (error) {
       message.textContent = error.message || 'The form could not be sent. Your answers are still saved on this device. Please try again.'; message.classList.remove('hidden'); message.focus();
@@ -403,5 +625,7 @@
   });
 
   repeaterNames.forEach(name => addEntry(name));
+  createVoiceControls();
+  restoreVoiceRecordings();
   restore(); updateConditional(); showStep(current);
 })();
