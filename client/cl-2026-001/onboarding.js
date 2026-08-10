@@ -326,7 +326,7 @@
       ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
       ['Roles and experience', roles], ['Employment gaps', data.employmentGaps.length ? `${data.employmentGaps.length} added` : 'None added'], ['Qualifications added', String(data.qualifications.length)],
       ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Preferred contact', text(f.preferredContact.value)],
-      ['Consultation', text(f.consultationRoute.value)], ['Deadline', f.deadlineGate.value === 'yes' ? text(f.deadline.value) : (f.deadlineGate.value === 'no' ? 'No deadline' : (f.deadlineGate.value === 'not-sure' ? 'Not sure yet' : 'Not provided yet'))],
+      ['Deadline', f.deadlineGate.value === 'yes' ? text(f.deadline.value) : (f.deadlineGate.value === 'no' ? 'No deadline' : (f.deadlineGate.value === 'not-sure' ? 'Not sure yet' : 'Not provided yet'))],
       ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None']
     ];
     document.getElementById('review-summary').innerHTML = `<dl>${values.map(([k,v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`).join('')}</dl>`;
