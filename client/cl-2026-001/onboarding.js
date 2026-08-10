@@ -250,13 +250,11 @@
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
     const showAccessibility = situations.includes('accessibility');
-    const accessibilityStep = document.querySelector('.form-step[data-conditional-step="accessibility"]');
-    const accessibilityItem = document.querySelector('#step-list [data-conditional-step="accessibility"]');
+    const accessibilityPanel = document.getElementById('accessibility-details');
     const consent = form.elements.specialCategoryConsent;
-    accessibilityStep?.classList.toggle('hidden', !showAccessibility);
-    accessibilityItem?.classList.toggle('hidden', !showAccessibility);
+    accessibilityPanel?.classList.toggle('hidden', !showAccessibility);
     if (consent) consent.disabled = !showAccessibility;
-    accessibilityStep?.querySelectorAll('[data-accessibility-detail]').forEach(field => {
+    accessibilityPanel?.querySelectorAll('[data-accessibility-detail]').forEach(field => {
       field.disabled = !showAccessibility || !consent?.checked;
     });
     const activeStepCount = steps.filter(step => !step.matches('[data-conditional-step].hidden')).length;
