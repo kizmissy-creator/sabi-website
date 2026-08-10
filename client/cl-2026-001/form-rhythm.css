@@ -89,6 +89,15 @@ textarea[rows="4"] { height: 105px; }
 textarea[rows="5"] { height: 120px; }
 textarea[rows="7"] { height: 150px; }
 
+legend small {
+  display: block;
+  margin-top: .2rem;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
 .choice {
   padding: .62rem .75rem;
   margin: .35rem 0;
