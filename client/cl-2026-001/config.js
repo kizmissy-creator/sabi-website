@@ -17,7 +17,7 @@ window.SABI_ONBOARDING_CONFIG = {
       field?.closest("label")?.remove();
     }
 
-    const privacyReminder = document.querySelector(".form-step[data-step='7'] .privacy-note");
+    const privacyReminder = document.querySelector(".form-step[data-step='8'] .privacy-note");
     if (privacyReminder) {
       privacyReminder.innerHTML = "<strong>Privacy reminder</strong><p>Your Terms and Conditions, Privacy Policy and any early-start request were dealt with at checkout. This final step is only for checking and sending your onboarding information.</p>";
     }
@@ -65,16 +65,16 @@ window.SABI_ONBOARDING_CONFIG = {
     });
 
     const session = await sessionResponse.json().catch(() => ({}));
-    if (!sessionResponse.ok || !session.ok || !session.endpoint || !session.token) {
+    if (!sessionResponse.ok || !session.ok || !session.token) {
       throw new Error(session.error || "Your secure access needs to be renewed before sending.");
     }
 
     submission.submissionToken = session.token;
 
-    return nativeFetch(session.endpoint, {
+    return nativeFetch(config.endpoint, {
       method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(submission)
     });
   };

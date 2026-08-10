@@ -391,7 +391,9 @@
     button.disabled = true; button.textContent = 'Sending securely…';
     try {
       const body = await payload();
-      await fetch(config.endpoint, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body)});
+      const response = await fetch(config.endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok || result.submissionId !== body.submissionId) throw new Error(result.error || 'The form could not be confirmed as received. Your answers are still saved on this device. Please try again.');
       localStorage.removeItem(storageKey);
       location.assign(`${config.confirmationUrl}?submission=${encodeURIComponent(body.submissionId)}`);
     } catch (error) {

@@ -20,6 +20,8 @@ This is a dedicated receiver for `CL-2026-001`. It does not modify or share the 
 5. Run `configureBronaghOnboarding` once. It creates the response tab and a restricted upload folder.
 6. Move the generated upload folder into Bronagh's approved `02 Onboarding and Client Evidence` matter folder if required. Moving it does not change its ID.
 
+If the form or the sheet mapping changes later, update the Apps Script code and run `updateBronaghOnboardingSheet`. It adds any new summary columns without deleting existing responses or folders.
+
 ## 2. Create the shared submission secret
 
 Generate one random secret of at least 32 characters. Do not put it in GitHub, the website files, email or the client record.
@@ -60,7 +62,7 @@ Test with entirely fictional information and files.
 2. Enter the correct password and confirm access remains after closing and reopening the browser.
 3. Complete part of the form, close it and confirm the local draft restores on the same browser and device.
 4. Confirm the draft does not appear in another browser or device.
-5. Submit fictional information and confirm one spreadsheet row, one private submission folder and one JSON snapshot are created.
+5. Submit fictional information and confirm one spreadsheet row, one private submission folder and one JSON snapshot are created. Confirm the sheet row includes the current situation, work history, qualifications, career direction, job-search information and the submission-folder link.
 6. Resend the same submission ID and confirm no duplicate record is created.
 7. Test a rejected file type, an oversized file, a wrong password and an interrupted submission.
 8. Test mobile and desktop layouts.

@@ -12,8 +12,8 @@
 - A password gate protects every route and remembers access for up to 30 days on that browser and device.
 - Unfinished text answers stay in the browser's local storage on that device.
 - Uploaded files are not retained in the browser draft and must be selected again before submission.
-- The final submission goes directly from the browser to the dedicated Google receiver.
-- Netlify issues a 15-minute signed pass but does not receive or retain the completed answers or files.
+- The final submission passes through a secure Netlify relay to the dedicated Google receiver.
+- Netlify issues a 15-minute signed pass and relays the completed answers and files without storing them.
 - Google rejects submissions without a valid pass bound to the client reference, service code and submission ID.
 - Final answers and files are stored only in the restricted SABI Google Workspace record.
 
@@ -28,19 +28,20 @@ None of these values should be committed to GitHub or included in the client ema
 
 ## Safest activation order
 
-1. Create the restricted dedicated Google Sheet and configure the Apps Script receiver using `google-workspace/bronagh-onboarding/SETUP.md`.
+1. Create the restricted dedicated Google Sheet and configure the Apps Script receiver using `google-workspace/bronagh-onboarding/SETUP.md`. Run `updateBronaghOnboardingSheet` after pasting the current code.
 2. Generate the shared submission secret and save the same value in Apps Script and the Bronagh Netlify site's `BRONAGH_SUBMISSION_SECRET` variable.
 3. Deploy the Apps Script web app and save its `/exec` URL only in `BRONAGH_APPS_SCRIPT_ENDPOINT` on Netlify.
 4. Create a separate Netlify site from `feat/bronagh-onboarding`. Do not connect this branch to the public SABI production site.
 5. Add the page password and separate cookie secret in Netlify.
 6. Deploy the isolated client site.
 7. Test the exact client URL on phone and desktop with entirely fictional data.
-8. Confirm password access, 30-day cookie behaviour, local save and restore, backup download, conditional questions, private uploads, duplicate protection and confirmation.
+8. Confirm password access, 30-day cookie behaviour, local save and restore, backup download, conditional questions, private uploads, duplicate protection and confirmation only after Google confirms the record was saved.
 9. Confirm files larger than 8 MB individually or 15 MB in total are rejected before submission.
 10. Confirm changing the URL does not reveal any public SABI pages.
 11. Confirm no Google endpoint or private secret appears in the deployed JavaScript or GitHub branch.
 12. Confirm the saved Google JSON does not contain the short-lived submission token.
-13. Only after all tests pass, send Bronagh the exact client URL and send the password separately.
+13. Confirm a deliberately invalid Google receiver returns an error and leaves the browser draft intact rather than showing the confirmation page.
+14. Only after all tests pass, send Bronagh the exact client URL and send the password separately.
 
 ## Payment
 

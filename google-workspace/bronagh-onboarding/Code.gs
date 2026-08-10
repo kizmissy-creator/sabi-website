@@ -11,6 +11,15 @@ const ONBOARDING_CONFIG = {
   submissionSecretProperty: 'BRONAGH_SUBMISSION_SECRET'
 };
 
+const ONBOARDING_HEADERS = [
+  'received_at', 'submission_id', 'client_reference', 'first_name', 'last_name', 'email', 'preferred_contact',
+  'current_situation', 'work_history', 'employment_gaps', 'qualifications', 'things_you_do_well',
+  'career_direction', 'priorities', 'working_arrangements', 'preferred_hours', 'contract_types',
+  'availability', 'travel_limit', 'pay_needs', 'job_search_stage', 'job_search_difficulties',
+  'example_jobs', 'deadline', 'success_outcomes', 'accessibility_consent', 'accessibility_discussion',
+  'working_preferences', 'submission_folder', 'status'
+];
+
 function configureBronaghOnboarding() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet) throw new Error('Open this script from the dedicated onboarding spreadsheet.');
@@ -21,6 +30,13 @@ function configureBronaghOnboarding() {
   });
   PropertiesService.getScriptProperties().setProperty(ONBOARDING_CONFIG.folderProperty, folder.id);
   return 'Configured. Keep the spreadsheet and upload folder Restricted.';
+}
+
+function updateBronaghOnboardingSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  if (!spreadsheet) throw new Error('Open this script from the dedicated onboarding spreadsheet.');
+  ensureSheet_(spreadsheet);
+  return 'The onboarding sheet headers are up to date.';
 }
 
 function setBronaghSubmissionSecret(secret) {
@@ -125,13 +141,7 @@ function save_(input) {
     delete snapshot.submissionToken;
     const snapshotBlob = Utilities.newBlob(JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT, 'onboarding-response.json');
     Drive.Files.create({name: 'onboarding-response.json', parents: [submissionFolder.id]}, snapshotBlob);
-    sheet.appendRow([
-      new Date(), safeCell_(input.submissionId), safeCell_(input.clientReference), safeCell_(input.firstName),
-      safeCell_(input.lastName), safeCell_(String(input.email).toLowerCase()), safeCell_(input.preferredContact),
-      safeCell_(input.deadline), safeCell_(input.broadDirection), safeCell_(input.targetedDocuments),
-      includesYes_(input.specialCategoryConsent) ? 'Yes' : 'No', 'Recorded at checkout',
-      safeCell_(driveUrl_(submissionFolder.id)), 'New'
-    ]);
+    appendSummaryRow_(sheet, input, driveUrl_(submissionFolder.id));
   } catch (error) {
     Drive.Files.update({trashed: true}, submissionFolder.id);
     throw error;
@@ -142,13 +152,55 @@ function ensureSheet_(spreadsheet) {
   let sheet = spreadsheet.getSheetByName(ONBOARDING_CONFIG.sheetName);
   if (!sheet) sheet = spreadsheet.insertSheet(ONBOARDING_CONFIG.sheetName);
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['received_at','submission_id','client_reference','first_name','last_name','email','preferred_contact','deadline','broad_direction','targeted_documents','sensitive_consent','checkout_consent','submission_folder','status']);
+    sheet.appendRow(ONBOARDING_HEADERS);
     sheet.setFrozenRows(1);
+  } else {
+    const existing = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
+    const missing = ONBOARDING_HEADERS.filter(header => !existing.includes(header));
+    if (missing.length) sheet.getRange(1, existing.length + 1, 1, missing.length).setValues([missing]);
   }
   return sheet;
 }
 
+function appendSummaryRow_(sheet, input, folderUrl) {
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
+  const values = {
+    received_at: new Date(),
+    submission_id: input.submissionId,
+    client_reference: input.clientReference,
+    first_name: input.firstName,
+    last_name: input.lastName,
+    email: String(input.email || '').toLowerCase(),
+    preferred_contact: input.preferredContact,
+    current_situation: list_(input.currentSituation),
+    work_history: input.workHistory,
+    employment_gaps: input.employmentGapsSummary,
+    qualifications: input.qualificationsSummary,
+    things_you_do_well: input.skills,
+    career_direction: input.broadDirection,
+    priorities: list_(input.priorities),
+    working_arrangements: list_(input.workplace),
+    preferred_hours: list_(input.hours),
+    contract_types: list_(input.contractTypes),
+    availability: input.availability,
+    travel_limit: input.travelLimit,
+    pay_needs: input.payNeeds,
+    job_search_stage: input.searchStage,
+    job_search_difficulties: list_(input.difficultParts),
+    example_jobs: input.exampleJobs,
+    deadline: input.deadlineGate === 'yes' ? input.deadline : (input.deadlineGate === 'no' ? 'No deadline' : 'Not sure yet'),
+    success_outcomes: input.successOutcome,
+    accessibility_consent: includesYes_(input.specialCategoryConsent) ? 'Yes' : 'No',
+    accessibility_discussion: input.accessibilityDiscussion,
+    working_preferences: input.workingPreferences,
+    submission_folder: folderUrl,
+    status: 'New'
+  };
+  sheet.appendRow(headers.map(header => header === 'received_at' ? values[header] : safeCell_(values[header])));
+}
+
 function includesYes_(value) { return value === 'yes' || value === true || (Array.isArray(value) && value.includes('yes')); }
+function list_(value) { return Array.isArray(value) ? value.join(', ') : String(value || ''); }
 function clean_(value, limit) { return String(value == null ? '' : value).replace(/\u0000/g, '').trim().slice(0, limit); }
 function safeCell_(value) { const text = clean_(value, 50000); return /^[=+\-@]/.test(text) ? "'" + text : text; }
 function driveUrl_(id) { return 'https://drive.google.com/open?id=' + encodeURIComponent(id); }

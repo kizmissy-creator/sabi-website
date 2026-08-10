@@ -96,12 +96,7 @@ export default async function onboardingSession(request) {
     .update(encodedClaims)
     .digest("base64url");
 
-  return json({
-    ok: true,
-    endpoint,
-    token: `${encodedClaims}.${signature}`,
-    expiresInSeconds: TOKEN_LIFETIME_MS / 1000
-  });
+  return json({ ok: true, token: `${encodedClaims}.${signature}`, expiresInSeconds: TOKEN_LIFETIME_MS / 1000 });
 }
 
 export const config = {
