@@ -105,7 +105,7 @@ legend small {
 
 .choice-grid {
   gap: .15rem .55rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .choice-grid .choice-accessibility {
