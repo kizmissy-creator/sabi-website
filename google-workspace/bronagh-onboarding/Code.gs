@@ -8,7 +8,9 @@ const ONBOARDING_CONFIG = {
   allowedClientReference: 'CL-2026-001',
   allowedServiceCode: 'career_partner_bespoke',
   folderProperty: 'BRONAGH_UPLOAD_FOLDER_ID',
-  submissionSecretProperty: 'BRONAGH_SUBMISSION_SECRET'
+  submissionSecretProperty: 'BRONAGH_SUBMISSION_SECRET',
+  paymentEmailSecretProperty: 'BRONAGH_PAYMENT_EMAIL_SECRET',
+  paymentEmailSheetName: 'Payment confirmations'
 };
 
 const ONBOARDING_HEADERS = [
@@ -46,11 +48,19 @@ function setBronaghSubmissionSecret(secret) {
   return 'Submission secret saved.';
 }
 
+function setBronaghPaymentEmailSecret(secret) {
+  const value = String(secret || '').trim();
+  if (value.length < 32) throw new Error('Use a randomly generated secret of at least 32 characters.');
+  PropertiesService.getScriptProperties().setProperty(ONBOARDING_CONFIG.paymentEmailSecretProperty, value);
+  return 'Payment confirmation email secret saved.';
+}
+
 function doPost(e) {
   try {
     const raw = String(e && e.postData && e.postData.contents || '');
     if (!raw || raw.length > ONBOARDING_CONFIG.maxRequestBytes) throw new Error('Invalid request size.');
     const input = JSON.parse(raw);
+    if (input.action === 'payment_confirmation') return sendPaymentConfirmation_(input);
     validate_(input);
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);
@@ -60,6 +70,52 @@ function doPost(e) {
     console.error('Onboarding rejected: ' + error.message);
     return json_({ok: false, error: 'Submission could not be accepted.'});
   }
+}
+
+function sendPaymentConfirmation_(input) {
+  validatePaymentConfirmation_(input);
+  const sheet = ensurePaymentConfirmationSheet_(SpreadsheetApp.getActiveSpreadsheet());
+  const existing = sheet.getRange('A:A').createTextFinder(String(input.deliveryId)).matchEntireCell(true).findNext();
+  if (existing) return json_({ok: true, duplicate: true});
+
+  const earlyStartText = input.earlyStart
+    ? 'You asked SABI to begin work before the end of the cancellation period. If you later cancel before the service is fully completed, a fair and proportionate amount may be deducted for work already supplied.'
+    : 'SABI will not begin substantive personalised work until the 14-day cancellation period has ended, unless you separately ask for an earlier start.';
+  const safeName = html_(input.firstName || 'there');
+  const htmlBody = '<p>Hello ' + safeName + ',</p>'
+    + '<p>Thank you for your payment of £135 for the SABI Bespoke Career Partner Package.</p>'
+    + '<p><a href="' + html_(input.onboardingUrl) + '">Open your private onboarding form</a></p>'
+    + '<p>Please use the access password sent separately and do not forward the link or password. You can complete the form in your own time.</p>'
+    + '<p>' + html_(earlyStartText) + '</p>'
+    + '<p>Your Stripe payment receipt will arrive separately. You can save the <a href="' + html_(input.termsUrl) + '">Terms and Conditions</a>, <a href="' + html_(input.privacyUrl) + '">Privacy Policy</a> and <a href="' + html_(input.cancellationUrl) + '">cancellation form</a> from the links provided.</p>'
+    + '<p>Once your onboarding is sent, SABI will review it and email any focused follow-up questions.</p>'
+    + '<p>Kind regards,<br>SABI Career Support<br><a href="mailto:hello@sabigroup.co.uk">hello@sabigroup.co.uk</a></p>';
+  MailApp.sendEmail({to: String(input.recipient), subject: 'Your SABI Career Support payment and onboarding', body: 'Thank you for your £135 payment for the SABI Bespoke Career Partner Package. Open your private onboarding form: ' + input.onboardingUrl, htmlBody: htmlBody, name: 'SABI Career Support'});
+  sheet.appendRow([String(input.deliveryId), new Date(), String(input.checkoutSessionId), String(input.recipient), input.earlyStart ? 'Early start requested' : 'Standard start', 'Sent']);
+  return json_({ok: true});
+}
+
+function validatePaymentConfirmation_(input) {
+  const required = ['deliveryId', 'checkoutSessionId', 'recipient', 'onboardingUrl', 'termsUrl', 'privacyUrl', 'cancellationUrl', 'deliveryToken'];
+  required.forEach(key => { if (!String(input[key] || '').trim()) throw new Error('Payment confirmation missing ' + key + '.'); });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input.recipient))) throw new Error('Payment confirmation recipient invalid.');
+  const secret = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.paymentEmailSecretProperty);
+  if (!secret) throw new Error('Payment confirmation email secret not configured.');
+  const clean = Object.assign({}, input); delete clean.deliveryToken;
+  const encoded = Utilities.base64EncodeWebSafe(JSON.stringify(clean), Utilities.Charset.UTF_8).replace(/=+$/g, '');
+  const expected = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(encoded, secret, Utilities.Charset.UTF_8)).replace(/=+$/g, '');
+  const parts = String(input.deliveryToken).split('.');
+  if (parts.length !== 2 || !constantTimeEqual_(parts[0], encoded) || !constantTimeEqual_(parts[1], expected)) throw new Error('Payment confirmation signature invalid.');
+}
+
+function ensurePaymentConfirmationSheet_(spreadsheet) {
+  let sheet = spreadsheet.getSheetByName(ONBOARDING_CONFIG.paymentEmailSheetName);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(ONBOARDING_CONFIG.paymentEmailSheetName);
+    sheet.appendRow(['delivery_id', 'sent_at', 'checkout_session_id', 'recipient', 'start_arrangement', 'status']);
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
 }
 
 function validate_(input) {
@@ -204,4 +260,5 @@ function list_(value) { return Array.isArray(value) ? value.join(', ') : String(
 function clean_(value, limit) { return String(value == null ? '' : value).replace(/\u0000/g, '').trim().slice(0, limit); }
 function safeCell_(value) { const text = clean_(value, 50000); return /^[=+\-@]/.test(text) ? "'" + text : text; }
 function driveUrl_(id) { return 'https://drive.google.com/open?id=' + encodeURIComponent(id); }
+function html_(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function json_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }

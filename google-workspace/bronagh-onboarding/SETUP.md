@@ -41,7 +41,18 @@ The signed pass lasts 15 minutes and is bound to Bronagh's client reference, ser
 5. In the separate Bronagh Netlify site, save it as the private environment variable `BRONAGH_APPS_SCRIPT_ENDPOINT`.
 6. Do not put the `/exec` URL back into `client/cl-2026-001/config.js`.
 
-## 4. Configure the private Bronagh Netlify site
+## 4. Send the payment confirmation email
+
+The same restricted Apps Script sends the confirmation email from the SABI Workspace account only after Netlify has verified Stripe's signed checkout-completed event. The email contains no onboarding answers or uploaded files.
+
+1. Replace the Apps Script code and manifest with the current versions in this folder. Authorise the added permission to send email.
+2. Generate a second random secret of at least 32 characters. Run `setBronaghPaymentEmailSecret('YOUR_RANDOM_SECRET')` once in Apps Script.
+3. In Netlify, create `BRONAGH_PAYMENT_EMAIL_SECRET` with the identical value and scope it to Functions and the Bronagh deploy context.
+4. Deploy a new version of the Apps Script web app so it uses the updated email code.
+5. In Stripe, add an endpoint for `https://YOUR-BRONAGH-SITE/api/stripe-payment-email`, select only `checkout.session.completed`, and copy the webhook signing secret into `STRIPE_PAYMENT_EMAIL_WEBHOOK_SECRET` on Netlify.
+6. Make one Stripe test-mode payment first. Confirm exactly one email is sent, the Payment confirmations sheet records it, and the email contains no form answers or attachments.
+
+## 5. Configure the private Bronagh Netlify site
 
 Deploy branch `feat/bronagh-onboarding` as a separate Netlify site. Do not merge it into `main` and do not attach it to the public SABI production site.
 

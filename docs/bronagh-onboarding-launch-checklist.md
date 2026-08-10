@@ -23,6 +23,8 @@
 - `BRONAGH_COOKIE_SECRET`
 - `BRONAGH_SUBMISSION_SECRET`
 - `BRONAGH_APPS_SCRIPT_ENDPOINT`
+- `BRONAGH_PAYMENT_EMAIL_SECRET`
+- `STRIPE_PAYMENT_EMAIL_WEBHOOK_SECRET`
 
 None of these values should be committed to GitHub or included in the client email.
 
@@ -47,7 +49,7 @@ None of these values should be committed to GitHub or included in the client ema
 
 The payment button uses the active, live, single-use Stripe Payment Link for the SABI Bespoke Career Partner Package at £135. It includes the client reference in Stripe for reconciliation. The page records the required terms confirmation before opening Stripe and distinguishes an early-start request in the tracked checkout URL.
 
-Stripe currently shows its hosted payment confirmation. Send the private onboarding link after confirming the successful payment in Stripe; do not promise an automatic onboarding redirect until the server-side verification route has been activated and tested.
+Stripe sends its own payment receipt. Once the payment-confirmation email route has been configured, Stripe's signed checkout-completed event sends the SABI confirmation email containing the private onboarding button and durable links to the applicable documents. Do not enable it until a test payment has confirmed exactly one email is sent.
 
 The onboarding can be tested before payment is activated. Do not imply the service has started merely because the form was submitted.
 
