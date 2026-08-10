@@ -313,10 +313,53 @@ legend small {
 
 .voice-answer {
   margin: 1rem 0 .35rem;
-  padding: .9rem 1rem;
   border: 1px solid #b8cfcc;
   border-radius: 12px;
   background: var(--teal-soft);
+}
+
+.voice-answer > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .72rem .9rem;
+  color: var(--teal-dark);
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.voice-answer > summary::-webkit-details-marker {
+  display: none;
+}
+
+.voice-answer > summary::before {
+  content: '+';
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.voice-answer[open] > summary::before {
+  content: '−';
+}
+
+.voice-answer > summary span {
+  flex: 1 1 auto;
+}
+
+.voice-answer > summary small {
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.voice-answer-body {
+  padding: .15rem .9rem .9rem;
+  border-top: 1px solid #c9dcd9;
 }
 
 .voice-intro,
