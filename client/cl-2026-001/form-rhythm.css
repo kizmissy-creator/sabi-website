@@ -453,3 +453,94 @@ legend small {
   min-height: 1.1rem;
   margin: .1rem 0 0;
 }
+
+.tag-fieldset {
+  margin: 1rem 0;
+}
+
+.tag-source-label {
+  display: none !important;
+}
+
+.tag-help {
+  margin: .2rem 0 .65rem;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.tag-entry-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .55rem;
+  align-items: stretch;
+}
+
+.tag-entry-input {
+  margin: 0;
+}
+
+.tag-add-button {
+  min-width: 74px;
+  padding: .65rem .9rem;
+  border: 2px solid var(--teal-dark);
+  border-radius: 9px;
+  background: var(--teal-dark);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  min-height: .25rem;
+  margin: .7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  max-width: 100%;
+  padding: .42rem .48rem .42rem .7rem;
+  border: 1px solid #8fb8b3;
+  border-radius: 999px;
+  background: var(--teal-soft);
+  color: var(--teal-dark);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.tag-chip span {
+  overflow-wrap: anywhere;
+}
+
+.tag-chip button {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  min-height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--teal-dark);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .tag-entry-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tag-add-button {
+    width: 100%;
+  }
+}

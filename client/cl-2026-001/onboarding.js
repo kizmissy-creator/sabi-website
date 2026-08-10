@@ -32,6 +32,8 @@
   const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate', 'Short course or training']);
   let current = 0;
   let saveTimer;
+  let broadDirectionTags = [];
+  let broadDirectionTagInput;
   const voiceQuestionNames = ['hobbies', 'interests', 'caringStrengths', 'skillsExamples', 'proudOf'];
   const voiceRecordings = new Map();
   const voiceDatabaseName = 'sabi-onboarding-voice-cl-2026-001';
@@ -240,6 +242,83 @@
         if (status) status.textContent = 'Saved recording restored from this device.';
       });
     } catch {}
+  }
+
+  function renderBroadDirectionTags() {
+    const list = document.getElementById('broad-direction-tags');
+    const source = form.elements.broadDirection;
+    if (!list || !source || !broadDirectionTagInput) return;
+    list.replaceChildren();
+    broadDirectionTags.forEach((value, index) => {
+      const item = document.createElement('li');
+      item.className = 'tag-chip';
+      const text = document.createElement('span');
+      text.textContent = value;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', `Remove ${value}`);
+      remove.addEventListener('click', () => {
+        broadDirectionTags.splice(index, 1);
+        renderBroadDirectionTags();
+        broadDirectionTagInput.focus();
+        scheduleSave();
+      });
+      item.append(text, remove);
+      list.appendChild(item);
+    });
+    source.value = broadDirectionTags.join('\n');
+    broadDirectionTagInput.required = broadDirectionTags.length === 0;
+    broadDirectionTagInput.setCustomValidity(broadDirectionTags.length ? '' : 'Add at least one role or type of work.');
+  }
+
+  function addBroadDirectionTag() {
+    if (!broadDirectionTagInput) return false;
+    const value = broadDirectionTagInput.value.replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (!value) {
+      renderBroadDirectionTags();
+      return false;
+    }
+    const exists = broadDirectionTags.some(existing => existing.toLowerCase() === value.toLowerCase());
+    if (!exists && broadDirectionTags.length < 20) broadDirectionTags.push(value);
+    broadDirectionTagInput.value = '';
+    renderBroadDirectionTags();
+    scheduleSave();
+    return true;
+  }
+
+  function loadBroadDirectionTags() {
+    const source = form.elements.broadDirection;
+    broadDirectionTags = String(source?.value || '').split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 20);
+    renderBroadDirectionTags();
+  }
+
+  function setupBroadDirectionTags() {
+    const source = form.elements.broadDirection;
+    const originalLabel = source?.closest('label');
+    if (!source || !originalLabel) return;
+    source.required = false;
+    originalLabel.classList.add('tag-source-label');
+    originalLabel.hidden = true;
+    const fieldset = document.createElement('fieldset');
+    fieldset.className = 'tag-fieldset';
+    fieldset.innerHTML = `<legend>Roles or types of work you are considering <span>*</span></legend><p class="tag-help">Add one at a time. Type a role or kind of work, then press Enter or choose Add.</p><div class="tag-entry-row"><input id="broad-direction-entry" class="tag-entry-input" autocomplete="off" maxlength="120" placeholder="For example, administrator"><button type="button" class="tag-add-button">Add</button></div><ul id="broad-direction-tags" class="tag-list" aria-label="Roles or types of work added"></ul>`;
+    originalLabel.before(fieldset);
+    broadDirectionTagInput = fieldset.querySelector('.tag-entry-input');
+    fieldset.querySelector('.tag-add-button').addEventListener('click', addBroadDirectionTag);
+    broadDirectionTagInput.addEventListener('input', () => broadDirectionTagInput.setCustomValidity(''));
+    broadDirectionTagInput.addEventListener('blur', () => { if (broadDirectionTagInput.value.trim()) addBroadDirectionTag(); });
+    broadDirectionTagInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addBroadDirectionTag();
+      } else if (event.key === 'Backspace' && !broadDirectionTagInput.value && broadDirectionTags.length) {
+        broadDirectionTags.pop();
+        renderBroadDirectionTags();
+        scheduleSave();
+      }
+    });
+    renderBroadDirectionTags();
   }
 
   stepMenuToggle?.addEventListener('click', () => {
@@ -513,6 +592,7 @@
   });
 
   function validateStep() {
+    addBroadDirectionTag();
     const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
     const fields = [...activeSteps[current].querySelectorAll('[required]')].filter(el => !el.disabled);
     const invalid = fields.filter(el => !el.checkValidity());
@@ -603,7 +683,7 @@
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); broadDirectionTags = []; if (broadDirectionTagInput) broadDirectionTagInput.value = ''; renderBroadDirectionTags(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateStep()) return;
@@ -626,6 +706,7 @@
 
   repeaterNames.forEach(name => addEntry(name));
   createVoiceControls();
+  setupBroadDirectionTags();
   restoreVoiceRecordings();
-  restore(); updateConditional(); showStep(current);
+  restore(); loadBroadDirectionTags(); updateConditional(); showStep(current);
 })();
