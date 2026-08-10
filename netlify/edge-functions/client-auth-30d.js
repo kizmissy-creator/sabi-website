@@ -1,8 +1,6 @@
 const COOKIE_NAME = "sabi_client_access";
 const CLIENT_REFERENCE = "CL-2026-001";
 const PREVIEW_HOST = "deploy-preview-2--celadon-melomakarona-a77f9d.netlify.app";
-const PREVIEW_TOKEN = "8a110a28c4bf4032b74975e2a89d3b1f";
-const PREVIEW_EXPIRES_AT = Date.parse("2026-08-10T00:00:00Z");
 
 function base64UrlDecode(value) {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
@@ -50,11 +48,15 @@ function denied() {
 export default async function clientAuth(request, context) {
   try {
     const url = new URL(request.url);
+    const previewToken = Netlify.env.get("BRONAGH_PREVIEW_TOKEN") || "";
+    const previewExpiresAt = Date.parse(Netlify.env.get("BRONAGH_PREVIEW_EXPIRES_AT") || "");
     const isWorkingPreview =
       url.hostname === PREVIEW_HOST &&
       (url.pathname === "/" || url.pathname === "/index.html") &&
-      url.searchParams.get("preview_access") === PREVIEW_TOKEN &&
-      Date.now() < PREVIEW_EXPIRES_AT;
+      previewToken &&
+      url.searchParams.get("preview_access") === previewToken &&
+      Number.isFinite(previewExpiresAt) &&
+      Date.now() < previewExpiresAt;
 
     if (isWorkingPreview) return;
 
