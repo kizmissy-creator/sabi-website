@@ -36,7 +36,7 @@
   const voiceRecordings = new Map();
   const voiceDatabaseName = 'sabi-onboarding-voice-cl-2026-001';
   const voiceStoreName = 'recordings';
-  const maxVoiceSeconds = 180;
+  const maxVoiceSeconds = 300;
   let activeVoiceRecording = null;
 
   function openVoiceDatabase() {
@@ -196,7 +196,7 @@
       const controls = document.createElement('details');
       controls.className = 'voice-answer';
       controls.dataset.voiceControls = field;
-      controls.innerHTML = `<summary><span>Prefer to answer by voice?</span><small>Up to 3 minutes</small></summary><div class="voice-answer-body"><p class="voice-intro">Record an answer and listen back before sending.</p><div class="voice-actions"><button type="button" class="voice-button" data-voice-start>Record an answer</button><button type="button" class="voice-button voice-stop" data-voice-stop hidden>Stop recording</button><span class="voice-timer" data-voice-timer>3:00</span></div><p class="voice-status" data-voice-status aria-live="polite">Nothing is recorded yet.</p><audio controls preload="metadata" hidden></audio><div class="voice-recorded-actions"><button type="button" class="voice-delete" data-voice-delete hidden>Delete recording</button><label class="voice-save-choice" hidden><input type="checkbox" data-voice-save> Save this recording on this device so I can return to it later</label></div><p class="voice-privacy">If you do not choose to save it, the recording stays only in this open page. It uploads to SABI only when you send the completed form.</p></div>`;
+      controls.innerHTML = `<summary><span>Prefer to answer by voice?</span><small>Up to 5 minutes</small></summary><div class="voice-answer-body"><p class="voice-intro">Record an answer and listen back before sending.</p><div class="voice-actions"><button type="button" class="voice-button" data-voice-start>Record an answer</button><button type="button" class="voice-button voice-stop" data-voice-stop hidden>Stop recording</button><span class="voice-timer" data-voice-timer>5:00</span></div><p class="voice-status" data-voice-status aria-live="polite">Nothing is recorded yet.</p><audio controls preload="metadata" hidden></audio><div class="voice-recorded-actions"><button type="button" class="voice-delete" data-voice-delete hidden>Delete recording</button><label class="voice-save-choice" hidden><input type="checkbox" data-voice-save> Save this recording on this device so I can return to it later</label></div><p class="voice-privacy">If you do not choose to save it, the recording stays only in this open page. It uploads to SABI only when you send the completed form.</p></div>`;
       card.insertBefore(controls, card.querySelector('.prompt-help'));
       controls.querySelector('[data-voice-start]').addEventListener('click', () => beginVoiceRecording(field));
       controls.querySelector('[data-voice-stop]').addEventListener('click', stopActiveVoiceRecording);
