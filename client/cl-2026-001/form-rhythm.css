@@ -236,6 +236,19 @@ legend small {
   margin-bottom: .4rem;
 }
 
+.qualification-status .choice-grid {
+  grid-template-columns: 1fr;
+  gap: .15rem;
+}
+
+.qualification-status .choice,
+.qualification-status .choice:has(input:checked) {
+  height: auto;
+  padding: .4rem .15rem;
+  border: 0;
+  background: transparent;
+}
+
 .question-group > h3,
 .group-heading h3 {
   margin: 0;
