@@ -524,6 +524,8 @@ legend small {
 
 .package-card {
   padding: 1.5rem;
+  transform: none;
+  border-bottom-width: 4px;
 }
 
 .package-card strong {
