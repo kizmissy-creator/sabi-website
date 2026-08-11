@@ -207,6 +207,11 @@ legend small {
   margin-top: .65rem;
 }
 
+.compact-gap #employment-gap-gate {
+  padding: 0;
+  border: 0;
+}
+
 .question-group > h3,
 .group-heading h3 {
   margin: 0;
