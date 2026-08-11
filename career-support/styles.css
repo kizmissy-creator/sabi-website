@@ -124,7 +124,7 @@ select:focus-visible {
 .progress { margin: 2rem 0; }
 .progress ol {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.5rem;
   margin: 0;
   padding: 0;
