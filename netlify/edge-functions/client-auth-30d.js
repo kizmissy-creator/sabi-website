@@ -77,18 +77,24 @@ export default async function clientAuth(request, context) {
       const encodedPayload = base64UrlEncode(payload);
       const signature = await hmac(secret, payload);
 
-      context.cookies.set({
-        name: COOKIE_NAME,
-        value: `${encodedPayload}.${signature}`,
-        path: "/",
-        secure: true,
-        httpOnly: true,
-        sameSite: "Strict",
-        expires: new Date(expires * 1000)
-      });
-
       url.searchParams.delete("preview_access");
-      return Response.redirect(url, 302);
+      const cookie = [
+        `${COOKIE_NAME}=${encodedPayload}.${signature}`,
+        "Path=/",
+        `Expires=${new Date(expires * 1000).toUTCString()}`,
+        "Secure",
+        "HttpOnly",
+        "SameSite=Strict"
+      ].join("; ");
+      return new Response(null, {
+        status: 302,
+        headers: {
+          location: url.toString(),
+          "set-cookie": cookie,
+          "cache-control": "private, no-store, max-age=0",
+          "referrer-policy": "no-referrer"
+        }
+      });
     }
 
     const token = context.cookies.get(COOKIE_NAME) || "";
