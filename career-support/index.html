@@ -26,7 +26,7 @@
     <section class="warning-panel" aria-labelledby="test-only-title">
       <div>
         <p class="eyebrow">Fictional testing only</p>
-        <h1 id="test-only-title">Career Support route shell</h1>
+        <h1 id="test-only-title">Career Support onboarding</h1>
         <p>Do not enter real client, payment, health, employment or contact information. Use an <strong>@example.com</strong> email address only. Paid checkout is disabled.</p>
       </div>
     </section>
@@ -36,7 +36,7 @@
         <li data-progress="service" aria-current="step"><span>1</span>Service</li>
         <li data-progress="age"><span>2</span>Age route</li>
         <li data-progress="email"><span>3</span>Secure return</li>
-        <li data-progress="draft"><span>4</span>Draft shell</li>
+        <li data-progress="about"><span>4</span>About you</li>
       </ol>
     </nav>
 
@@ -115,33 +115,97 @@
       </div>
     </section>
 
-    <section id="draft-screen" class="screen card" aria-labelledby="draft-heading" hidden>
+    <section id="about-screen" class="screen card" aria-labelledby="about-heading" hidden>
       <p class="eyebrow">Step 4 of 4</p>
-      <h2 id="draft-heading">Draft shell</h2>
+      <h2 id="about-heading">About you</h2>
+      <p class="intro">These are the first approved core intake questions. Use fictional information only while this route is in development.</p>
+
       <div class="draft-reference">
         <span>Draft reference</span>
         <strong id="draft-reference">Not created</strong>
       </div>
       <p id="save-state" class="save-state" role="status" aria-live="polite">No changes to save.</p>
 
-      <form id="draft-form" novalidate>
-        <div class="field-row">
-          <label for="fictional-name">Fictional preferred name</label>
-          <input id="fictional-name" name="preferredName" type="text" maxlength="60" placeholder="Example Person">
+      <form id="about-form" novalidate>
+        <div class="field-grid two-column">
+          <div class="field-row">
+            <label for="name-first">First name <span aria-hidden="true">*</span></label>
+            <input id="name-first" name="NAME_FIRST" type="text" autocomplete="given-name" maxlength="80" required>
+          </div>
+          <div class="field-row">
+            <label for="name-last">Last name <span aria-hidden="true">*</span></label>
+            <input id="name-last" name="NAME_LAST" type="text" autocomplete="family-name" maxlength="100" required>
+          </div>
         </div>
-        <div class="field-row">
-          <label for="fictional-note">Fictional test note</label>
-          <textarea id="fictional-note" name="testNote" rows="4" maxlength="500" placeholder="Use invented information only."></textarea>
+
+        <div class="field-grid two-column">
+          <div class="field-row">
+            <label for="name-preferred">What name would you like me to use?</label>
+            <input id="name-preferred" name="NAME_PREFERRED" type="text" maxlength="80">
+            <p class="field-help">Leave blank if it is the same as your first name.</p>
+          </div>
+          <div class="field-row">
+            <label for="pronouns">Pronouns</label>
+            <input id="pronouns" name="PRONOUNS" type="text" maxlength="80">
+            <p class="field-help">Optional. Add only what you would like SABI to use.</p>
+          </div>
         </div>
+
+        <div class="field-row">
+          <label for="verified-email">Verified email address</label>
+          <input id="verified-email" type="email" readonly aria-readonly="true">
+          <p class="field-help">This fictional address is tied to the current draft and secure return link.</p>
+        </div>
+
+        <fieldset id="contact-allowed" class="checkbox-panel">
+          <legend>How are you happy for SABI to contact you? <span aria-hidden="true">*</span></legend>
+          <p class="field-help">Choose every route you are comfortable using. Nothing is preselected.</p>
+          <div id="contact-method-options" class="checkbox-grid"></div>
+        </fieldset>
+
+        <div id="phone-row" class="field-row" hidden>
+          <label for="phone">Telephone number <span aria-hidden="true">*</span></label>
+          <input id="phone" name="PHONE" type="tel" autocomplete="tel" maxlength="40">
+          <p class="field-help">Required only when telephone or SMS is selected.</p>
+        </div>
+
+        <div class="field-row">
+          <label for="contact-primary">Which contact method should I normally try first? <span aria-hidden="true">*</span></label>
+          <select id="contact-primary" name="CONTACT_PRIMARY" required disabled>
+            <option value="">Choose at least one contact method first</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <label for="location-base">Where are you based? <span aria-hidden="true">*</span></label>
+          <input id="location-base" name="LOCATION_BASE" type="text" autocomplete="address-level2" maxlength="120" placeholder="Newcastle upon Tyne or NE6" required>
+          <p class="field-help">Town, city or postcode area is enough. A full home address is not needed.</p>
+        </div>
+
+        <div class="field-row">
+          <label for="life-stage-impact">Does your current stage of life affect the opportunities, timing or support that may suit you?</label>
+          <select id="life-stage-impact" name="LIFE_STAGE_IMPACT"></select>
+          <p class="field-help">Optional. This is not asking for your age. Examples include returning to work, changing career later in life or needing age-specific training information.</p>
+        </div>
+
+        <div id="life-stage-detail-row" class="field-row" hidden>
+          <label for="life-stage-detail">Tell me anything about this that would be useful</label>
+          <textarea id="life-stage-detail" name="LIFE_STAGE_DETAIL" rows="4" maxlength="1000"></textarea>
+          <p class="field-help">Only include what may affect the kind of support, timing or opportunities that fit.</p>
+        </div>
+
         <div class="information-panel">
-          <h3>Not part of this first shell</h3>
-          <p>Uploads, real work history, health information, Terms acceptance, early-start choices and payment remain disabled until their own controls are built and tested.</p>
+          <h3>Still deliberately disabled</h3>
+          <p>Uploads, work history, health information, Terms acceptance, early-start choices and payment are not part of this development batch yet.</p>
         </div>
       </form>
 
       <div class="actions split">
         <button class="button secondary" type="button" data-back="email">Back</button>
-        <button id="copy-return-link" class="button primary" type="button">Copy fictional return link</button>
+        <div class="action-cluster">
+          <button id="copy-return-link" class="button secondary" type="button">Copy fictional return link</button>
+          <button id="validate-about" class="button primary" type="button">Check this section</button>
+        </div>
       </div>
     </section>
   </main>
@@ -150,6 +214,7 @@
     <p>© 2026 SABI. Development route. Fictional data only.</p>
   </footer>
 
+  <script src="phase2-field-config.js"></script>
   <script src="app.js" defer></script>
 </body>
 </html>
