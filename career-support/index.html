@@ -37,6 +37,7 @@
         <li data-progress="age"><span>2</span>Age route</li>
         <li data-progress="email"><span>3</span>Secure return</li>
         <li data-progress="about"><span>4</span>About you</li>
+        <li data-progress="current"><span>5</span>Current situation</li>
       </ol>
     </nav>
 
@@ -44,7 +45,7 @@
     <div id="error-summary" class="error-summary" role="alert" tabindex="-1" hidden></div>
 
     <section id="service-screen" class="screen card" aria-labelledby="service-heading">
-      <p class="eyebrow">Step 1 of 4</p>
+      <p class="eyebrow">Step 1 of 5</p>
       <h2 id="service-heading">Choose the service being tested</h2>
       <p class="intro">The visible name, price and summary come from one approved configuration object. An altered or unknown service code is never guessed.</p>
       <div id="service-options" class="service-grid"></div>
@@ -55,7 +56,7 @@
     </section>
 
     <section id="age-screen" class="screen card" aria-labelledby="age-heading" hidden>
-      <p class="eyebrow">Step 2 of 4</p>
+      <p class="eyebrow">Step 2 of 5</p>
       <h2 id="age-heading">Which age group applies to the fictional test person?</h2>
       <p class="intro">SABI Career Support is available from age 16 at launch. A parent or guardian is not required solely because someone is 16 or 17.</p>
       <fieldset class="choice-group">
@@ -92,7 +93,7 @@
     </section>
 
     <section id="email-screen" class="screen card" aria-labelledby="email-heading" hidden>
-      <p class="eyebrow">Step 3 of 4</p>
+      <p class="eyebrow">Step 3 of 5</p>
       <h2 id="email-heading">Create or reopen a fictional test draft</h2>
       <p class="intro">The finished route will verify the email address and create a secure return link. During this development stage, only <strong>@example.com</strong> addresses are accepted.</p>
 
@@ -116,7 +117,7 @@
     </section>
 
     <section id="about-screen" class="screen card" aria-labelledby="about-heading" hidden>
-      <p class="eyebrow">Step 4 of 4</p>
+      <p class="eyebrow">Step 4 of 5</p>
       <h2 id="about-heading">About you</h2>
       <p class="intro">These are the first approved core intake questions. Use fictional information only while this route is in development.</p>
 
@@ -193,19 +194,85 @@
           <textarea id="life-stage-detail" name="LIFE_STAGE_DETAIL" rows="4" maxlength="1000"></textarea>
           <p class="field-help">Only include what may affect the kind of support, timing or opportunities that fit.</p>
         </div>
-
-        <div class="information-panel">
-          <h3>Still deliberately disabled</h3>
-          <p>Uploads, work history, health information, Terms acceptance, early-start choices and payment are not part of this development batch yet.</p>
-        </div>
       </form>
 
       <div class="actions split">
         <button class="button secondary" type="button" data-back="email">Back</button>
         <div class="action-cluster">
           <button id="copy-return-link" class="button secondary" type="button">Copy fictional return link</button>
-          <button id="validate-about" class="button primary" type="button">Check this section</button>
+          <button id="continue-to-current" class="button primary" type="button">Continue</button>
         </div>
+      </div>
+    </section>
+
+    <section id="current-screen" class="screen card" aria-labelledby="current-heading" hidden>
+      <p class="eyebrow">Step 5 of 5</p>
+      <h2 id="current-heading">Your current situation</h2>
+      <p class="intro">Work, study, caring and other responsibilities can overlap, so this section does not force one neat label.</p>
+
+      <fieldset id="employment-status" class="checkbox-panel">
+        <legend>Which of these best describe your current situation? <span aria-hidden="true">*</span></legend>
+        <p class="field-help">Select all that apply.</p>
+        <div id="employment-status-options" class="checkbox-grid"></div>
+      </fieldset>
+
+      <div id="employment-other-row" class="field-row" hidden>
+        <label for="employment-other">Tell me briefly what applies</label>
+        <input id="employment-other" name="EMPLOYMENT_STATUS_OTHER" type="text" maxlength="160">
+      </div>
+
+      <div class="information-panel">
+        <h3>Current or most recent role</h3>
+        <p>Use the title you were given, or describe the work if there was no formal title. If the fictional person has never had paid work, this part can be left blank.</p>
+      </div>
+
+      <div class="field-row">
+        <label for="current-role-title">What is your current or most recent role?</label>
+        <input id="current-role-title" name="CURRENT_ROLE_TITLE" type="text" maxlength="160">
+      </div>
+
+      <div class="field-row">
+        <label for="current-role-org">Organisation or setting</label>
+        <input id="current-role-org" name="CURRENT_ROLE_ORG" type="text" maxlength="180">
+        <p class="field-help">Optional. A sector or setting is enough if the organisation name is private.</p>
+      </div>
+
+      <div class="field-grid two-column">
+        <div class="field-row">
+          <label for="current-role-start">When did this role start?</label>
+          <input id="current-role-start" name="CURRENT_ROLE_START" type="text" maxlength="40" placeholder="Approx. March 2024">
+        </div>
+        <div class="field-row">
+          <label for="current-role-end">When did it end?</label>
+          <input id="current-role-end" name="CURRENT_ROLE_END" type="text" maxlength="40" placeholder="Approx. July 2026">
+        </div>
+      </div>
+
+      <label class="checkbox-option standalone-checkbox">
+        <input id="current-role-current" name="CURRENT_ROLE_CURRENT" type="checkbox" value="yes">
+        <span>Still doing this role</span>
+      </label>
+
+      <div class="field-row">
+        <label for="current-role-likes">What do you like about your current or most recent work?</label>
+        <textarea id="current-role-likes" name="CURRENT_ROLE_LIKES" rows="4" maxlength="1200"></textarea>
+        <p class="field-help">Think about tasks, environment, people, pace, purpose or ways of working.</p>
+      </div>
+
+      <div class="field-row">
+        <label for="current-role-change">What would you like to change about your current or most recent work?</label>
+        <textarea id="current-role-change" name="CURRENT_ROLE_CHANGE" rows="4" maxlength="1200"></textarea>
+        <p class="field-help">You can mention tasks, environment, hours, pay, progression, travel, pressure or anything else that matters.</p>
+      </div>
+
+      <div class="information-panel">
+        <h3>Next build stage</h3>
+        <p>Work history and document upload come next. Uploads remain disabled until the private-file controls are built and tested.</p>
+      </div>
+
+      <div class="actions split">
+        <button class="button secondary" type="button" data-back="about">Back</button>
+        <button id="validate-current" class="button primary" type="button">Check this section</button>
       </div>
     </section>
   </main>
