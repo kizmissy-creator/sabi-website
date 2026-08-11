@@ -302,7 +302,7 @@
     originalLabel.hidden = true;
     const fieldset = document.createElement('fieldset');
     fieldset.className = 'tag-fieldset';
-    fieldset.innerHTML = `<legend>Roles or types of work you are considering <span>*</span></legend><p class="tag-help">Add one at a time. Type a role or kind of work, then press Enter or choose Add.</p><div class="tag-entry-row"><input id="broad-direction-entry" class="tag-entry-input" autocomplete="off" maxlength="120" placeholder="For example, administrator"><button type="button" class="tag-add-button">Add</button></div><ul id="broad-direction-tags" class="tag-list" aria-label="Roles or types of work added"></ul>`;
+    fieldset.innerHTML = `<legend>Roles or types of work you are considering <span>*</span></legend><p class="tag-help" id="broad-direction-help">Add one at a time. Type a role or kind of work, then press Enter or choose Add.</p><div class="tag-entry-row"><label class="visually-hidden" for="broad-direction-entry">Add a role or type of work</label><input id="broad-direction-entry" class="tag-entry-input" autocomplete="off" maxlength="120" placeholder="For example, administrator" aria-describedby="broad-direction-help" data-error-label="Roles or types of work you are considering"><button type="button" class="tag-add-button">Add</button></div><ul id="broad-direction-tags" class="tag-list" aria-label="Roles or types of work added" aria-live="polite"></ul>`;
     originalLabel.before(fieldset);
     broadDirectionTagInput = fieldset.querySelector('.tag-entry-input');
     fieldset.querySelector('.tag-add-button').addEventListener('click', addBroadDirectionTag);
@@ -560,14 +560,23 @@
     syncExperienceChoice();
   }
 
-  function showStep(index) {
+  function showStep(index, {focusHeading = true} = {}) {
     const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
     const activeItems = stepItems.filter(item => !item.matches('[data-conditional-step].hidden'));
     current = Math.max(0, Math.min(index, activeSteps.length - 1));
     steps.forEach(step => step.classList.remove('active'));
     activeSteps[current].classList.add('active');
     stepItems.forEach(item => item.classList.remove('active', 'done'));
-    activeItems.forEach((item, i) => { item.classList.toggle('active', i === current); item.classList.toggle('done', i < current); });
+    activeItems.forEach((item, i) => {
+      const isCurrent = i === current;
+      item.classList.toggle('active', isCurrent);
+      item.classList.toggle('done', i < current);
+      const button = item.querySelector('button');
+      if (button) {
+        if (isCurrent) button.setAttribute('aria-current', 'step');
+        else button.removeAttribute('aria-current');
+      }
+    });
     const eyebrow = activeSteps[current].querySelector(':scope > .eyebrow');
     if (eyebrow) eyebrow.textContent = `STEP ${current + 1}`;
     progressBar.style.width = `${((current + 1) / activeSteps.length) * 100}%`;
@@ -575,7 +584,9 @@
     previous.hidden = current === 0; next.hidden = current === activeSteps.length - 1;
     if (current === activeSteps.length - 1) buildReview();
     errorSummary.classList.add('hidden'); updateConditional(); scheduleSave();
-    document.querySelector('.form-shell').scrollIntoView({behavior:'smooth', block:'start'});
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector('.form-shell').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'start'});
+    if (focusHeading) activeSteps[current].querySelector('h2')?.focus({preventScroll:true});
   }
 
   stepItems.forEach((item, index) => {
@@ -591,33 +602,147 @@
     });
   });
 
-  function validateStep() {
+  function fieldErrorLabel(field) {
+    if (field.dataset.errorLabel) return field.dataset.errorLabel;
+    if (field.type === 'radio') {
+      const groupLegend = field.closest('fieldset')?.querySelector(':scope > legend');
+      const legendText = groupLegend?.childNodes[0]?.textContent?.trim().replace(/\s*\*$/, '');
+      if (legendText) return legendText;
+    }
+    const label = field.closest('label');
+    const firstText = [...(label?.childNodes || [])].find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    if (firstText) return firstText.textContent.trim().replace(/\s*\*$/, '');
+    const legend = field.closest('fieldset')?.querySelector(':scope > legend');
+    return legend?.childNodes[0]?.textContent?.trim().replace(/\s*\*$/, '') || 'Required answer';
+  }
+
+  function collectStepErrors(stepIndex) {
+    const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+    const step = activeSteps[stepIndex];
+    if (!step) return [];
+    const errors = [...step.querySelectorAll('[required]')]
+      .filter(field => !field.disabled && !field.checkValidity())
+      .map(field => ({label: fieldErrorLabel(field), target: field}));
+    step.querySelectorAll('[data-required-checkbox-group]').forEach(group => {
+      const name = group.dataset.requiredCheckboxGroup;
+      if (!group.querySelector(`input[name="${name}"]:checked`)) {
+        errors.push({label: group.dataset.errorLabel || 'Required choice', target: group});
+      }
+    });
+    return errors.filter((error, index, list) => list.findIndex(item => item.label === error.label) === index);
+  }
+
+  function showValidationErrors(errors) {
+    document.querySelectorAll('.invalid, .invalid-group').forEach(element => element.classList.remove('invalid', 'invalid-group'));
+    errors.forEach(error => error.target.classList.add(error.target.matches('fieldset') ? 'invalid-group' : 'invalid'));
+    errorSummary.replaceChildren();
+    const heading = document.createElement('strong');
+    heading.textContent = 'Please check this step.';
+    const explanation = document.createElement('p');
+    explanation.textContent = errors.length === 1 ? 'One required answer is missing or incomplete.' : `${errors.length} required answers are missing or incomplete.`;
+    const list = document.createElement('ul');
+    errors.forEach(error => {
+      const item = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = error.label;
+      button.addEventListener('click', () => {
+        const focusTarget = error.target.matches('fieldset') ? error.target.querySelector('input, select, textarea') : error.target;
+        focusTarget?.focus();
+      });
+      item.appendChild(button);
+      list.appendChild(item);
+    });
+    errorSummary.append(heading, explanation, list);
+    errorSummary.classList.remove('hidden');
+    errorSummary.focus();
+  }
+
+  function validateStep(stepIndex = current) {
+    addBroadDirectionTag();
+    const errors = collectStepErrors(stepIndex);
+    if (!errors.length) return true;
+    showValidationErrors(errors);
+    return false;
+  }
+
+  function validateAllSteps() {
     addBroadDirectionTag();
     const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
-    const fields = [...activeSteps[current].querySelectorAll('[required]')].filter(el => !el.disabled);
-    const invalid = fields.filter(el => !el.checkValidity());
-    document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
-    if (!invalid.length) return true;
-    invalid.forEach(el => el.classList.add('invalid'));
-    errorSummary.innerHTML = `<strong>Please check this step.</strong><br>${invalid.length === 1 ? 'One required answer is missing or incomplete.' : `${invalid.length} required answers are missing or incomplete.`}`;
-    errorSummary.classList.remove('hidden'); errorSummary.focus(); return false;
+    for (let index = 0; index < activeSteps.length; index++) {
+      const errors = collectStepErrors(index);
+      if (!errors.length) continue;
+      showStep(index, {focusHeading:false});
+      showValidationErrors(errors);
+      return false;
+    }
+    return true;
   }
 
   function buildReview() {
     const f = form.elements;
-    const text = value => value && String(value).trim() ? String(value).trim() : 'Not provided yet';
     const data = serialise().data;
-    const roles = data.employmentHistory.length ? data.employmentHistory.map(entry => [entry.jobTitle, entry.organisation].filter(Boolean).join(' at ') || entry.experienceType || 'Experience added').join('; ') : (document.getElementById('no-experience')?.checked ? 'No experience to add' : 'Not provided yet');
-    const values = [
-      ['Client', `${text(f.firstName.value)} ${text(f.lastName.value)}`], ['Email', text(f.email.value)],
-      ['Package', 'Bespoke Career Partner · £135'], ['Broad direction', text(f.broadDirection.value)],
-      ['Roles and experience', roles], ['Employment gaps', data.employmentGaps.length ? `${data.employmentGaps.length} added` : 'None added'], ['Qualifications added', String(data.qualifications.length)],
-      ['Things you do well', data.skills || data.achievementsSummary ? 'Added' : 'Not provided yet'], ['Preferred contact', text(f.preferredContact.value)],
-      ['Deadline', f.deadlineGate.value === 'yes' ? text(f.deadline.value) : (f.deadlineGate.value === 'no' ? 'No deadline' : (f.deadlineGate.value === 'not-sure' ? 'Not sure yet' : 'Not provided yet'))],
-      ['Files selected', [...form.querySelectorAll('input[type=file]')].filter(x => x.files.length).map(x => x.files[0].name).join(', ') || 'None'],
-      ['Voice answers', voiceRecordings.size ? `${voiceRecordings.size} recorded` : 'None']
+    const clean = value => value == null ? '' : String(value).trim();
+    const inputLabel = input => {
+      const label = input?.closest('label');
+      if (!label) return clean(input?.value);
+      const copy = label.cloneNode(true);
+      copy.querySelectorAll('input, select, textarea, small').forEach(element => element.remove());
+      return clean(copy.textContent).replace(/\s+/g, ' ');
+    };
+    const selectedLabels = name => [...form.querySelectorAll(`input[name="${name}"]:checked`)].map(inputLabel).join(', ');
+    const voiceAnswer = (field, written) => [clean(written), voiceRecordings.has(field) ? 'Voice answer recorded' : ''].filter(Boolean).join('\n');
+    const formatEntries = (entries, fields) => (entries || []).map((entry, index) => {
+      const details = fields.map(([key, label]) => clean(entry[key]) ? `${label}: ${entry[key]}` : '').filter(Boolean);
+      return details.length ? `${index + 1}. ${details.join('; ')}` : '';
+    }).filter(Boolean).join('\n');
+    const files = [...form.querySelectorAll('input[type=file]')].filter(input => input.files.length).map(input => input.files[0].name).join(', ');
+
+    const sections = [
+      {title:'About you', step:0, rows:[
+        ['Name', [clean(f.firstName.value), clean(f.lastName.value)].filter(Boolean).join(' ')],
+        ['Preferred name', f.preferredName.value], ['Pronouns', f.pronouns.value], ['Email', f.email.value],
+        ['Telephone', f.telephone.value], ['Preferred contact', selectedLabels('preferredContact')], ['Area', f.location.value]
+      ]},
+      {title:'Your situation', step:1, rows:[['Current situation', selectedLabels('currentSituation')]]},
+      {title:'Your experience', step:2, rows:[
+        ['Work and other experience', document.getElementById('no-experience')?.checked ? 'I do not have experience to add' : formatEntries(data.employmentHistory, [['experienceType','Type'],['jobTitle','Role or activity'],['organisation','Organisation or setting'],['startDate','Start'],['endDate','End'],['responsibilities','What I did'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])],
+        ['Employment gaps', formatEntries(data.employmentGaps, [['startDate','Start'],['endDate','End'],['reason','Reason']])],
+        ['Qualifications and training', formatEntries(data.qualifications, [['qualificationType','Type'],['subject','Subject or course'],['grade','Result or status'],['completionYear','Year'],['provider','Provider'],['expiry','Expiry or renewal']])]
+      ]},
+      {title:'What you bring', step:3, rows:[
+        ['Hobbies or interests', voiceAnswer('hobbies', f.hobbies.value)], ['Tasks that hold your attention', voiceAnswer('interests', f.interests.value)],
+        ['Caring responsibilities', voiceAnswer('caringStrengths', f.caringStrengths?.value)], ['What someone who knows you might say', voiceAnswer('skillsExamples', f.skillsExamples.value)],
+        ['Things you consider yourself good at', selectedLabels('strengthAttributes')], ['Something you feel pleased or proud about', voiceAnswer('proudOf', f.proudOf.value)]
+      ]},
+      {title:'What comes next', step:4, rows:[
+        ['Roles or types of work', f.broadDirection.value], ['Sectors or settings', f.targetSectors.value], ['Roles or settings to avoid', f.rolesToAvoid.value],
+        ['What matters most', selectedLabels('priorities')], ['Anything else that matters', f.priorityNotes.value], ['Working arrangements', selectedLabels('workplace')],
+        ['Hours or working patterns', selectedLabels('hours')], ['Other hours or pattern', f.hoursOther.value], ['Contract types', selectedLabels('contractTypes')],
+        ['Maximum commute or travel', f.travelLimit.value], ['Available from', f.availability.value], ['Pay needs or expectations', f.payNeeds.value]
+      ]},
+      {title:'Your job search', step:5, rows:[
+        ['Current stage', f.searchStage.value], ['Anything else about your search', f.searchStageNotes.value], ['Parts that feel hardest', selectedLabels('difficultParts')],
+        ['Something else that feels difficult', f.difficultPartsOther.value], ['Specific jobs or roles', formatEntries(data.exampleOpportunities, [['role','Role'],['organisation','Organisation'],['url','Link']])],
+        ['Deadline', selectedLabels('deadlineGate')], ['Deadline type', f.deadlineType.value], ['Deadline date', f.deadline.value], ['Deadline notes', f.deadlineNotes.value],
+        ['Application or supporting statement', selectedLabels('applicationDraft')], ['What would make the service successful', selectedLabels('successOutcomes')], ['Other successful outcome', f.successOutcomeOther.value]
+      ]},
+      {title:'Documents', step:6, rows:[['Files selected', files], ['Document link', f.documentUrl.value], ['Documents to send later', f.documentNotes.value]]},
+      {title:'Working together', step:7, rows:[
+        ['Accessibility consent', selectedLabels('specialCategoryConsent')], ['Accessibility or adjustment information', f.accessibilityNeeds.value],
+        ['Who you would like to discuss this with', selectedLabels('accessibilityDiscussion')], ['How we work together', f.workingPreferences.value], ['Anyone else involved', selectedLabels('supporter')]
+      ]}
     ];
-    document.getElementById('review-summary').innerHTML = `<dl>${values.map(([k,v]) => `<div><dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd></div>`).join('')}</dl>`;
+
+    const review = document.getElementById('review-summary');
+    review.innerHTML = sections.map((section, index) => {
+      const rows = section.rows.filter(([, value]) => clean(value));
+      const body = rows.length
+        ? `<dl>${rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(clean(value))}</dd></div>`).join('')}</dl>`
+        : '<p class="review-empty">No optional answers added on this page.</p>';
+      return `<details class="review-section"${index === 0 ? ' open' : ''}><summary><span>${escapeHtml(section.title)}</span><small>Open to check</small></summary>${body}<button type="button" class="review-edit" data-review-step="${section.step}">Edit this section</button></details>`;
+    }).join('');
+    review.querySelectorAll('[data-review-step]').forEach(button => button.addEventListener('click', () => showStep(Number(button.dataset.reviewStep))));
   }
 
   const escapeHtml = value => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -646,6 +771,8 @@
   }
 
   form.addEventListener('input', event => {
+    event.target.classList?.remove('invalid');
+    if (event.target.name === 'currentSituation') event.target.closest('[data-required-checkbox-group]')?.classList.remove('invalid-group');
     if (event.target.name === 'hours' && event.target.checked) {
       const noPreference = form.querySelector('input[name="hours"][value="no-preference"]');
       if (event.target.value === 'no-preference') form.querySelectorAll('input[name="hours"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
@@ -686,7 +813,7 @@
   document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); broadDirectionTags = []; if (broadDirectionTagInput) broadDirectionTagInput.value = ''; renderBroadDirectionTags(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
-    event.preventDefault(); if (!validateStep()) return;
+    event.preventDefault(); if (!validateAllSteps()) return;
     const button = form.querySelector('[type=submit]'); const message = document.getElementById('submit-message');
     if (!config.endpoint) { message.textContent = 'The secure submission connection is not live yet. Your answers remain saved on this device; please do not send real documents until SABI confirms the page is ready.'; message.classList.remove('hidden'); message.focus(); return; }
     button.disabled = true; button.textContent = 'Sending securely…';
@@ -708,5 +835,5 @@
   createVoiceControls();
   setupBroadDirectionTags();
   restoreVoiceRecordings();
-  restore(); loadBroadDirectionTags(); updateConditional(); showStep(current);
+  restore(); loadBroadDirectionTags(); updateConditional(); showStep(current, {focusHeading:false});
 })();

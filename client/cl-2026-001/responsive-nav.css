@@ -50,8 +50,12 @@
     overflow: auto;
   }
 
-  .save-state,
-  .progress-panel .text-button {
+  .save-state {
     display: none;
+  }
+
+  .draft-options {
+    margin-top: .55rem;
+    padding-top: .5rem;
   }
 }

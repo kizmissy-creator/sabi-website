@@ -47,12 +47,28 @@
 
 .choice:has(input:checked) {
   background: #fff8dc;
-  border-color: #d3a619;
+  border-color: #8a6800;
   color: var(--ink);
 }
 
 .choice input {
   accent-color: #b98900;
+}
+
+input:not([type="radio"]):not([type="checkbox"]),
+select,
+textarea {
+  border-color: #647c7a;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #765a00;
+  outline-offset: 2px;
 }
 
 form {
@@ -309,6 +325,150 @@ legend small {
   .repeat-card {
     padding: .85rem;
   }
+}
+
+.required-note {
+  margin: -.55rem 0 1rem;
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+.required-note span {
+  color: var(--error);
+  font-weight: 800;
+}
+
+.invalid-group > legend {
+  color: var(--error);
+}
+
+.invalid-group > .choice-grid {
+  outline: 2px solid var(--error);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.error-summary p {
+  margin: .25rem 0 .5rem;
+}
+
+.error-summary ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.error-summary button {
+  padding: .1rem 0;
+  border: 0;
+  background: transparent;
+  color: #731d1d;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: .16em;
+  cursor: pointer;
+}
+
+.draft-options {
+  margin-top: .75rem;
+  border-top: 1px solid var(--line);
+  padding-top: .65rem;
+}
+
+.draft-options summary {
+  color: var(--teal-dark);
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.draft-options > div {
+  padding-top: .35rem;
+}
+
+.draft-options p {
+  margin: .35rem 0 0;
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.4;
+}
+
+.review-summary {
+  padding: 0;
+  border-left: 0;
+  background: transparent;
+}
+
+.review-section {
+  margin: .7rem 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.review-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem 1rem;
+  color: var(--teal-dark);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.review-section > summary small {
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.review-section[open] > summary {
+  border-bottom: 1px solid var(--line);
+  background: var(--teal-soft);
+}
+
+.review-section dl {
+  padding: .35rem 1rem;
+}
+
+.review-section dd {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.review-empty {
+  margin: 0;
+  padding: 1rem;
+  color: var(--muted);
+}
+
+.review-edit {
+  margin: 0 1rem 1rem;
+  padding: .45rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--teal-dark);
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+  cursor: pointer;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .voice-answer {

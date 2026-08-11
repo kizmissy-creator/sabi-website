@@ -151,6 +151,8 @@ function validate_(input) {
   verifySubmissionToken_(input.submissionToken, input);
   if (!clean_(input.firstName, 120) || !clean_(input.lastName, 120)) throw new Error('Name required.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input.email || ''))) throw new Error('Email required.');
+  if (!['email', 'whatsapp', 'phone', 'video'].includes(String(input.preferredContact || ''))) throw new Error('Preferred contact required.');
+  if (!Array.isArray(input.currentSituation) || !input.currentSituation.length) throw new Error('Current situation required.');
   if (input.ageEligible !== 'yes') throw new Error('Age eligibility required.');
   if (!clean_(input.broadDirection, 5000)) throw new Error('Broad direction required.');
   if (!includesYes_(input.clientDeclaration)) throw new Error('Client declaration missing.');

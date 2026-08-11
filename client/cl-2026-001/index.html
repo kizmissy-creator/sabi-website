@@ -16,7 +16,7 @@
   <script src="./onboarding.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to the form</a>
+  <a class="skip-link" href="#onboarding-form">Skip to the form</a>
   <header class="site-header">
     <div class="header-inner">
       <div class="brand" aria-label="SABI">
@@ -51,7 +51,7 @@
       </aside>
     </section>
 
-    <section class="form-shell" aria-labelledby="form-title">
+    <section class="form-shell" aria-label="Career Partner onboarding form">
       <aside class="progress-panel">
         <p class="eyebrow">YOUR PROGRESS</p>
         <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
@@ -61,8 +61,14 @@
           <li class="active"><button type="button" data-go-to-step="0">About you</button></li><li><button type="button" data-go-to-step="1">Your situation</button></li><li><button type="button" data-go-to-step="2">Your experience</button></li><li><button type="button" data-go-to-step="3">What you bring</button></li><li><button type="button" data-go-to-step="4">What comes next</button></li><li><button type="button" data-go-to-step="5">Your job search</button></li><li><button type="button" data-go-to-step="6">Documents</button></li><li><button type="button" data-go-to-step="7">Working together</button></li><li><button type="button" data-go-to-step="8">Review and send</button></li>
         </ol>
         <p class="save-state" id="save-state" aria-live="polite">Ready to save</p>
-        <button class="text-button" id="download-draft" type="button">Download a backup</button>
-        <button class="text-button danger" id="clear-draft" type="button">Clear saved answers</button>
+        <details class="draft-options">
+          <summary>Saved-answer options</summary>
+          <div>
+            <button class="text-button" id="download-draft" type="button">Download a backup</button>
+            <button class="text-button danger" id="clear-draft" type="button">Clear saved answers</button>
+            <p>Clear saved answers when using a shared device.</p>
+          </div>
+        </details>
       </aside>
 
       <form id="onboarding-form" novalidate>
@@ -74,22 +80,22 @@
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
 
         <section class="form-step compact-details active" data-step="0">
-          <p class="eyebrow">STEP 1</p><h2 id="form-title">About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p>
+          <p class="eyebrow">STEP 1</p><h2 id="form-title" tabindex="-1">About you</h2><p class="intro">The basics, including how you would like me to address and contact you.</p><p class="required-note"><span aria-hidden="true">*</span> means this answer is required.</p>
           <div class="grid two"><label>First name <span>*</span><input name="firstName" autocomplete="given-name" required></label><label>Last name <span>*</span><input name="lastName" autocomplete="family-name" required></label></div>
           <div class="grid two"><label>Preferred name <small>Optional</small><input name="preferredName" autocomplete="nickname"></label><label>Pronouns <small>Optional</small><input name="pronouns"></label></div>
           <div class="grid contact-row"><label>Email address <span>*</span><input type="email" name="email" autocomplete="email" required></label><label>Telephone number <small>Optional</small><input type="tel" name="telephone" autocomplete="tel"></label></div>
-          <fieldset class="compact-choices"><legend>How would you usually like me to contact you? <span>*</span></legend><label class="choice"><input type="radio" name="preferredContact" value="email" required> Email</label><label class="choice"><input type="radio" name="preferredContact" value="whatsapp"> WhatsApp</label><label class="choice"><input type="radio" name="preferredContact" value="phone"> Telephone</label><label class="choice"><input type="radio" name="preferredContact" value="video"> Video call</label></fieldset>
+          <fieldset class="compact-choices"><legend>How would you prefer SABI to contact you? <span>*</span></legend><label class="choice"><input type="radio" name="preferredContact" value="email" required> Email</label><label class="choice"><input type="radio" name="preferredContact" value="whatsapp"> WhatsApp</label><label class="choice"><input type="radio" name="preferredContact" value="phone"> Telephone</label><label class="choice"><input type="radio" name="preferredContact" value="video"> Video call</label></fieldset>
           <label class="field-medium">Town, city or postcode area <small>Optional — no full address needed</small><input name="location"></label>
           <p class="form-privacy">SABI uses these details and your answers to deliver your confirmed Career Partner package.</p>
         </section>
 
         <section class="form-step" data-step="1">
-          <p class="eyebrow">STEP 2</p><h2>Your situation now</h2><p class="intro">Tell me what best describes where you are now.</p>
-          <fieldset><legend>Which of these describe your current situation? <span>*</span></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="currentSituation" value="employed"> Employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="self-employed"> Self-employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="not-working"> Not currently working</label><label class="choice"><input type="checkbox" name="currentSituation" value="first-job"> Looking for my first job</label><label class="choice"><input type="checkbox" name="currentSituation" value="education"> Studying or training</label><label class="choice"><input type="checkbox" name="currentSituation" value="caring"> Caring responsibilities</label><label class="choice"><input type="checkbox" name="currentSituation" value="redundancy"> At risk of or recently made redundant</label><label class="choice"><input type="checkbox" name="currentSituation" value="leave"> On parental, sickness or other leave</label><label class="choice"><input type="checkbox" name="currentSituation" value="returning"> Returning after a break</label><label class="choice choice-accessibility"><input type="checkbox" name="currentSituation" value="accessibility"><div>I would like to share accessibility, disability or workplace-adjustment needs with SABI<small>This is optional. You do not need a diagnosis or formal label, and you can decide what you want SABI or a current or future employer to know.</small></div></label></div></fieldset>
+          <p class="eyebrow">STEP 2</p><h2 tabindex="-1">Your situation now</h2><p class="intro">Tell me what best describes where you are now.</p>
+          <fieldset data-required-checkbox-group="currentSituation" data-error-label="Current situation"><legend>Which of these describe your current situation? <span>*</span><small>Choose all that apply. For example, you can be employed and also have caring responsibilities.</small></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="currentSituation" value="employed"> Employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="self-employed"> Self-employed</label><label class="choice"><input type="checkbox" name="currentSituation" value="not-working"> Not currently working</label><label class="choice"><input type="checkbox" name="currentSituation" value="first-job"> Looking for my first job</label><label class="choice"><input type="checkbox" name="currentSituation" value="education"> Studying or training</label><label class="choice"><input type="checkbox" name="currentSituation" value="caring"> Caring responsibilities</label><label class="choice"><input type="checkbox" name="currentSituation" value="redundancy"> At risk of or recently made redundant</label><label class="choice"><input type="checkbox" name="currentSituation" value="leave"> On parental, sickness or other leave</label><label class="choice"><input type="checkbox" name="currentSituation" value="returning"> Returning after a break</label><label class="choice choice-accessibility"><input type="checkbox" name="currentSituation" value="accessibility"><div>I would like to share accessibility, disability or workplace-adjustment needs with SABI<small>This is optional. You do not need a diagnosis or formal label, and you can decide what you want SABI or a current or future employer to know.</small></div></label></div></fieldset>
         </section>
 
         <section class="form-step" data-step="2">
-          <p class="eyebrow">STEP 3</p><h2>Your experience</h2><p class="intro">Add any paid work, self-employment, volunteering, placements, education or other relevant experience.</p>
+          <p class="eyebrow">STEP 3</p><h2 tabindex="-1">Your experience</h2><p class="intro">Add any paid work, self-employment, volunteering, placements, education or other relevant experience.</p>
           <div class="question-group">
             <div class="group-heading"><div><h3>Work and other experience</h3><p>Add employment, self-employment, volunteering, placements or other relevant experience separately.</p></div></div>
             <label class="choice none-choice"><input type="checkbox" name="noExperience" value="yes" id="no-experience"> I have no experience to add</label>
@@ -103,7 +109,7 @@
         </section>
 
         <section class="form-step" data-step="3">
-          <p class="eyebrow">STEP 4</p><h2>What you bring</h2><p class="intro">This is about the qualities, abilities and interests you bring from every part of your life. Your answers do not need to be related to work. Personal interests, hobbies and everyday activities are especially useful. Only share things you are comfortable having considered as part of your career support. Every question on this page is optional, and it is fine if you are not sure yet.</p>
+          <p class="eyebrow">STEP 4</p><h2 tabindex="-1">What you bring</h2><p class="intro">This is about the qualities, abilities and interests you bring from every part of your life. Your answers do not need to be related to work. Personal interests, hobbies and everyday activities are especially useful. Only share things you are comfortable having considered as part of your career support. Every question on this page is optional, and it is fine if you are not sure yet.</p>
           <div class="question-group prompt-card"><label>What hobbies or interests would you like to tell me about? <small>Anything is useful, and it does not need to sound impressive or relate to work. Talents and strengths can be hidden in the things we enjoy or do naturally. Only share what you want me to consider.</small><textarea name="hobbies" rows="3"></textarea></label><details class="prompt-help"><summary>See some example answers</summary><p><strong>Example:</strong> “I enjoy cooking and trying new recipes. I like planning what I need, changing recipes to suit different people and seeing everything come together.”</p><p><strong>Another example:</strong> “I spend a lot of time gaming. I especially enjoy games where I have to solve problems, plan ahead or work with other players.”</p></details></div>
           <div class="question-group prompt-card"><label>What kinds of tasks keep you focused or hold your attention? <small>This helps me understand the kind of work, pace and environment that may suit you. Think about what you can become absorbed in, choose to return to or find easier to continue with.</small><textarea name="interests" rows="3"></textarea></label><details class="prompt-help"><summary>See some example answers</summary><p><strong>Example:</strong> “I can stay focused when I am organising information or trying to work out why something is not working. I like having a clear problem to solve.”</p><p><strong>Another example:</strong> “I hold my attention better when I am helping someone directly or making something they can use. I prefer practical tasks where I can see progress.”</p></details></div>
           <div id="caring-strengths" class="question-group prompt-card conditional hidden"><label>If you are comfortable, tell me briefly about any caring responsibilities you have had. <small>Caring can involve valuable practical and people skills. This question does not assume that caring affects whether or when you can work. You do not need to share private details, identify anyone or find strengths if none come to mind.</small><textarea name="caringStrengths" rows="4" disabled></textarea></label><details class="prompt-help"><summary>See some example answers</summary><p><strong>Example:</strong> “I have cared for my children while managing appointments, school routines and the household. It has made me organised, patient and used to changing plans when something unexpected happens.”</p><p><strong>Another example:</strong> “I have helped a relative with appointments and everyday tasks. I learned how to explain things clearly, speak up when they needed support and stay calm when plans changed.”</p></details></div>
@@ -113,7 +119,7 @@
         </section>
 
         <section class="form-step" data-step="4">
-          <p class="eyebrow">STEP 5</p><h2>What comes next</h2>
+          <p class="eyebrow">STEP 5</p><h2 tabindex="-1">What comes next</h2>
           <label>Roles or types of work you are considering <span>*</span><textarea name="broadDirection" rows="3" required placeholder="List role titles or types of work. It is fine to be unsure."></textarea></label>
           <div class="grid two"><label>Sectors or settings that interest you <small>Optional</small><input name="targetSectors"></label><label>Roles or settings you want to avoid <small>Optional</small><input name="rolesToAvoid"></label></div>
           <fieldset><legend>What matters most in your next role?</legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="priorities" value="pay"> Pay</label><label class="choice"><input type="checkbox" name="priorities" value="meaning"> Meaning or purpose</label><label class="choice"><input type="checkbox" name="priorities" value="stability"> Stability</label><label class="choice"><input type="checkbox" name="priorities" value="progression"> Progression</label><label class="choice"><input type="checkbox" name="priorities" value="flexibility"> Flexibility</label><label class="choice"><input type="checkbox" name="priorities" value="environment"> Working environment</label><label class="choice"><input type="checkbox" name="priorities" value="hours"> Hours</label><label class="choice"><input type="checkbox" name="priorities" value="location"> Location</label></div></fieldset>
@@ -127,7 +133,7 @@
         </section>
 
         <section class="form-step" data-step="5">
-          <p class="eyebrow">STEP 6</p><h2>Your job search</h2>
+          <p class="eyebrow">STEP 6</p><h2 tabindex="-1">Your job search</h2>
           <label>Where are you in your job search now?<select name="searchStage"><option value="">Choose the closest answer</option><option>Exploring possibilities</option><option>Ready to start searching</option><option>Actively searching</option><option>Applying</option><option>Interviewing</option><option>Pausing for now</option></select></label>
           <label>Is there anything else you want to tell me about where you are now or how your job search is going? <small>Optional</small><textarea name="searchStageNotes" rows="3"></textarea></label>
           <fieldset><legend>Which parts of searching or applying feel hardest? <small>Choose any that fit</small></legend><div class="choice-grid"><label class="choice"><input type="checkbox" name="difficultParts" value="meeting-requirements"> Knowing whether I meet the requirements</label><label class="choice"><input type="checkbox" name="difficultParts" value="applications"> Completing application forms or supporting statements</label><label class="choice"><input type="checkbox" name="difficultParts" value="describing-myself"> Describing my experience and what I am good at</label><label class="choice"><input type="checkbox" name="difficultParts" value="organisation"> Keeping track of applications and deadlines</label><label class="choice"><input type="checkbox" name="difficultParts" value="finding-vacancies"> Finding suitable vacancies</label><label class="choice"><input type="checkbox" name="difficultParts" value="understanding-adverts"> Understanding job adverts</label><label class="choice"><input type="checkbox" name="difficultParts" value="tailoring-cv"> Tailoring my CV</label><label class="choice"><input type="checkbox" name="difficultParts" value="cover-letters"> Writing cover letters</label><label class="choice"><input type="checkbox" name="difficultParts" value="confidence"> Confidence or motivation</label><label class="choice"><input type="checkbox" name="difficultParts" value="responses"> No response or handling rejection</label><label class="choice"><input type="checkbox" name="difficultParts" value="interviews"> Interviews</label><label class="choice"><input type="checkbox" name="difficultParts" value="assessments"> Tests or assessments</label><label class="choice"><input type="checkbox" name="difficultParts" value="not-sure"> I am not sure yet</label><label class="choice"><input type="checkbox" name="difficultParts" value="other"> Something else</label></div></fieldset>
@@ -140,7 +146,7 @@
         </section>
 
         <section class="form-step" data-step="6">
-          <p class="eyebrow">STEP 7</p><h2>Documents</h2><p class="intro">Upload only documents that are relevant. You can also paste a link or explain what you will send later.</p>
+          <p class="eyebrow">STEP 7</p><h2 tabindex="-1">Documents</h2><p class="intro">Upload only documents that are relevant. You can also paste a link or explain what you will send later.</p>
           <label>Existing CV or work-history document <small>Optional · PDF, Word or text · 8 MB maximum</small><input type="file" name="existingCv" accept=".pdf,.doc,.docx,.txt"></label>
           <label>Vacancy advert, job description or person specification <small>Optional · 8 MB maximum</small><input type="file" name="vacancyDocument" accept=".pdf,.doc,.docx,.txt"></label>
           <label>Application draft <small>Optional · 8 MB maximum</small><input type="file" name="applicationDocument" accept=".pdf,.doc,.docx,.txt"></label>
@@ -150,7 +156,7 @@
         </section>
 
         <section class="form-step" data-step="7">
-          <p class="eyebrow">STEP 8</p><h2>Working together</h2>
+          <p class="eyebrow">STEP 8</p><h2 tabindex="-1">Working together</h2>
           <div class="info-box"><h3>What happens after you send this form</h3><ol><li>I will review and work through the information you have shared.</li><li>If I need anything else, I will send follow-up questions in a form. You can reply through the form or through WhatsApp messages or voice notes, whichever is most practical. This gives us both a clear record of what you have shared.</li><li>I will research and write up suitable roles and career directions you could consider.</li><li>You can then have an optional short phone or video call to discuss the findings, explore anything in more detail and agree what your CVs should be aimed towards. If you do not want a call, we can cover this in writing or voice notes instead.</li></ol></div>
           <div id="accessibility-details" class="question-group conditional hidden"><h3>Accessibility, disability and workplace adjustments</h3><p>Only complete this if you want to. You do not need to name a diagnosis. You can tell me what you would like considered during your career support, in applications or in conversations with an employer.</p><label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes" disabled> I consent to SABI using any health, disability or neurodivergence information I choose to provide for the purpose of adapting and delivering my career support. These questions are optional, I do not need to name a diagnosis, and I can withdraw my consent at any time.</label><label>Is there anything about accessibility, disability, health or workplace adjustments you would like me to know? <small>You can include anything you would like considered in your career support, applications or conversations with an employer. Optional.</small><textarea name="accessibilityNeeds" rows="5" data-accessibility-detail disabled></textarea></label><fieldset><legend>Who would you like to discuss your needs or possible adjustments with?</legend><label class="choice"><input type="radio" name="accessibilityDiscussion" value="sabi" data-accessibility-detail disabled> SABI</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="employer" data-accessibility-detail disabled> A current or potential employer</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="both" data-accessibility-detail disabled> Both</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-sure" data-accessibility-detail disabled> I am not sure yet</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-now" data-accessibility-detail disabled> I would prefer not to discuss this now</label></fieldset></div>
           <label>Is there anything else you would like me to know about how we work together? <small>Optional</small><textarea name="workingPreferences" rows="4"></textarea></label>
@@ -158,7 +164,7 @@
         </section>
 
         <section class="form-step" data-step="8">
-          <p class="eyebrow">STEP 9</p><h2>Review and send</h2><p class="intro">Check the summary below. You can go back to change anything; your detailed answers are included with the final submission.</p>
+          <p class="eyebrow">STEP 9</p><h2 tabindex="-1">Review and send</h2><p class="intro">Open each section below to check your answers. Use Edit this section if you need to change anything.</p>
           <div id="review-summary" class="review-summary"></div>
           <div class="privacy-note"><strong>Privacy reminder</strong><p>SABI will use this information to assess and deliver your Career Partner support and keep the records needed to manage the service. Optional sensitive information is used only where you have explicitly consented.</p></div>
           <label class="choice consent"><input type="checkbox" name="termsAccepted" required value="yes"> I have read and agree to the SABI Career Support Terms and the Service Schedule for this purchase. <span>*</span></label>
