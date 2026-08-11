@@ -7,6 +7,13 @@ function base64UrlDecode(value) {
   return atob(padded);
 }
 
+function base64UrlEncode(value) {
+  return btoa(value)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
 function bytes(value) {
   return new TextEncoder().encode(value);
 }
@@ -58,10 +65,31 @@ export default async function clientAuth(request, context) {
       Number.isFinite(previewExpiresAt) &&
       Date.now() < previewExpiresAt;
 
-    if (isWorkingPreview) return;
-
     const secret = Netlify.env.get("BRONAGH_ACCESS_SECRET");
     if (!secret) return denied();
+
+    if (isWorkingPreview) {
+      const expires = Math.min(
+        Math.floor(previewExpiresAt / 1000),
+        Math.floor(Date.now() / 1000) + 24 * 60 * 60
+      );
+      const payload = `${CLIENT_REFERENCE}.cs_preview.${expires}`;
+      const encodedPayload = base64UrlEncode(payload);
+      const signature = await hmac(secret, payload);
+
+      context.cookies.set({
+        name: COOKIE_NAME,
+        value: `${encodedPayload}.${signature}`,
+        path: "/",
+        secure: true,
+        httpOnly: true,
+        sameSite: "Strict",
+        expires: new Date(expires * 1000)
+      });
+
+      url.searchParams.delete("preview_access");
+      return Response.redirect(url, 302);
+    }
 
     const token = context.cookies.get(COOKIE_NAME) || "";
     const parts = token.split(".");
