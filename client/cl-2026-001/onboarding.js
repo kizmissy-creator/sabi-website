@@ -399,12 +399,6 @@
       else field.value = value || '';
     });
     if (name === 'qualifications') syncQualificationCard(card, values.grade || '');
-    const qualificationHeading = card.querySelector('[data-qualification-heading]');
-    if (name === 'qualifications' && options.highlight && values.subject) {
-      card.classList.add('quick-qualification-card');
-      qualificationHeading.textContent = `${values.subject} qualification`;
-      qualificationHeading.hidden = false;
-    }
     if (options.prepend) container.prepend(card);
     else container.appendChild(card);
     renumberEntries(name);
@@ -501,7 +495,7 @@
     const results = typeField.value ? details.options : [];
     if (gradeLabel) gradeLabel.textContent = typeField.value ? details.label : 'Grade, result or status';
     gradeField.disabled = !typeField.value;
-    gradeField.innerHTML = `<option value="">${typeField.value ? details.prompt : 'Choose qualification type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
+    gradeField.innerHTML = `<option value="">${typeField.value ? details.prompt : 'Choose the type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
     gradeField.value = results.includes(currentGrade) ? currentGrade : '';
     const showExpiry = renewableQualificationTypes.has(typeField.value);
     expiryGroup?.classList.toggle('hidden', !showExpiry);
@@ -886,13 +880,9 @@
   });
   form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
   document.querySelectorAll('[data-add-entry]').forEach(button => button.addEventListener('click', () => {
-    const qualificationSubject = button.dataset.qualificationSubject;
-    const addedCard = addEntry(button.dataset.addEntry, qualificationSubject ? {subject: qualificationSubject} : {}, {prepend: Boolean(qualificationSubject), highlight: Boolean(qualificationSubject)});
-    if (qualificationSubject) {
-      const unavailableValue = qualificationSubject === 'English' ? 'No current English Level 2 equivalent' : 'No current maths Level 2 equivalent';
-      const unavailableChoice = form.querySelector(`input[name="englishMathsStatus"][value="${unavailableValue}"]`);
-      if (unavailableChoice) unavailableChoice.checked = false;
-      addedCard?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+    const addedCard = addEntry(button.dataset.addEntry);
+    if (button.dataset.addEntry === 'qualifications') {
+      addedCard?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest'});
       addedCard?.querySelector('[data-repeat-field="qualificationType"]')?.focus({preventScroll: true});
     }
     scheduleSave();

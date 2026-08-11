@@ -207,24 +207,46 @@ legend small {
   margin-top: .65rem;
 }
 
-.qualification-shortcuts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .55rem;
+.qualification-actions {
   margin-top: 1rem;
 }
 
-.qualification-shortcuts .add-button {
-  padding: .7rem .8rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  text-align: left;
-  text-decoration: none;
-  background: #fff;
+.qualification-actions .add-button {
+  display: inline-flex;
+  align-items: center;
 }
 
-.qualification-shortcuts .add-button:last-child {
-  grid-column: 1 / -1;
+.qualification-empty-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  width: fit-content;
+  margin-top: .9rem;
+  color: var(--muted);
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qualification-empty-choice input {
+  flex: 0 0 auto;
+  margin-top: .12rem;
+}
+
+.qualification-card {
+  border-left: 4px solid var(--yellow);
+  background: #fffef8;
+}
+
+.qualification-card-label {
+  color: var(--teal-dark);
+  font-family: var(--heading-font);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.qualification-primary-fields {
+  grid-template-columns: minmax(12rem, .8fr) minmax(16rem, 1.2fr);
 }
 
 .qualification-status {
@@ -259,15 +281,6 @@ legend small {
   padding: .4rem .15rem;
   border: 0;
   background: transparent;
-}
-
-.quick-qualification-card {
-  border-left: 4px solid var(--yellow);
-  background: #fffef8;
-}
-
-.qualification-card-heading:has(h4[hidden]) {
-  justify-content: flex-end;
 }
 
 .question-group > h3,
@@ -473,12 +486,8 @@ legend small {
     padding: .85rem;
   }
 
-  .qualification-shortcuts {
+  .qualification-primary-fields {
     grid-template-columns: 1fr;
-  }
-
-  .qualification-shortcuts .add-button:last-child {
-    grid-column: auto;
   }
 }
 
