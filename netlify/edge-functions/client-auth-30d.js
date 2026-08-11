@@ -1,6 +1,6 @@
 const COOKIE_NAME = "sabi_client_access";
 const CLIENT_REFERENCE = "CL-2026-001";
-const PREVIEW_HOST = "deploy-preview-2--celadon-melomakarona-a77f9d.netlify.app";
+const PREVIEW_HOST = "deploy-preview-2--sabi-bronagh-onboarding.netlify.app";
 
 function base64UrlDecode(value) {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
