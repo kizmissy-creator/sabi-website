@@ -47,7 +47,7 @@
       legend: 'Roles or types of work you are considering',
       help: 'Add one idea at a time. It is fine to be unsure or to add broad ideas rather than exact job titles.',
       placeholder: 'For example, administrator',
-      required: true
+      required: false
     },
     {
       name: 'targetSectors',
@@ -612,9 +612,9 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
-    const gapSituationSelected = situations.includes('employment-gap');
-    const gapRepeater = document.querySelector('[data-repeater="employmentGaps"]');
-    if (gapSituationSelected && gapRepeater && !gapRepeater.children.length) addEntry('employmentGaps');
+    const gapSituationSelected = ['employment-gap', 'returning', 'not-working', 'redundancy', 'leave'].some(value => situations.includes(value));
+    const gapSection = document.getElementById('employment-gap-section');
+    const gapSectionWasHidden = gapSection?.classList.contains('hidden');
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
@@ -636,6 +636,7 @@
     progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
     progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
     setConditional('employment-gap-section', gapSituationSelected);
+    if (gapSituationSelected && gapSectionWasHidden && gapSection) gapSection.open = false;
     setConditional('caring-strengths', situations.includes('caring'));
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));

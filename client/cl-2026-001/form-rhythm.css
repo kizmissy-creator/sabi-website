@@ -216,7 +216,7 @@ legend small {
   align-items: center;
 }
 
-.qualification-none-choice {
+.none-entry-choice {
   display: flex;
   align-items: flex-start;
   gap: .65rem;
@@ -231,11 +231,11 @@ legend small {
   cursor: pointer;
 }
 
-.qualification-none-choice:has(input:checked) {
+.none-entry-choice:has(input:checked) {
   background: #fff5cf;
 }
 
-.qualification-none-choice input {
+.none-entry-choice input {
   flex: 0 0 auto;
   margin-top: .12rem;
 }
@@ -319,6 +319,44 @@ legend small {
 
 .preference-details-body > p:first-child {
   color: var(--muted);
+}
+
+.employment-gap-details,
+.practical-preferences-details {
+  border-left: 4px solid var(--yellow);
+  background: #fff;
+}
+
+.employment-gap-details > summary,
+.practical-preferences-details > summary {
+  color: var(--teal-dark);
+  background: #fffdf5;
+}
+
+.practical-preferences-details .preference-details-body {
+  display: grid;
+  gap: .8rem;
+  padding: 1rem;
+  background: #f8fbfb;
+}
+
+.preference-question {
+  padding: .2rem 1rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.preference-question fieldset,
+.preference-question > label,
+.preference-question .grid > label {
+  margin-top: .9rem;
+  margin-bottom: .65rem;
+}
+
+.practical-preferences-details .choice:has(input:checked) {
+  border-color: #d1ad38;
+  background: #fff5cf;
 }
 
 .opportunity-details {
@@ -450,6 +488,22 @@ legend small {
 
 .add-button {
   padding: .65rem 0;
+}
+
+.add-button.primary-add-action {
+  display: inline-flex;
+  align-items: center;
+  margin: .9rem 0 .35rem;
+  padding: .68rem .95rem;
+  border: 1px solid #d1ad38;
+  border-radius: 9px;
+  background: var(--yellow);
+  color: var(--teal-dark);
+  text-decoration: none;
+}
+
+.add-button.primary-add-action:hover {
+  background: #f6d66d;
 }
 
 .inline-choice {
