@@ -216,6 +216,30 @@ legend small {
   align-items: center;
 }
 
+.qualification-none-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  width: fit-content;
+  margin-top: .9rem;
+  padding: .6rem .75rem;
+  border-radius: 9px;
+  background: #f5f9f9;
+  color: var(--teal-dark);
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.qualification-none-choice:has(input:checked) {
+  background: #fff5cf;
+}
+
+.qualification-none-choice input {
+  flex: 0 0 auto;
+  margin-top: .12rem;
+}
+
 .qualification-card {
   border-left: 4px solid var(--yellow);
   background: #fffef8;
