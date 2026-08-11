@@ -1,19 +1,16 @@
 /* A task-focused rhythm: compact controls, clear grouping, room where writing needs it. */
 body {
-  background: #fbfaf4;
+  background: #f5fdfd;
 }
 
 .form-step > h2 {
   width: fit-content;
-  margin-left: -.08em;
-  padding: 0 .08em .06em;
-  background: linear-gradient(
-    to bottom,
-    transparent 69%,
-    rgba(242, 201, 76, .34) 69%,
-    rgba(242, 201, 76, .34) 91%,
-    transparent 91%
-  );
+  margin: .2rem 0 1rem;
+  padding: 0 0 0 .65rem;
+  border-left: 4px solid var(--yellow);
+  background: transparent;
+  font-size: clamp(2rem, 3.7vw, 2.75rem);
+  line-height: 1.08;
 }
 
 .form-shell {
@@ -205,24 +202,11 @@ legend small {
 }
 
 .question-group {
-  position: relative;
-  overflow: hidden;
   margin: 1.5rem 0;
   padding: 1.15rem;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 18px;
   background: #f9fcfc;
-}
-
-.question-group:not(.opportunity-card)::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 1.15rem;
-  width: 2.8rem;
-  height: 3px;
-  border-radius: 0 0 4px 4px;
-  background: rgba(242, 201, 76, .72);
 }
 
 .form-step[data-step="2"] .question-group {
@@ -548,6 +532,18 @@ legend small {
 
 .price {
   font-size: 2.25rem;
+}
+
+@media (min-width: 851px) {
+  .hero {
+    gap: 3rem;
+    padding-top: 3.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(3.3rem, 5vw, 4.5rem);
+  }
 }
 
 @media (max-width: 850px) {
