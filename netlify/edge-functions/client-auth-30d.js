@@ -59,9 +59,8 @@ export default async function clientAuth(request, context) {
     const previewExpiresAt = Date.parse(Netlify.env.get("BRONAGH_PREVIEW_EXPIRES_AT") || "");
     const isWorkingPreview =
       url.hostname === PREVIEW_HOST &&
-      (url.pathname === "/" || url.pathname === "/index.html") &&
       previewToken &&
-      url.searchParams.get("preview_access") === previewToken &&
+      constantTimeEqual(url.searchParams.get("preview_access") || "", previewToken) &&
       Number.isFinite(previewExpiresAt) &&
       Date.now() < previewExpiresAt;
 
