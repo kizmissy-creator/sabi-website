@@ -187,6 +187,32 @@ legend small {
   margin: 0;
 }
 
+.preference-details {
+  margin: 1.35rem 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f9fcfc;
+}
+
+.preference-details > summary {
+  padding: .9rem 1rem;
+  color: var(--teal-dark);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.preference-details[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.preference-details-body {
+  padding: .2rem 1rem 1rem;
+}
+
+.preference-details-body > p:first-child {
+  color: var(--muted);
+}
+
 .prompt-card {
   background: #fff;
 }

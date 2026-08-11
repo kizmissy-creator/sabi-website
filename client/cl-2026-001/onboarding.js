@@ -13,6 +13,7 @@
   const storageKey = 'sabi-onboarding-cl-2026-001-v23';
   const config = window.SABI_ONBOARDING_CONFIG || {};
   const repeaterNames = ['employmentHistory', 'employmentGaps', 'qualifications', 'exampleOpportunities'];
+  const fixedDraftFields = new Set(['clientReference', 'serviceCode', 'formVersion', 'ageEligible']);
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
   const qualificationResultDetails = {
     'GCSE or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'In progress', 'Not sure'] },
@@ -426,7 +427,7 @@
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.employmentGapsSummary = (data.employmentGaps || []).map(entry => summariseEntry({...entry, startDate: formatMonth(entry.startDate), endDate: entry.current ? 'Ongoing' : formatMonth(entry.endDate)}, [['startDate','Start'],['endDate','End'],['reason','Reason']])).join('\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
-    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
+    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.practicalSkills, data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
     data.successOutcome = cleanSummary_([Array.isArray(data.successOutcomes) ? data.successOutcomes.filter(value => value !== 'other').join(', ') : '', data.successOutcomeOther]);
@@ -533,9 +534,35 @@
     saveState.textContent = 'Saving…'; clearTimeout(saveTimer); saveTimer = setTimeout(save, 350);
   }
 
+  function migrateDraftChoices(data) {
+    const difficultPartMap = {
+      'tailoring-cv': 'tailoring-documents',
+      'cover-letters': 'tailoring-documents',
+      confidence: 'confidence-responses',
+      responses: 'confidence-responses',
+      interviews: 'interviews-assessments',
+      assessments: 'interviews-assessments'
+    };
+    if (Array.isArray(data.difficultParts)) data.difficultParts = [...new Set(data.difficultParts.map(value => difficultPartMap[value] || value))];
+    const combinedDirection = 'Feel clearer about suitable roles and my career direction';
+    if (Array.isArray(data.successOutcomes)) data.successOutcomes = [...new Set(data.successOutcomes.map(value => ['Feel clearer about my career direction', 'Know which roles may suit me'].includes(value) ? combinedDirection : value))];
+  }
+
+  function revealPopulatedPreferenceDetails() {
+    document.querySelectorAll('details.preference-details').forEach(details => {
+      const populatedField = [...details.querySelectorAll('input, select, textarea')].some(field => {
+        if (['checkbox', 'radio'].includes(field.type)) return field.checked;
+        return String(field.value || '').trim();
+      });
+      const populatedRepeater = [...details.querySelectorAll('.repeater')].some(repeater => repeater.children.length);
+      if (populatedField || populatedRepeater) details.open = true;
+    });
+  }
+
   function restore() {
     try {
       const draft = JSON.parse(localStorage.getItem(storageKey)); if (!draft?.data) return;
+      migrateDraftChoices(draft.data);
       repeaterNames.forEach(name => {
         const container = document.querySelector(`[data-repeater="${name}"]`);
         container.replaceChildren();
@@ -543,6 +570,7 @@
         entries.forEach(entry => addEntry(name, entry));
       });
       for (const [name, value] of Object.entries(draft.data)) {
+        if (fixedDraftFields.has(name)) continue;
         const fields = [...form.elements].filter(el => el.name === name);
         fields.forEach(el => {
           if (el.type === 'checkbox') el.checked = Array.isArray(value) && value.includes(el.value);
@@ -572,6 +600,12 @@
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
+    const preferredContact = form.elements.preferredContact.value;
+    const telephone = form.elements.telephone;
+    const telephoneHelp = document.getElementById('telephone-help');
+    const telephoneNeeded = ['whatsapp', 'phone'].includes(preferredContact);
+    if (telephone) telephone.required = telephoneNeeded;
+    if (telephoneHelp) telephoneHelp.textContent = telephoneNeeded ? 'Required for this contact choice' : 'Only needed for WhatsApp or telephone contact';
     const showAccessibility = situations.includes('accessibility');
     const accessibilityPanel = document.getElementById('accessibility-details');
     const consent = form.elements.specialCategoryConsent;
@@ -749,7 +783,7 @@
       {title:'What you bring', step:3, rows:[
         ['Hobbies or interests', voiceAnswer('hobbies', f.hobbies.value)], ['Tasks that hold your attention', voiceAnswer('interests', f.interests.value)],
         ['Caring responsibilities', voiceAnswer('caringStrengths', f.caringStrengths?.value)], ['What someone who knows you might say', voiceAnswer('skillsExamples', f.skillsExamples.value)],
-        ['Things you consider yourself good at', selectedLabels('strengthAttributes')], ['Something you feel pleased or proud about', voiceAnswer('proudOf', f.proudOf.value)]
+        ['Things you consider yourself good at', selectedLabels('strengthAttributes')], ['Practical skills or knowledge', f.practicalSkills.value], ['Something you feel pleased or proud about', voiceAnswer('proudOf', f.proudOf.value)]
       ]},
       {title:'What comes next', step:4, rows:[
         ['Roles or types of work', f.broadDirection.value], ['Sectors or settings', f.targetSectors.value], ['Roles or settings to avoid', f.rolesToAvoid.value],
@@ -845,7 +879,7 @@
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateAllSteps()) return;
@@ -869,5 +903,5 @@
   createVoiceControls();
   tagFieldConfigs.forEach(setupTagField);
   restoreVoiceRecordings();
-  restore(); tagFieldConfigs.forEach(config => loadTagField(config.name)); updateConditional(); showStep(current, {focusHeading:false});
+  restore(); tagFieldConfigs.forEach(config => loadTagField(config.name)); updateConditional(); revealPopulatedPreferenceDetails(); showStep(current, {focusHeading:false});
 })();

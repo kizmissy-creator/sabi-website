@@ -151,7 +151,9 @@ function validate_(input) {
   verifySubmissionToken_(input.submissionToken, input);
   if (!clean_(input.firstName, 120) || !clean_(input.lastName, 120)) throw new Error('Name required.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(input.email || ''))) throw new Error('Email required.');
-  if (!['email', 'whatsapp', 'phone', 'video'].includes(String(input.preferredContact || ''))) throw new Error('Preferred contact required.');
+  if (!['email', 'whatsapp', 'phone'].includes(String(input.preferredContact || ''))) throw new Error('Preferred contact required.');
+  if (['whatsapp', 'phone'].includes(String(input.preferredContact || '')) && !String(input.telephone || '').trim()) throw new Error('Telephone number required for the selected contact method.');
+  if (!['no', 'payer', 'supporter'].includes(String(input.supporter || ''))) throw new Error('Communication involvement choice required.');
   const situationOptions = ['employed', 'self-employed', 'not-working', 'first-job', 'education', 'caring', 'redundancy', 'leave', 'returning'];
   if (!Array.isArray(input.currentSituation) || !input.currentSituation.some(value => situationOptions.includes(value))) throw new Error('Current situation required.');
   if (input.ageEligible !== 'yes') throw new Error('Age eligibility required.');
