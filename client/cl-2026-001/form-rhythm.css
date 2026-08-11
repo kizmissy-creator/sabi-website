@@ -195,6 +195,10 @@ legend small {
   background: #f9fcfc;
 }
 
+.form-step[data-step="2"] .question-group {
+  background: #fff;
+}
+
 .compact-gap {
   padding: .85rem 1rem;
 }
@@ -225,7 +229,7 @@ legend small {
   padding: .6rem .75rem;
   border: 1px solid var(--line);
   border-radius: 9px;
-  background: #f5f9f9;
+  background: #fff;
   color: var(--teal-dark);
   font-size: .9rem;
   font-weight: 700;
