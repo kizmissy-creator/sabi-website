@@ -377,7 +377,7 @@
     });
   }
 
-  function addEntry(name, values = {}) {
+  function addEntry(name, values = {}, options = {}) {
     const container = document.querySelector(`[data-repeater="${name}"]`);
     const template = document.getElementById(`${name}-template`);
     if (!container || !template) return;
@@ -399,10 +399,18 @@
       else field.value = value || '';
     });
     if (name === 'qualifications') syncQualificationCard(card, values.grade || '');
-    container.appendChild(card);
+    const qualificationHeading = card.querySelector('[data-qualification-heading]');
+    if (name === 'qualifications' && options.highlight && values.subject) {
+      card.classList.add('quick-qualification-card');
+      qualificationHeading.textContent = `${values.subject} qualification`;
+      qualificationHeading.hidden = false;
+    }
+    if (options.prepend) container.prepend(card);
+    else container.appendChild(card);
     renumberEntries(name);
     syncCurrentRoleCards();
     syncCurrentGapCards();
+    return card;
   }
 
   function collectRepeater(name) {
@@ -610,10 +618,9 @@
     }
     document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
-    const gapSituationSelected = situations.some(value => ['not-working', 'returning'].includes(value));
-    const hasEmploymentGap = document.getElementById('has-employment-gap')?.checked;
+    const gapSituationSelected = situations.includes('employment-gap');
     const gapRepeater = document.querySelector('[data-repeater="employmentGaps"]');
-    if ((gapSituationSelected || hasEmploymentGap) && gapRepeater && !gapRepeater.children.length) addEntry('employmentGaps');
+    if (gapSituationSelected && gapRepeater && !gapRepeater.children.length) addEntry('employmentGaps');
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
@@ -634,8 +641,7 @@
     const activeStepCount = steps.filter(step => !step.matches('[data-conditional-step].hidden')).length;
     progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
     progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
-    setConditional('employment-gap-gate', !gapSituationSelected);
-    setConditional('employment-gap-area', gapSituationSelected || hasEmploymentGap);
+    setConditional('employment-gap-section', gapSituationSelected);
     setConditional('caring-strengths', situations.includes('caring'));
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));
@@ -881,11 +887,13 @@
   form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
   document.querySelectorAll('[data-add-entry]').forEach(button => button.addEventListener('click', () => {
     const qualificationSubject = button.dataset.qualificationSubject;
-    addEntry(button.dataset.addEntry, qualificationSubject ? {subject: qualificationSubject} : {});
+    const addedCard = addEntry(button.dataset.addEntry, qualificationSubject ? {subject: qualificationSubject} : {}, {prepend: Boolean(qualificationSubject), highlight: Boolean(qualificationSubject)});
     if (qualificationSubject) {
       const unavailableValue = qualificationSubject === 'English' ? 'No current English Level 2 equivalent' : 'No current maths Level 2 equivalent';
       const unavailableChoice = form.querySelector(`input[name="englishMathsStatus"][value="${unavailableValue}"]`);
       if (unavailableChoice) unavailableChoice.checked = false;
+      addedCard?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+      addedCard?.querySelector('[data-repeat-field="qualificationType"]')?.focus({preventScroll: true});
     }
     scheduleSave();
   }));

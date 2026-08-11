@@ -207,11 +207,6 @@ legend small {
   margin-top: .65rem;
 }
 
-.compact-gap #employment-gap-gate {
-  padding: 0;
-  border: 0;
-}
-
 .qualification-shortcuts {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -233,12 +228,29 @@ legend small {
 }
 
 .qualification-status {
-  margin-bottom: .4rem;
+  margin: 0;
 }
 
-.qualification-status .choice-grid {
-  grid-template-columns: 1fr;
-  gap: .15rem;
+.qualification-status-details {
+  margin-top: .8rem;
+  border-top: 1px solid var(--line);
+  padding-top: .55rem;
+}
+
+.qualification-status-details > summary {
+  width: fit-content;
+  color: var(--teal-dark);
+  font-size: .86rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: .16em;
+  cursor: pointer;
+}
+
+.qualification-status p {
+  margin: .6rem 0 .25rem;
+  color: var(--muted);
+  font-size: .84rem;
 }
 
 .qualification-status .choice,
@@ -247,6 +259,15 @@ legend small {
   padding: .4rem .15rem;
   border: 0;
   background: transparent;
+}
+
+.quick-qualification-card {
+  border-left: 4px solid var(--yellow);
+  background: #fffef8;
+}
+
+.qualification-card-heading:has(h4[hidden]) {
+  justify-content: flex-end;
 }
 
 .question-group > h3,
