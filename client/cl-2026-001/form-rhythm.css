@@ -212,6 +212,30 @@ legend small {
   border: 0;
 }
 
+.qualification-shortcuts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .55rem;
+  margin-top: 1rem;
+}
+
+.qualification-shortcuts .add-button {
+  padding: .7rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+  text-decoration: none;
+  background: #fff;
+}
+
+.qualification-shortcuts .add-button:last-child {
+  grid-column: 1 / -1;
+}
+
+.qualification-status {
+  margin-bottom: .4rem;
+}
+
 .question-group > h3,
 .group-heading h3 {
   margin: 0;
@@ -413,6 +437,14 @@ legend small {
   .question-group,
   .repeat-card {
     padding: .85rem;
+  }
+
+  .qualification-shortcuts {
+    grid-template-columns: 1fr;
+  }
+
+  .qualification-shortcuts .add-button:last-child {
+    grid-column: auto;
   }
 }
 

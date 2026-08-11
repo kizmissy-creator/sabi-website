@@ -15,8 +15,15 @@
   const repeaterNames = ['employmentHistory', 'employmentGaps', 'qualifications', 'exampleOpportunities'];
   const fixedDraftFields = new Set(['clientReference', 'serviceCode', 'formVersion', 'ageEligible']);
   const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
+  const gcseResultDetails = { label: 'Grade or result', prompt: 'Choose grade or result', options: ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'In progress', 'Not sure'] };
   const qualificationResultDetails = {
-    'GCSE or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'In progress', 'Not sure'] },
+    'GCSE': gcseResultDetails,
+    'GCSE or equivalent': gcseResultDetails,
+    'Functional Skills': { label: 'Level or status', prompt: 'Choose level or status', options: ['Level 2', 'Level 1', 'Entry Level 3', 'Entry Level 2', 'Entry Level 1', 'Pass', 'In progress', 'Not sure'] },
+    'Scottish National qualification': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['A', 'B', 'C', 'D', 'Pass', 'In progress', 'Not sure'] },
+    'Essential Skills qualification': { label: 'Level or status', prompt: 'Choose level or status', options: ['Level 2', 'Level 1', 'Entry Level 3', 'Entry Level 2', 'Entry Level 1', 'Pass', 'In progress', 'Not sure'] },
+    'Overseas qualification': defaultResultDetails,
+    'Another equivalent or not sure': defaultResultDetails,
     'A level or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['A*', 'A', 'B', 'C', 'D', 'E', 'U', 'Pass', 'In progress', 'Not sure'] },
     'BTEC': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction*', 'Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
     'T Level': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction*', 'Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
@@ -426,7 +433,7 @@
     data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.employmentGapsSummary = (data.employmentGaps || []).map(entry => summariseEntry({...entry, startDate: formatMonth(entry.startDate), endDate: entry.current ? 'Ongoing' : formatMonth(entry.endDate)}, [['startDate','Start'],['endDate','End'],['reason','Reason']])).join('\n');
-    data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
+    data.qualificationsSummary = cleanSummary_([(data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['resultNotes','Result or equivalency details'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n'), Array.isArray(data.englishMathsStatus) ? `English and maths: ${data.englishMathsStatus.join(', ')}` : '']);
     data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', Array.isArray(data.practicalSkillAreas) ? data.practicalSkillAreas.join(', ') : '', data.practicalSkills, data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
@@ -478,6 +485,8 @@
     const gradeLabel = card.querySelector('[data-grade-label]');
     const expiryGroup = card.querySelector('[data-expiry-field]');
     const expiryField = card.querySelector('[data-repeat-field="expiry"]');
+    const resultNotesGroup = card.querySelector('[data-result-notes-field]');
+    const resultNotesField = card.querySelector('[data-repeat-field="resultNotes"]');
     if (!typeField || !gradeField) return;
     const currentGrade = selectedGrade || gradeField.value;
     const details = qualificationResultDetails[typeField.value] || defaultResultDetails;
@@ -491,6 +500,12 @@
     if (expiryField) {
       expiryField.disabled = !showExpiry;
       if (!showExpiry) expiryField.value = '';
+    }
+    const showResultNotes = ['Overseas qualification', 'Another equivalent or not sure'].includes(typeField.value);
+    resultNotesGroup?.classList.toggle('hidden', !showResultNotes);
+    if (resultNotesField) {
+      resultNotesField.disabled = !showResultNotes;
+      if (!showResultNotes) resultNotesField.value = '';
     }
   }
 
@@ -780,7 +795,8 @@
       {title:'Your experience', step:2, rows:[
         ['Work and other experience', document.getElementById('no-experience')?.checked ? 'I do not have any work or other experience to add yet' : formatEntries(data.employmentHistory, [['experienceType','Type'],['jobTitle','Role or activity'],['organisation','Organisation or setting'],['startDate','Start'],['endDate','End'],['responsibilities','What I did'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])],
         ['Employment gaps', formatEntries(data.employmentGaps, [['startDate','Start'],['endDate','End'],['reason','Reason']])],
-        ['Qualifications and training', document.getElementById('no-qualifications')?.checked ? 'I do not have any qualifications or training to add' : formatEntries(data.qualifications, [['qualificationType','Type'],['subject','Subject or course'],['grade','Result or status'],['completionYear','Year'],['provider','Provider'],['expiry','Expiry or renewal']])]
+        ['Qualifications and training', document.getElementById('no-qualifications')?.checked ? 'I do not have any qualifications or training to add' : formatEntries(data.qualifications, [['qualificationType','Type'],['subject','Subject or course'],['grade','Result or status'],['resultNotes','Result or equivalency details'],['completionYear','Year'],['provider','Provider'],['expiry','Expiry or renewal']])],
+        ['English and maths status', selectedLabels('englishMathsStatus')]
       ]},
       {title:'What you bring', step:3, rows:[
         ['Hobbies or interests', voiceAnswer('hobbies', f.hobbies.value)], ['Tasks that hold your attention', voiceAnswer('interests', f.interests.value)],
@@ -864,7 +880,13 @@
   });
   form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
   document.querySelectorAll('[data-add-entry]').forEach(button => button.addEventListener('click', () => {
-    addEntry(button.dataset.addEntry);
+    const qualificationSubject = button.dataset.qualificationSubject;
+    addEntry(button.dataset.addEntry, qualificationSubject ? {subject: qualificationSubject} : {});
+    if (qualificationSubject) {
+      const unavailableValue = qualificationSubject === 'English' ? 'No current English Level 2 equivalent' : 'No current maths Level 2 equivalent';
+      const unavailableChoice = form.querySelector(`input[name="englishMathsStatus"][value="${unavailableValue}"]`);
+      if (unavailableChoice) unavailableChoice.checked = false;
+    }
     scheduleSave();
   }));
   form.addEventListener('click', event => {
