@@ -216,23 +216,6 @@ legend small {
   align-items: center;
 }
 
-.qualification-empty-choice {
-  display: flex;
-  align-items: flex-start;
-  gap: .65rem;
-  width: fit-content;
-  margin-top: .9rem;
-  color: var(--muted);
-  font-size: .9rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.qualification-empty-choice input {
-  flex: 0 0 auto;
-  margin-top: .12rem;
-}
-
 .qualification-card {
   border-left: 4px solid var(--yellow);
   background: #fffef8;
