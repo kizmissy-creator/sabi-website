@@ -91,7 +91,7 @@ form {
 
 .form-step h2,
 .info-box h2 {
-  font-size: clamp(2rem, 3vw, 2.4rem);
+  font-size: clamp(2rem, 2.6vw, 2.25rem);
 }
 
 .intro {
@@ -536,22 +536,22 @@ legend small {
 
 @media (min-width: 851px) {
   .hero {
-    gap: 2.5rem;
-    padding-top: 2.75rem;
-    padding-bottom: 2rem;
+    gap: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 1.5rem;
     align-items: start;
   }
 
   .hero h1 {
-    font-size: clamp(3rem, 4vw, 3.5rem);
+    font-size: clamp(2.75rem, 3.2vw, 3rem);
     line-height: 1;
-    margin-bottom: 1.15rem;
+    margin-bottom: .9rem;
   }
 
   .hero .lead {
-    max-width: 640px;
-    font-size: 1.05rem;
-    line-height: 1.6;
+    max-width: 620px;
+    font-size: 1rem;
+    line-height: 1.55;
   }
 
   .hero-support {
@@ -560,8 +560,22 @@ legend small {
 
   .package-card {
     width: 100%;
-    max-width: 350px;
+    max-width: 320px;
+    padding: 1.25rem;
     justify-self: end;
+  }
+
+  .package-card strong {
+    font-size: 1.5rem;
+  }
+
+  .package-card .price {
+    font-size: 2rem;
+  }
+
+  .package-card ul {
+    font-size: .85rem;
+    line-height: 1.5;
   }
 }
 
