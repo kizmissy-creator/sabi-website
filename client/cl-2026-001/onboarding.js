@@ -53,14 +53,14 @@
       name: 'targetSectors',
       id: 'target-sectors',
       legend: 'Sectors or settings that interest you',
-      help: 'Optional. Add any workplaces, sectors or environments that appeal to you.',
+      help: 'Add any workplaces, sectors or environments that appeal to you.',
       placeholder: 'For example, education'
     },
     {
       name: 'rolesToAvoid',
       id: 'roles-to-avoid',
       legend: 'Roles or settings you want to avoid',
-      help: 'Optional. Add anything you already know would not suit you.',
+      help: 'Add anything you already know would not suit you.',
       placeholder: 'For example, night work'
     }
   ];
