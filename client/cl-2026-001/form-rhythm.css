@@ -121,7 +121,7 @@ legend small {
 
 .choice-grid {
   gap: .15rem .55rem;
-  align-items: stretch;
+  align-items: start;
 }
 
 .choice-grid .choice-accessibility {
@@ -651,6 +651,10 @@ legend small {
   margin: 1rem 0;
 }
 
+.tag-pair > .tag-fieldset {
+  margin: 1.25rem 0;
+}
+
 .tag-source-label {
   display: none !important;
 }
@@ -726,6 +730,12 @@ legend small {
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
+}
+
+.consent-note {
+  margin: -.45rem 0 1rem 2.9rem;
+  color: var(--muted);
+  font-size: .84rem;
 }
 
 @media (max-width: 520px) {

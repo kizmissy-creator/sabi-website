@@ -32,8 +32,31 @@
   const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate']);
   let current = 0;
   let saveTimer;
-  let broadDirectionTags = [];
-  let broadDirectionTagInput;
+  const tagFieldConfigs = [
+    {
+      name: 'broadDirection',
+      id: 'broad-direction',
+      legend: 'Roles or types of work you are considering',
+      help: 'Add one idea at a time. It is fine to be unsure or to add broad ideas rather than exact job titles.',
+      placeholder: 'For example, administrator',
+      required: true
+    },
+    {
+      name: 'targetSectors',
+      id: 'target-sectors',
+      legend: 'Sectors or settings that interest you',
+      help: 'Optional. Add any workplaces, sectors or environments that appeal to you.',
+      placeholder: 'For example, education'
+    },
+    {
+      name: 'rolesToAvoid',
+      id: 'roles-to-avoid',
+      legend: 'Roles or settings you want to avoid',
+      help: 'Optional. Add anything you already know would not suit you.',
+      placeholder: 'For example, night work'
+    }
+  ];
+  const tagFields = new Map();
   const voiceQuestionNames = ['hobbies', 'interests', 'caringStrengths', 'skillsExamples', 'proudOf'];
   const voiceRecordings = new Map();
   const voiceDatabaseName = 'sabi-onboarding-voice-cl-2026-001';
@@ -244,12 +267,12 @@
     } catch {}
   }
 
-  function renderBroadDirectionTags() {
-    const list = document.getElementById('broad-direction-tags');
-    const source = form.elements.broadDirection;
-    if (!list || !source || !broadDirectionTagInput) return;
+  function renderTagField(name) {
+    const field = tagFields.get(name);
+    if (!field) return;
+    const {config, input, list, source, tags} = field;
     list.replaceChildren();
-    broadDirectionTags.forEach((value, index) => {
+    tags.forEach((value, index) => {
       const item = document.createElement('li');
       item.className = 'tag-chip';
       const text = document.createElement('span');
@@ -259,42 +282,45 @@
       remove.textContent = '×';
       remove.setAttribute('aria-label', `Remove ${value}`);
       remove.addEventListener('click', () => {
-        broadDirectionTags.splice(index, 1);
-        renderBroadDirectionTags();
-        broadDirectionTagInput.focus();
+        tags.splice(index, 1);
+        renderTagField(name);
+        input.focus();
         scheduleSave();
       });
       item.append(text, remove);
       list.appendChild(item);
     });
-    source.value = broadDirectionTags.join('\n');
-    broadDirectionTagInput.required = broadDirectionTags.length === 0;
-    broadDirectionTagInput.setCustomValidity(broadDirectionTags.length ? '' : 'Add at least one role or type of work.');
+    source.value = tags.join('\n');
+    input.required = Boolean(config.required && tags.length === 0);
+    input.setCustomValidity(config.required && !tags.length ? 'Add at least one role or type of work.' : '');
   }
 
-  function addBroadDirectionTag() {
-    if (!broadDirectionTagInput) return false;
-    const value = broadDirectionTagInput.value.replace(/\s+/g, ' ').trim().slice(0, 120);
+  function addTag(name) {
+    const field = tagFields.get(name);
+    if (!field) return false;
+    const {input, tags} = field;
+    const value = input.value.replace(/\s+/g, ' ').trim().slice(0, 120);
     if (!value) {
-      renderBroadDirectionTags();
+      renderTagField(name);
       return false;
     }
-    const exists = broadDirectionTags.some(existing => existing.toLowerCase() === value.toLowerCase());
-    if (!exists && broadDirectionTags.length < 20) broadDirectionTags.push(value);
-    broadDirectionTagInput.value = '';
-    renderBroadDirectionTags();
+    const exists = tags.some(existing => existing.toLowerCase() === value.toLowerCase());
+    if (!exists && tags.length < 20) tags.push(value);
+    input.value = '';
+    renderTagField(name);
     scheduleSave();
     return true;
   }
 
-  function loadBroadDirectionTags() {
-    const source = form.elements.broadDirection;
-    broadDirectionTags = String(source?.value || '').split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 20);
-    renderBroadDirectionTags();
+  function loadTagField(name) {
+    const field = tagFields.get(name);
+    if (!field) return;
+    field.tags.splice(0, field.tags.length, ...String(field.source.value || '').split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 20));
+    renderTagField(name);
   }
 
-  function setupBroadDirectionTags() {
-    const source = form.elements.broadDirection;
+  function setupTagField(config) {
+    const source = form.elements[config.name];
     const originalLabel = source?.closest('label');
     if (!source || !originalLabel) return;
     source.required = false;
@@ -302,23 +328,25 @@
     originalLabel.hidden = true;
     const fieldset = document.createElement('fieldset');
     fieldset.className = 'tag-fieldset';
-    fieldset.innerHTML = `<legend>Roles or types of work you are considering <span>*</span></legend><p class="tag-help" id="broad-direction-help">Add one at a time. Type a role or kind of work, then press Enter or choose Add.</p><div class="tag-entry-row"><label class="visually-hidden" for="broad-direction-entry">Add a role or type of work</label><input id="broad-direction-entry" class="tag-entry-input" autocomplete="off" maxlength="120" placeholder="For example, administrator" aria-describedby="broad-direction-help" data-error-label="Roles or types of work you are considering"><button type="button" class="tag-add-button">Add</button></div><ul id="broad-direction-tags" class="tag-list" aria-label="Roles or types of work added" aria-live="polite"></ul>`;
+    const requiredMark = config.required ? ' <span>*</span>' : '';
+    fieldset.innerHTML = `<legend>${config.legend}${requiredMark}</legend><p class="tag-help" id="${config.id}-help">${config.help}</p><div class="tag-entry-row"><label class="visually-hidden" for="${config.id}-entry">Add to ${config.legend.toLowerCase()}</label><input id="${config.id}-entry" class="tag-entry-input" autocomplete="off" maxlength="120" placeholder="${config.placeholder}" aria-describedby="${config.id}-help" data-error-label="${config.legend}"><button type="button" class="tag-add-button">Add</button></div><ul id="${config.id}-tags" class="tag-list" aria-label="${config.legend} added" aria-live="polite"></ul>`;
     originalLabel.before(fieldset);
-    broadDirectionTagInput = fieldset.querySelector('.tag-entry-input');
-    fieldset.querySelector('.tag-add-button').addEventListener('click', addBroadDirectionTag);
-    broadDirectionTagInput.addEventListener('input', () => broadDirectionTagInput.setCustomValidity(''));
-    broadDirectionTagInput.addEventListener('blur', () => { if (broadDirectionTagInput.value.trim()) addBroadDirectionTag(); });
-    broadDirectionTagInput.addEventListener('keydown', event => {
+    const input = fieldset.querySelector('.tag-entry-input');
+    tagFields.set(config.name, {config, source, input, list: fieldset.querySelector('.tag-list'), tags: []});
+    fieldset.querySelector('.tag-add-button').addEventListener('click', () => addTag(config.name));
+    input.addEventListener('input', () => input.setCustomValidity(''));
+    input.addEventListener('blur', () => { if (input.value.trim()) addTag(config.name); });
+    input.addEventListener('keydown', event => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        addBroadDirectionTag();
-      } else if (event.key === 'Backspace' && !broadDirectionTagInput.value && broadDirectionTags.length) {
-        broadDirectionTags.pop();
-        renderBroadDirectionTags();
+        addTag(config.name);
+      } else if (event.key === 'Backspace' && !input.value && tagFields.get(config.name).tags.length) {
+        tagFields.get(config.name).tags.pop();
+        renderTagField(config.name);
         scheduleSave();
       }
     });
-    renderBroadDirectionTags();
+    renderTagField(config.name);
   }
 
   stepMenuToggle?.addEventListener('click', () => {
@@ -817,7 +845,7 @@
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); broadDirectionTags = []; if (broadDirectionTagInput) broadDirectionTagInput.value = ''; renderBroadDirectionTags(); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateAllSteps()) return;
@@ -839,7 +867,7 @@
   });
 
   createVoiceControls();
-  setupBroadDirectionTags();
+  tagFieldConfigs.forEach(setupTagField);
   restoreVoiceRecordings();
-  restore(); loadBroadDirectionTags(); updateConditional(); showStep(current, {focusHeading:false});
+  restore(); tagFieldConfigs.forEach(config => loadTagField(config.name)); updateConditional(); showStep(current, {focusHeading:false});
 })();
