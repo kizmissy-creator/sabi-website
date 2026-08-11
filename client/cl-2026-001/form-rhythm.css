@@ -124,6 +124,19 @@ legend small {
   align-items: start;
 }
 
+.balanced-choice-grid {
+  align-items: stretch;
+}
+
+.balanced-choice-grid .choice {
+  height: 100%;
+  align-items: center;
+}
+
+.balanced-choice-grid .choice-wide {
+  grid-column: 1 / -1;
+}
+
 .choice-grid .choice-accessibility {
   grid-column: 1 / -1;
 }
@@ -180,6 +193,18 @@ legend small {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #f9fcfc;
+}
+
+.compact-gap {
+  padding: .85rem 1rem;
+}
+
+.compact-gap .group-heading h3 {
+  font-size: 1.15rem;
+}
+
+.compact-gap .none-choice {
+  margin-top: .65rem;
 }
 
 .question-group > h3,

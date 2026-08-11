@@ -427,7 +427,7 @@
     data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
     data.employmentGapsSummary = (data.employmentGaps || []).map(entry => summariseEntry({...entry, startDate: formatMonth(entry.startDate), endDate: entry.current ? 'Ongoing' : formatMonth(entry.endDate)}, [['startDate','Start'],['endDate','End'],['reason','Reason']])).join('\n');
     data.qualificationsSummary = (data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n');
-    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', data.practicalSkills, data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
+    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', Array.isArray(data.practicalSkillAreas) ? data.practicalSkillAreas.join(', ') : '', data.practicalSkills, data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
     data.achievementsSummary = data.proudOf || '';
     data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
     data.successOutcome = cleanSummary_([Array.isArray(data.successOutcomes) ? data.successOutcomes.filter(value => value !== 'other').join(', ') : '', data.successOutcomeOther]);
@@ -597,6 +597,8 @@
     const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
     const gapSituationSelected = situations.some(value => ['not-working', 'returning'].includes(value));
     const hasEmploymentGap = document.getElementById('has-employment-gap')?.checked;
+    const gapRepeater = document.querySelector('[data-repeater="employmentGaps"]');
+    if ((gapSituationSelected || hasEmploymentGap) && gapRepeater && !gapRepeater.children.length) addEntry('employmentGaps');
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
@@ -783,7 +785,7 @@
       {title:'What you bring', step:3, rows:[
         ['Hobbies or interests', voiceAnswer('hobbies', f.hobbies.value)], ['Tasks that hold your attention', voiceAnswer('interests', f.interests.value)],
         ['Caring responsibilities', voiceAnswer('caringStrengths', f.caringStrengths?.value)], ['What someone who knows you might say', voiceAnswer('skillsExamples', f.skillsExamples.value)],
-        ['Things you consider yourself good at', selectedLabels('strengthAttributes')], ['Practical skills or knowledge', f.practicalSkills.value], ['Something you feel pleased or proud about', voiceAnswer('proudOf', f.proudOf.value)]
+        ['Things you consider yourself good at', selectedLabels('strengthAttributes')], ['Practical skill areas', selectedLabels('practicalSkillAreas')], ['Practical skills or knowledge', f.practicalSkills.value], ['Something you feel pleased or proud about', voiceAnswer('proudOf', f.proudOf.value)]
       ]},
       {title:'What comes next', step:4, rows:[
         ['Roles or types of work', f.broadDirection.value], ['Sectors or settings', f.targetSectors.value], ['Roles or settings to avoid', f.rolesToAvoid.value],
