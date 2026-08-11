@@ -3,8 +3,10 @@
 const ONBOARDING_CONFIG = {
   sheetName: 'Bronagh Onboarding',
   maxRequestBytes: 26000000,
-  maxFileBytes: 8 * 1024 * 1024,
+  maxFileBytes: 12 * 1024 * 1024,
+  abandonedUploadDays: 90,
   allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'webm', 'm4a', 'ogg'],
+  documentFields: ['existingCv', 'vacancyDocument', 'applicationDocument'],
   allowedClientReference: 'CL-2026-001',
   allowedServiceCode: 'career_partner_bespoke',
   folderProperty: 'BRONAGH_UPLOAD_FOLDER_ID',
@@ -61,6 +63,9 @@ function doPost(e) {
     if (!raw || raw.length > ONBOARDING_CONFIG.maxRequestBytes) throw new Error('Invalid request size.');
     const input = JSON.parse(raw);
     if (input.action === 'payment_confirmation') return sendPaymentConfirmation_(input);
+    if (input.action === 'file_upload') return uploadFile_(input);
+    if (input.action === 'file_status') return uploadStatus_(input);
+    if (input.action === 'file_delete') return deleteFile_(input);
     validate_(input);
     const lock = LockService.getScriptLock();
     lock.waitLock(20000);
@@ -144,6 +149,132 @@ function ensurePaymentConfirmationSheet_(spreadsheet) {
   return sheet;
 }
 
+function validateUploadIdentity_(input) {
+  if (input.clientReference !== ONBOARDING_CONFIG.allowedClientReference) throw new Error('Wrong client reference.');
+  if (input.serviceCode !== ONBOARDING_CONFIG.allowedServiceCode) throw new Error('Wrong service code.');
+  if (!/^[a-z0-9-]{20,80}$/i.test(String(input.submissionId || ''))) throw new Error('Invalid submission ID.');
+  verifySubmissionToken_(input.submissionToken, input);
+}
+
+function validateDocumentFile_(file) {
+  const field = String(file && file.field || '');
+  const name = String(file && file.name || '');
+  const ext = name.split('.').pop().toLowerCase();
+  if (!ONBOARDING_CONFIG.documentFields.includes(field)) throw new Error('Unknown document category.');
+  if (!ONBOARDING_CONFIG.allowedExtensions.includes(ext) || ['webm', 'm4a', 'ogg'].includes(ext)) throw new Error('File type rejected.');
+  if (!Number.isFinite(Number(file.size)) || Number(file.size) <= 0 || Number(file.size) > ONBOARDING_CONFIG.maxFileBytes) throw new Error('File too large.');
+  if (!file.base64) throw new Error('Missing file data.');
+}
+
+function uploadFile_(input) {
+  validateUploadIdentity_(input);
+  const requestId = String(input.uploadRequestId || '');
+  if (!/^[a-z0-9-]{20,80}$/i.test(requestId)) throw new Error('Invalid upload request ID.');
+  try {
+    validateDocumentFile_(input.file);
+    const bytes = Utilities.base64Decode(input.file.base64);
+    if (bytes.length !== Number(input.file.size) || bytes.length > ONBOARDING_CONFIG.maxFileBytes) throw new Error('Decoded file size is invalid.');
+    const lock = LockService.getScriptLock();
+    lock.waitLock(20000);
+    let result;
+    try {
+      const folder = getOrCreateSubmissionFolder_(input.submissionId);
+      const safeName = safeFileName_(input.file.name);
+      const blob = Utilities.newBlob(bytes, input.file.type || 'application/octet-stream', safeName);
+      const created = Drive.Files.create({name: safeName, parents: [folder.id]}, blob);
+      result = {ok: true, upload: {
+      id: created.id,
+      field: String(input.file.field),
+      name: safeName,
+      type: String(input.file.type || 'application/octet-stream'),
+      size: bytes.length
+      }};
+    } finally {
+      lock.releaseLock();
+    }
+    CacheService.getScriptCache().put(uploadResultKey_(requestId), JSON.stringify(result), 21600);
+    return json_(result);
+  } catch (error) {
+    CacheService.getScriptCache().put(uploadResultKey_(requestId), JSON.stringify({ok: false, error: 'The document could not be uploaded.'}), 21600);
+    throw error;
+  }
+}
+
+function uploadStatus_(input) {
+  validateUploadIdentity_(input);
+  const requestId = String(input.uploadRequestId || '');
+  if (!/^[a-z0-9-]{20,80}$/i.test(requestId)) throw new Error('Invalid upload request ID.');
+  const value = CacheService.getScriptCache().get(uploadResultKey_(requestId));
+  return value ? json_(JSON.parse(value)) : json_({ok: true, pending: true});
+}
+
+function uploadResultKey_(requestId) {
+  return 'bronagh-upload-' + requestId;
+}
+
+function deleteFile_(input) {
+  validateUploadIdentity_(input);
+  const uploadId = String(input.uploadId || '');
+  if (!/^[a-z0-9_-]{10,180}$/i.test(uploadId)) throw new Error('Invalid upload reference.');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const folder = findSubmissionFolder_(input.submissionId);
+    if (!folder) return json_({ok: true, missing: true});
+    const file = Drive.Files.get(uploadId, {fields: 'id,parents,trashed'});
+    if (file.trashed || !Array.isArray(file.parents) || !file.parents.includes(folder.id)) throw new Error('Upload does not belong to this submission.');
+    Drive.Files.update({trashed: true}, uploadId);
+    return json_({ok: true, uploadId: uploadId});
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function safeFileName_(name) {
+  const safe = String(name || '').replace(/[^a-z0-9._ -]/gi, '_').replace(/\s+/g, ' ').trim().slice(0, 180);
+  if (!safe || safe === '.' || safe === '..') throw new Error('Invalid file name.');
+  return safe;
+}
+
+function findSubmissionFolder_(submissionId) {
+  const rootId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
+  if (!rootId) throw new Error('Upload folder not configured.');
+  const escapedName = String(submissionId).replace(/'/g, "\\'");
+  const result = Drive.Files.list({
+    q: "'" + rootId + "' in parents and name = '" + escapedName + "' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+    fields: 'files(id,name,createdTime)',
+    pageSize: 10
+  });
+  return result.files && result.files.length ? result.files[0] : null;
+}
+
+function getOrCreateSubmissionFolder_(submissionId) {
+  const existing = findSubmissionFolder_(submissionId);
+  if (existing) return existing;
+  const rootId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
+  return Drive.Files.create({
+    name: String(submissionId),
+    mimeType: 'application/vnd.google-apps.folder',
+    parents: [rootId]
+  });
+}
+
+function verifiedStoredUploads_(input, folderId) {
+  return (input.uploads || []).map(upload => {
+    const stored = Drive.Files.get(String(upload.id), {fields: 'id,name,mimeType,size,parents,trashed'});
+    if (stored.trashed || !Array.isArray(stored.parents) || !stored.parents.includes(folderId)) throw new Error('Uploaded document does not belong to this submission.');
+    if (String(stored.name) !== String(upload.name) || Number(stored.size) !== Number(upload.size)) throw new Error('Uploaded document details do not match.');
+    return {
+      field: String(upload.field),
+      name: String(stored.name),
+      type: String(stored.mimeType || upload.type || 'application/octet-stream'),
+      size: Number(stored.size),
+      id: String(stored.id),
+      url: driveUrl_(stored.id)
+    };
+  });
+}
+
 function validate_(input) {
   if (input.clientReference !== ONBOARDING_CONFIG.allowedClientReference) throw new Error('Wrong client reference.');
   if (input.serviceCode !== ONBOARDING_CONFIG.allowedServiceCode) throw new Error('Wrong service code.');
@@ -165,6 +296,12 @@ function validate_(input) {
     if (!ONBOARDING_CONFIG.allowedExtensions.includes(ext)) throw new Error('File type rejected.');
     if (!Number.isFinite(Number(file.size)) || Number(file.size) > ONBOARDING_CONFIG.maxFileBytes) throw new Error('File too large.');
     if (!file.base64) throw new Error('Missing file data.');
+  });
+  (input.uploads || []).forEach(upload => {
+    if (!ONBOARDING_CONFIG.documentFields.includes(String(upload.field || ''))) throw new Error('Unknown uploaded document category.');
+    if (!/^[a-z0-9_-]{10,180}$/i.test(String(upload.id || ''))) throw new Error('Invalid uploaded document reference.');
+    if (!clean_(upload.name, 180)) throw new Error('Uploaded document name missing.');
+    if (!Number.isFinite(Number(upload.size)) || Number(upload.size) <= 0 || Number(upload.size) > ONBOARDING_CONFIG.maxFileBytes) throw new Error('Uploaded document size invalid.');
   });
 }
 
@@ -207,32 +344,60 @@ function save_(input) {
   const sheet = ensureSheet_(SpreadsheetApp.getActiveSpreadsheet());
   const existing = sheet.getRange('B:B').createTextFinder(input.submissionId).matchEntireCell(true).findNext();
   if (existing) return;
-  const folderId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
-  if (!folderId) throw new Error('Upload folder not configured.');
-  const submissionFolder = Drive.Files.create({
-    name: input.submissionId,
-    mimeType: 'application/vnd.google-apps.folder',
-    parents: [folderId]
-  });
-  const uploadRows = [];
+  const submissionFolder = getOrCreateSubmissionFolder_(input.submissionId);
+  const uploadRows = verifiedStoredUploads_(input, submissionFolder.id);
   try {
     (input.files || []).forEach(file => {
       const bytes = Utilities.base64Decode(file.base64);
       if (bytes.length > ONBOARDING_CONFIG.maxFileBytes) throw new Error('Decoded file too large.');
-      const safeName = String(file.name).replace(/[^a-z0-9._ -]/gi, '_').slice(0, 180);
+      const safeName = safeFileName_(file.name);
       const blob = Utilities.newBlob(bytes, file.type || 'application/octet-stream', safeName);
       const created = Drive.Files.create({name: safeName, parents: [submissionFolder.id]}, blob);
-      uploadRows.push({field: file.field, name: safeName, id: created.id, url: driveUrl_(created.id)});
+      uploadRows.push({field: file.field, name: safeName, type: file.type || 'application/octet-stream', size: bytes.length, id: created.id, url: driveUrl_(created.id)});
     });
     const snapshot = Object.assign({}, input, {files: uploadRows});
     delete snapshot.submissionToken;
+    delete snapshot.uploads;
     const snapshotBlob = Utilities.newBlob(JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT, 'onboarding-response.json');
     Drive.Files.create({name: 'onboarding-response.json', parents: [submissionFolder.id]}, snapshotBlob);
     appendSummaryRow_(sheet, input, driveUrl_(submissionFolder.id));
   } catch (error) {
-    Drive.Files.update({trashed: true}, submissionFolder.id);
     throw error;
   }
+}
+
+function installBronaghUploadCleanupTrigger() {
+  ScriptApp.getProjectTriggers()
+    .filter(trigger => trigger.getHandlerFunction() === 'cleanupAbandonedBronaghUploads')
+    .forEach(trigger => ScriptApp.deleteTrigger(trigger));
+  ScriptApp.newTrigger('cleanupAbandonedBronaghUploads').timeBased().everyDays(1).atHour(3).create();
+  return 'Daily cleanup trigger installed.';
+}
+
+function cleanupAbandonedBronaghUploads() {
+  const rootId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
+  if (!rootId) throw new Error('Upload folder not configured.');
+  const sheet = ensureSheet_(SpreadsheetApp.getActiveSpreadsheet());
+  const submittedIds = new Set(sheet.getLastRow() > 1 ? sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).getValues().flat().map(String) : []);
+  const cutoff = Date.now() - ONBOARDING_CONFIG.abandonedUploadDays * 24 * 60 * 60 * 1000;
+  let pageToken;
+  let removed = 0;
+  do {
+    const result = Drive.Files.list({
+      q: "'" + rootId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      fields: 'nextPageToken,files(id,name,createdTime)',
+      pageSize: 100,
+      pageToken: pageToken
+    });
+    (result.files || []).forEach(folder => {
+      if (!submittedIds.has(String(folder.name)) && new Date(folder.createdTime).getTime() < cutoff) {
+        Drive.Files.update({trashed: true}, folder.id);
+        removed += 1;
+      }
+    });
+    pageToken = result.nextPageToken;
+  } while (pageToken);
+  return 'Removed ' + removed + ' abandoned upload folder(s).';
 }
 
 function ensureSheet_(spreadsheet) {

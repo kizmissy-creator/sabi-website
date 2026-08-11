@@ -71,6 +71,9 @@
   const voiceStoreName = 'recordings';
   const maxVoiceSeconds = 300;
   let activeVoiceRecording = null;
+  const documentFieldNames = ['existingCv', 'vacancyDocument', 'applicationDocument'];
+  const uploadedDocuments = new Map(documentFieldNames.map(name => [name, []]));
+  let pendingDocumentUploads = 0;
 
   function openVoiceDatabase() {
     return new Promise((resolve, reject) => {
@@ -539,7 +542,7 @@
     }
     repeaterNames.forEach(name => { data[name] = collectRepeater(name); });
     addCompatibilityFields(data);
-    return { data, current, savedAt: new Date().toISOString() };
+    return {data, uploads: documentFieldNames.flatMap(name => uploadedDocuments.get(name) || []), current, savedAt: new Date().toISOString()};
   }
 
   function save() {
@@ -580,6 +583,7 @@
     try {
       const draft = JSON.parse(localStorage.getItem(storageKey)); if (!draft?.data) return;
       migrateDraftChoices(draft.data);
+      documentFieldNames.forEach(name => uploadedDocuments.set(name, (draft.uploads || []).filter(upload => upload.field === name)));
       repeaterNames.forEach(name => {
         const container = document.querySelector(`[data-repeater="${name}"]`);
         container.replaceChildren();
@@ -596,6 +600,7 @@
         });
       }
       current = 0;
+      documentFieldNames.forEach(renderDocumentUploads);
       saveState.textContent = `Draft restored from ${new Date(draft.savedAt).toLocaleString()}`;
     } catch { localStorage.removeItem(storageKey); }
   }
@@ -767,6 +772,155 @@
     return true;
   }
 
+  const formatFileSize = bytes => `${(Number(bytes) / (1024 * 1024)).toFixed(Number(bytes) >= 1024 * 1024 ? 1 : 2)} MB`;
+
+  function renderDocumentUploads(fieldName) {
+    const card = document.querySelector(`[data-upload-field="${fieldName}"]`);
+    const list = card?.querySelector('[data-upload-list]');
+    if (!list) return;
+    list.replaceChildren();
+    (uploadedDocuments.get(fieldName) || []).forEach(upload => {
+      const row = document.createElement('div');
+      row.className = 'upload-item upload-complete';
+      const details = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = upload.name;
+      const meta = document.createElement('small');
+      meta.textContent = `${formatFileSize(upload.size)} · Uploaded securely`;
+      details.append(name, meta);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'upload-remove';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => removeDocumentUpload(fieldName, upload, remove));
+      row.append(details, remove);
+      list.append(row);
+    });
+  }
+
+  function readFileWithProgress(file, progress) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onprogress = event => { if (event.lengthComputable) progress(Math.round((event.loaded / event.total) * 35)); };
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = () => reject(new Error(`${file.name} could not be read.`));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+  async function requestUploadTicket(uploadRequestId) {
+    const response = await fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+      action: 'ticket', uploadRequestId, submissionId: form.elements.submissionId.value,
+      clientReference: form.elements.clientReference.value, serviceCode: form.elements.serviceCode.value
+    })});
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok || !result.receiverUrl || !result.token) throw new Error(result.error || 'A secure upload could not be started.');
+    return result;
+  }
+
+  async function pollUploadStatus(uploadRequestId) {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const response = await fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        action: 'status', uploadRequestId, submissionId: form.elements.submissionId.value,
+        clientReference: form.elements.clientReference.value, serviceCode: form.elements.serviceCode.value
+      })});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || 'The document upload could not be confirmed.');
+      if (result.upload?.id) return result;
+      await wait(1000);
+    }
+    throw new Error('The document is taking longer than expected to confirm. Please try again.');
+  }
+
+  async function uploadOneDocument(fieldName, file, existingRow) {
+    const list = document.querySelector(`[data-upload-field="${fieldName}"] [data-upload-list]`);
+    const row = existingRow || document.createElement('div');
+    row.className = 'upload-item upload-pending';
+    row.replaceChildren();
+    const details = document.createElement('div');
+    const name = document.createElement('strong'); name.textContent = file.name;
+    const status = document.createElement('small'); status.textContent = 'Preparing secure upload…';
+    const progressBar = document.createElement('progress'); progressBar.max = 100; progressBar.value = 0;
+    details.append(name, status, progressBar); row.append(details);
+    if (!existingRow) list.append(row);
+    const updateProgress = value => { progressBar.value = value; status.textContent = value < 35 ? 'Preparing secure upload…' : 'Uploading securely…'; };
+
+    pendingDocumentUploads += 1;
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['pdf', 'doc', 'docx', 'txt'].includes(ext)) throw new Error(`${file.name} is not a PDF, Word or text file.`);
+      if (!file.size || file.size > config.maxFileBytes) throw new Error(`${file.name} must be smaller than 12 MB.`);
+      if (!config.uploadEndpoint) throw new Error('Secure document uploads are not available yet.');
+      const uploadRequestId = makeId();
+      const ticket = await requestUploadTicket(uploadRequestId);
+      const base64 = await readFileWithProgress(file, updateProgress);
+      progressBar.value = 45;
+      await fetch(ticket.receiverUrl, {method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({
+        action: 'file_upload', uploadRequestId,
+        submissionId: form.elements.submissionId.value,
+        clientReference: form.elements.clientReference.value,
+        serviceCode: form.elements.serviceCode.value,
+        submissionToken: ticket.token,
+        file: {field: fieldName, name: file.name, type: file.type || 'application/octet-stream', size: file.size, base64}
+      })});
+      progressBar.value = 85; status.textContent = 'Confirming secure upload…';
+      const result = await pollUploadStatus(uploadRequestId);
+      uploadedDocuments.get(fieldName).push(result.upload);
+      renderDocumentUploads(fieldName);
+      scheduleSave();
+    } catch (error) {
+      row.className = 'upload-item upload-failed';
+      status.textContent = error.message;
+      progressBar.remove();
+      const actions = document.createElement('div'); actions.className = 'upload-actions';
+      const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'upload-retry'; retry.textContent = 'Try again';
+      const dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.className = 'upload-remove'; dismiss.textContent = 'Remove';
+      retry.addEventListener('click', () => uploadOneDocument(fieldName, file, row));
+      dismiss.addEventListener('click', () => row.remove());
+      actions.append(retry, dismiss); row.append(actions);
+    } finally {
+      pendingDocumentUploads -= 1;
+    }
+  }
+
+  async function removeDocumentUpload(fieldName, upload, button) {
+    button.disabled = true; button.textContent = 'Removing…';
+    try {
+      const response = await fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        action: 'delete', submissionId: form.elements.submissionId.value, clientReference: form.elements.clientReference.value,
+        serviceCode: form.elements.serviceCode.value, uploadId: upload.id
+      })});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || 'The document could not be removed.');
+      uploadedDocuments.set(fieldName, (uploadedDocuments.get(fieldName) || []).filter(item => item.id !== upload.id));
+      renderDocumentUploads(fieldName); scheduleSave();
+    } catch (error) {
+      button.disabled = false; button.textContent = 'Remove';
+      alert(`${error.message} Please try again.`);
+    }
+  }
+
+  function setupDocumentUploads() {
+    document.querySelectorAll('[data-document-input]').forEach(input => input.addEventListener('change', async () => {
+      const files = [...input.files]; input.value = '';
+      for (const file of files) await uploadOneDocument(input.name, file);
+    }));
+    documentFieldNames.forEach(renderDocumentUploads);
+  }
+
+  async function deleteAllDocumentUploads() {
+    const requests = documentFieldNames.flatMap(fieldName => (uploadedDocuments.get(fieldName) || []).map(upload =>
+      fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        action: 'delete', submissionId: form.elements.submissionId.value, clientReference: form.elements.clientReference.value,
+        serviceCode: form.elements.serviceCode.value, uploadId: upload.id
+      })})
+    ));
+    await Promise.allSettled(requests);
+    documentFieldNames.forEach(name => { uploadedDocuments.set(name, []); renderDocumentUploads(name); });
+  }
+
   function buildReview() {
     const f = form.elements;
     const data = serialise().data;
@@ -784,7 +938,7 @@
       const details = fields.map(([key, label]) => clean(entry[key]) ? `${label}: ${entry[key]}` : '').filter(Boolean);
       return details.length ? `${index + 1}. ${details.join('; ')}` : '';
     }).filter(Boolean).join('\n');
-    const files = [...form.querySelectorAll('input[type=file]')].filter(input => input.files.length).map(input => input.files[0].name).join(', ');
+    const files = documentFieldNames.flatMap(name => uploadedDocuments.get(name) || []).map(upload => upload.name).join(', ');
 
     const sections = [
       {title:'About you', step:0, rows:[
@@ -838,16 +992,11 @@
   const readFile = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
 
   async function payload() {
+    if (pendingDocumentUploads > 0) throw new Error('Please wait for your document uploads to finish before sending the form.');
     const draft = serialise(); const files = [];
-    for (const input of form.querySelectorAll('input[type=file]')) {
-      const file = input.files[0]; if (!file) continue;
-      const ext = file.name.split('.').pop().toLowerCase();
-      if (file.size > config.maxFileBytes || !config.acceptedExtensions.includes(ext)) throw new Error(`${file.name} is not an accepted file or is larger than 8 MB.`);
-      files.push({ field: input.name, name: file.name, type: file.type || 'application/octet-stream', size: file.size, base64: await readFile(file) });
-    }
     for (const recording of voiceRecordings.values()) {
       const ext = recording.name.split('.').pop().toLowerCase();
-      if (recording.blob.size > config.maxFileBytes || !config.acceptedExtensions.includes(ext)) throw new Error('A voice answer is larger than 8 MB or is not in an accepted audio format. Delete it and record it again.');
+      if (recording.blob.size > config.maxFileBytes || !config.acceptedExtensions.includes(ext)) throw new Error('A voice answer is larger than 12 MB or is not in an accepted audio format. Delete it and record it again.');
       files.push({
         field: `voice_${recording.field}`,
         name: recording.name,
@@ -856,7 +1005,7 @@
         base64: await readFile(recording.blob)
       });
     }
-    return {...draft.data, files, submittedAt: new Date().toISOString(), userAgent: navigator.userAgent};
+    return {...draft.data, uploads: draft.uploads, files, submittedAt: new Date().toISOString(), userAgent: navigator.userAgent};
   }
 
   form.addEventListener('input', event => {
@@ -902,7 +1051,7 @@
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (pendingDocumentUploads > 0) { alert('Please wait for the document upload to finish before clearing the form.'); return; } if (confirm('Clear all answers, recordings and uploaded documents? This cannot be undone.')) { discardActiveVoiceRecording(); await deleteAllDocumentUploads(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateAllSteps()) return;
@@ -924,6 +1073,7 @@
   });
 
   createVoiceControls();
+  setupDocumentUploads();
   tagFieldConfigs.forEach(setupTagField);
   restoreVoiceRecordings();
   restore(); tagFieldConfigs.forEach(config => loadTagField(config.name)); updateConditional(); revealPopulatedPreferenceDetails(); showStep(current, {focusHeading:false});

@@ -11,9 +11,9 @@
   <link rel="stylesheet" href="./onboarding.css?v=51">
   <link rel="stylesheet" href="./responsive-nav.css?v=51">
   <link rel="stylesheet" href="./compact-form.css?v=51">
-  <link rel="stylesheet" href="./form-rhythm.css?v=51">
-  <script src="./config.js" defer></script>
-  <script src="./onboarding.js" defer></script>
+  <link rel="stylesheet" href="./form-rhythm.css?v=52">
+  <script src="./config.js?v=52" defer></script>
+  <script src="./onboarding.js?v=52" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#onboarding-form">Skip to the form</a>
@@ -74,7 +74,7 @@
       <form id="onboarding-form" novalidate>
         <input type="hidden" name="clientReference" value="CL-2026-001">
         <input type="hidden" name="serviceCode" value="career_partner_bespoke">
-        <input type="hidden" name="formVersion" value="bronagh-2026-08-11-v51">
+        <input type="hidden" name="formVersion" value="bronagh-2026-08-11-v52">
         <input type="hidden" name="ageEligible" value="yes">
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
@@ -148,12 +148,12 @@
 
         <section class="form-step" data-step="6">
           <p class="eyebrow">STEP 7</p><h2 tabindex="-1">Documents</h2><p class="intro">This whole page is optional. Add only documents that would be useful for your career support. You can upload a file, paste a link, say what you will send later, or leave the page blank.</p>
-          <label>Existing CV or work-history document <small>PDF, Word or text · 8 MB maximum</small><input type="file" name="existingCv" accept=".pdf,.doc,.docx,.txt"></label>
-          <label>Vacancy advert, job description or person specification <small>PDF, Word or text · 8 MB maximum</small><input type="file" name="vacancyDocument" accept=".pdf,.doc,.docx,.txt"></label>
-          <label>Application draft <small>PDF, Word or text · 8 MB maximum</small><input type="file" name="applicationDocument" accept=".pdf,.doc,.docx,.txt"></label>
+          <div class="document-upload" data-upload-field="existingCv"><h3>Existing CV or work-history documents</h3><p>Add any current or older versions that may be useful. PDF, Word or text files, up to 12 MB each.</p><label class="upload-picker">+ Add documents<input class="visually-hidden" type="file" name="existingCv" accept=".pdf,.doc,.docx,.txt" multiple data-document-input></label><div class="upload-list" data-upload-list aria-live="polite"></div></div>
+          <div class="document-upload" data-upload-field="vacancyDocument"><h3>Vacancy or role documents</h3><p>Add adverts, job descriptions or person specifications. PDF, Word or text files, up to 12 MB each.</p><label class="upload-picker">+ Add documents<input class="visually-hidden" type="file" name="vacancyDocument" accept=".pdf,.doc,.docx,.txt" multiple data-document-input></label><div class="upload-list" data-upload-list aria-live="polite"></div></div>
+          <div class="document-upload" data-upload-field="applicationDocument"><h3>Application documents</h3><p>Add an application draft or supporting statement. PDF, Word or text files, up to 12 MB each.</p><label class="upload-picker">+ Add documents<input class="visually-hidden" type="file" name="applicationDocument" accept=".pdf,.doc,.docx,.txt" multiple data-document-input></label><div class="upload-list" data-upload-list aria-live="polite"></div></div>
           <label>Document or profile link<input type="url" name="documentUrl" placeholder="https://"></label>
           <label>Notes about documents you will send later<textarea name="documentNotes" rows="3"></textarea></label>
-          <div class="notice">Files are not stored in your browser draft. They are attached only when you make the final submission. If you leave this page, you will need to select them again.</div>
+          <div class="notice">Documents upload securely as you add them and are kept in SABI's restricted Google Drive. You can return on this browser and remove or add documents before sending the form.</div>
         </section>
 
         <section class="form-step" data-step="7">

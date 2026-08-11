@@ -989,3 +989,129 @@ legend small {
     width: 100%;
   }
 }
+
+.document-upload {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #b8cfcc;
+  border-radius: 14px;
+  background: #fbfefe;
+}
+
+.document-upload h3 {
+  margin: 0 0 .25rem;
+  color: var(--teal-dark);
+  font-size: 1.05rem;
+}
+
+.document-upload > p {
+  margin: 0 0 .8rem;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.upload-picker {
+  display: inline-flex;
+  width: auto;
+  margin: 0;
+  padding: .55rem .8rem;
+  border: 1px solid #d1ad38;
+  border-radius: 8px;
+  background: #fff1b8;
+  color: var(--teal-dark);
+  font-size: .9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.upload-picker:hover {
+  background: #f6d66d;
+}
+
+.upload-picker:focus-within {
+  outline: 3px solid #765a00;
+  outline-offset: 2px;
+}
+
+.upload-list {
+  display: grid;
+  gap: .55rem;
+  margin-top: .75rem;
+}
+
+.upload-list:empty {
+  display: none;
+}
+
+.upload-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .75rem;
+  align-items: center;
+  padding: .7rem .75rem;
+  border: 1px solid #c9d9d7;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.upload-item strong,
+.upload-item small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.upload-item small {
+  margin-top: .15rem;
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.upload-item progress {
+  display: block;
+  width: min(100%, 300px);
+  height: .45rem;
+  margin-top: .5rem;
+  accent-color: var(--teal-dark);
+}
+
+.upload-complete {
+  border-left: 3px solid var(--teal-dark);
+}
+
+.upload-failed {
+  border-color: #aa5b5b;
+  background: #fff8f8;
+}
+
+.upload-actions {
+  display: flex;
+  gap: .4rem;
+}
+
+.upload-remove,
+.upload-retry {
+  padding: .4rem .55rem;
+  border: 1px solid #8fb8b3;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--teal-dark);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.upload-remove:hover,
+.upload-retry:hover {
+  background: var(--teal-soft);
+}
+
+@media (max-width: 520px) {
+  .upload-item {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-actions {
+    justify-content: flex-start;
+  }
+}
