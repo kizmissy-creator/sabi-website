@@ -29,7 +29,7 @@
     'Short course or training': { label: 'Status', prompt: 'Choose status', options: ['Completed', 'In progress', 'Attended', 'Passed', 'No grade or result applies', 'Not sure'] },
     'Not listed': defaultResultDetails
   };
-  const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate', 'Short course or training']);
+  const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate']);
   let current = 0;
   let saveTimer;
   let broadDirectionTags = [];
@@ -333,11 +333,11 @@
 
   function renumberEntries(name) {
     const cards = [...document.querySelector(`[data-repeater="${name}"]`).children];
-    cards.forEach((card, index) => {
+    cards.forEach(card => {
       const number = card.querySelector('[data-entry-number]');
-      if (number) number.textContent = String(index + 1);
+      if (number) number.textContent = '';
       const remove = card.querySelector('[data-remove-entry]');
-      if (remove) remove.hidden = cards.length === 1;
+      if (remove) remove.hidden = false;
     });
   }
 
@@ -371,6 +371,7 @@
 
   function collectRepeater(name) {
     if (name === 'employmentHistory' && document.getElementById('no-experience')?.checked) return [];
+    if (name === 'qualifications' && document.getElementById('no-qualifications')?.checked) return [];
     return [...document.querySelector(`[data-repeater="${name}"]`).children].map(card => {
       const entry = {};
       card.querySelectorAll('[data-repeat-field]').forEach(field => {
@@ -434,6 +435,12 @@
     const noExperience = document.getElementById('no-experience')?.checked;
     const area = document.getElementById('experience-entry-area');
     if (area) area.hidden = noExperience;
+  }
+
+  function syncQualificationChoice() {
+    const noQualifications = document.getElementById('no-qualifications')?.checked;
+    const area = document.getElementById('qualification-entry-area');
+    if (area) area.hidden = noQualifications;
   }
 
   function syncQualificationCard(card, selectedGrade = '') {
@@ -504,7 +511,7 @@
       repeaterNames.forEach(name => {
         const container = document.querySelector(`[data-repeater="${name}"]`);
         container.replaceChildren();
-        const entries = Array.isArray(draft.data[name]) && draft.data[name].length ? draft.data[name] : [{}];
+        const entries = Array.isArray(draft.data[name]) ? draft.data[name] : [];
         entries.forEach(entry => addEntry(name, entry));
       });
       for (const [name, value] of Object.entries(draft.data)) {
@@ -558,6 +565,7 @@
     syncCurrentGapCards();
     syncQualificationCards();
     syncExperienceChoice();
+    syncQualificationChoice();
   }
 
   function showStep(index, {focusHeading = true} = {}) {
@@ -706,9 +714,9 @@
       ]},
       {title:'Your situation', step:1, rows:[['Current situation', selectedLabels('currentSituation')]]},
       {title:'Your experience', step:2, rows:[
-        ['Work and other experience', document.getElementById('no-experience')?.checked ? 'I do not have experience to add' : formatEntries(data.employmentHistory, [['experienceType','Type'],['jobTitle','Role or activity'],['organisation','Organisation or setting'],['startDate','Start'],['endDate','End'],['responsibilities','What I did'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])],
+        ['Work and other experience', document.getElementById('no-experience')?.checked ? 'I do not have any work or other experience to add yet' : formatEntries(data.employmentHistory, [['experienceType','Type'],['jobTitle','Role or activity'],['organisation','Organisation or setting'],['startDate','Start'],['endDate','End'],['responsibilities','What I did'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])],
         ['Employment gaps', formatEntries(data.employmentGaps, [['startDate','Start'],['endDate','End'],['reason','Reason']])],
-        ['Qualifications and training', formatEntries(data.qualifications, [['qualificationType','Type'],['subject','Subject or course'],['grade','Result or status'],['completionYear','Year'],['provider','Provider'],['expiry','Expiry or renewal']])]
+        ['Qualifications and training', document.getElementById('no-qualifications')?.checked ? 'I do not have any qualifications or training to add' : formatEntries(data.qualifications, [['qualificationType','Type'],['subject','Subject or course'],['grade','Result or status'],['completionYear','Year'],['provider','Provider'],['expiry','Expiry or renewal']])]
       ]},
       {title:'What you bring', step:3, rows:[
         ['Hobbies or interests', voiceAnswer('hobbies', f.hobbies.value)], ['Tasks that hold your attention', voiceAnswer('interests', f.interests.value)],
@@ -800,7 +808,6 @@
     if (!button) return;
     const container = button.closest('[data-repeater]');
     button.closest('.repeat-card').remove();
-    if (!container.children.length) addEntry(container.dataset.repeater);
     renumberEntries(container.dataset.repeater);
     scheduleSave();
   });
@@ -810,7 +817,7 @@
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); broadDirectionTags = []; if (broadDirectionTagInput) broadDirectionTagInput.value = ''; renderBroadDirectionTags(); repeaterNames.forEach(name => { document.querySelector(`[data-repeater="${name}"]`).replaceChildren(); addEntry(name); }); document.getElementById('submission-id').value = makeId(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (confirm('Clear all answers and recordings saved on this device? This cannot be undone.')) { discardActiveVoiceRecording(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); broadDirectionTags = []; if (broadDirectionTagInput) broadDirectionTagInput.value = ''; renderBroadDirectionTags(); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateAllSteps()) return;
@@ -831,7 +838,6 @@
     }
   });
 
-  repeaterNames.forEach(name => addEntry(name));
   createVoiceControls();
   setupBroadDirectionTags();
   restoreVoiceRecordings();

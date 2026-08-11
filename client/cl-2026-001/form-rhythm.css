@@ -133,6 +133,35 @@ legend small {
   line-height: 1.45;
 }
 
+.accessibility-gate {
+  margin-top: 1.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.accessibility-gate .choice {
+  margin: 0;
+}
+
+.accessibility-gate details {
+  margin: .45rem .8rem 0 2.9rem;
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.accessibility-gate summary {
+  width: fit-content;
+  color: var(--teal-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: .16em;
+  cursor: pointer;
+}
+
+.accessibility-gate p {
+  margin: .45rem 0 0;
+}
+
 .info-box,
 .privacy-note,
 .notice,
@@ -205,6 +234,10 @@ legend small {
   border: 1px solid #aec2c0;
   border-radius: 12px;
   background: #fff;
+}
+
+.repeater:empty {
+  display: none;
 }
 
 .repeat-card-heading {
