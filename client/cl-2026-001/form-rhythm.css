@@ -321,6 +321,57 @@ legend small {
   color: var(--muted);
 }
 
+.opportunity-details {
+  border: 2px solid #ead283;
+  border-left: 5px solid var(--yellow);
+  background: #fffdf5;
+  box-shadow: 0 8px 22px rgba(22, 73, 72, .07);
+}
+
+.opportunity-details > summary {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: 1rem;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.opportunity-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.opportunity-details > summary::before {
+  content: "+";
+  display: grid;
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--teal-dark);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.opportunity-details[open] > summary::before {
+  content: "−";
+}
+
+.opportunity-details > summary span {
+  display: grid;
+  gap: .05rem;
+}
+
+.opportunity-details > summary small {
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 .prompt-card {
   background: #fff;
 }
