@@ -208,7 +208,7 @@ legend small {
 }
 
 .qualification-actions {
-  margin-top: 1rem;
+  margin-top: .35rem;
 }
 
 .qualification-actions .add-button {
@@ -223,6 +223,7 @@ legend small {
   width: fit-content;
   margin-top: .9rem;
   padding: .6rem .75rem;
+  border: 1px solid var(--line);
   border-radius: 9px;
   background: #f5f9f9;
   color: var(--teal-dark);
@@ -232,6 +233,7 @@ legend small {
 }
 
 .none-entry-choice:has(input:checked) {
+  border-color: #d1ad38;
   background: #fff5cf;
 }
 
@@ -254,40 +256,6 @@ legend small {
 
 .qualification-primary-fields {
   grid-template-columns: minmax(12rem, .8fr) minmax(16rem, 1.2fr);
-}
-
-.qualification-status {
-  margin: 0;
-}
-
-.qualification-status-details {
-  margin-top: .8rem;
-  border-top: 1px solid var(--line);
-  padding-top: .55rem;
-}
-
-.qualification-status-details > summary {
-  width: fit-content;
-  color: var(--teal-dark);
-  font-size: .86rem;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: .16em;
-  cursor: pointer;
-}
-
-.qualification-status p {
-  margin: .6rem 0 .25rem;
-  color: var(--muted);
-  font-size: .84rem;
-}
-
-.qualification-status .choice,
-.qualification-status .choice:has(input:checked) {
-  height: auto;
-  padding: .4rem .15rem;
-  border: 0;
-  background: transparent;
 }
 
 .question-group > h3,
@@ -327,10 +295,14 @@ legend small {
   background: #fff;
 }
 
+.practical-preferences-details {
+  border-left: 2px solid #cdbf88;
+}
+
 .employment-gap-details > summary,
 .practical-preferences-details > summary {
   color: var(--teal-dark);
-  background: #fffdf5;
+  background: #fff;
 }
 
 .practical-preferences-details .preference-details-body {
@@ -504,6 +476,23 @@ legend small {
 
 .add-button.primary-add-action:hover {
   background: #f6d66d;
+}
+
+.add-button.qualification-add-action {
+  display: inline-flex;
+  align-items: center;
+  margin: .65rem 0 .25rem;
+  padding: .48rem .7rem;
+  border: 1px solid var(--teal);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--teal-dark);
+  font-size: .88rem;
+  text-decoration: none;
+}
+
+.add-button.qualification-add-action:hover {
+  background: var(--teal-soft);
 }
 
 .inline-choice {
