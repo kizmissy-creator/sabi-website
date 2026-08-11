@@ -322,19 +322,18 @@ legend small {
 }
 
 .opportunity-details {
-  border: 2px solid #ead283;
-  border-left: 5px solid var(--yellow);
-  background: #fffdf5;
-  box-shadow: 0 8px 22px rgba(22, 73, 72, .07);
+  border: 1px solid #d8cfad;
+  border-left: 4px solid var(--yellow);
+  background: #fff;
 }
 
 .opportunity-details > summary {
   display: flex;
   align-items: center;
-  gap: .8rem;
-  padding: 1rem;
+  gap: .65rem;
+  padding: .8rem .9rem;
   list-style: none;
-  font-size: 1rem;
+  font-size: .92rem;
 }
 
 .opportunity-details > summary::-webkit-details-marker {
@@ -344,32 +343,20 @@ legend small {
 .opportunity-details > summary::before {
   content: "+";
   display: grid;
-  flex: 0 0 2rem;
-  width: 2rem;
-  height: 2rem;
+  flex: 0 0 1.6rem;
+  width: 1.6rem;
+  height: 1.6rem;
   place-items: center;
   border-radius: 50%;
-  background: var(--yellow);
+  border: 1px solid var(--yellow);
+  background: #fff5cf;
   color: var(--teal-dark);
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 
 .opportunity-details[open] > summary::before {
   content: "−";
-}
-
-.opportunity-details > summary span {
-  display: grid;
-  gap: .05rem;
-}
-
-.opportunity-details > summary small {
-  color: var(--muted);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
 }
 
 .prompt-card {
