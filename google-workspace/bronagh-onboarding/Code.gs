@@ -19,7 +19,7 @@ const ONBOARDING_HEADERS = [
   'career_direction', 'priorities', 'working_arrangements', 'preferred_hours', 'contract_types',
   'availability', 'travel_limit', 'pay_needs', 'job_search_stage', 'job_search_difficulties',
   'example_jobs', 'deadline', 'success_outcomes', 'accessibility_consent', 'accessibility_discussion',
-  'working_preferences', 'submission_folder', 'status'
+  'follow_up_discussion', 'working_preferences', 'submission_folder', 'status'
 ];
 
 function configureBronaghOnboarding() {
@@ -279,6 +279,7 @@ function appendSummaryRow_(sheet, input, folderUrl) {
     success_outcomes: input.successOutcome,
     accessibility_consent: includesYes_(input.specialCategoryConsent) ? 'Yes' : 'No',
     accessibility_discussion: input.accessibilityDiscussion,
+    follow_up_discussion: input.followUpDiscussion,
     working_preferences: input.workingPreferences,
     submission_folder: folderUrl,
     status: 'New'

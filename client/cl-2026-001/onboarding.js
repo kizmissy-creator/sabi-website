@@ -800,7 +800,7 @@
       {title:'Documents', step:6, rows:[['Files selected', files], ['Document link', f.documentUrl.value], ['Documents to send later', f.documentNotes.value]]},
       {title:'Working together', step:7, rows:[
         ['Accessibility consent', selectedLabels('specialCategoryConsent')], ['Accessibility or adjustment information', f.accessibilityNeeds.value],
-        ['Who you would like to discuss this with', selectedLabels('accessibilityDiscussion')], ['How we work together', f.workingPreferences.value], ['Anyone else involved', selectedLabels('supporter')]
+        ['Who you would like to discuss this with', selectedLabels('accessibilityDiscussion')], ['Optional follow-up discussion', selectedLabels('followUpDiscussion')], ['How we work together', f.workingPreferences.value], ['Anyone else involved', selectedLabels('supporter')]
       ]}
     ];
 
