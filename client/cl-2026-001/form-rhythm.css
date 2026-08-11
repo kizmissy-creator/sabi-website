@@ -1,4 +1,21 @@
 /* A task-focused rhythm: compact controls, clear grouping, room where writing needs it. */
+body {
+  background: #fbfaf4;
+}
+
+.form-step > h2 {
+  width: fit-content;
+  margin-left: -.08em;
+  padding: 0 .08em .06em;
+  background: linear-gradient(
+    to bottom,
+    transparent 69%,
+    rgba(242, 201, 76, .34) 69%,
+    rgba(242, 201, 76, .34) 91%,
+    transparent 91%
+  );
+}
+
 .form-shell {
   max-width: 1040px;
   grid-template-columns: 230px minmax(0, 760px);
@@ -188,11 +205,24 @@ legend small {
 }
 
 .question-group {
+  position: relative;
+  overflow: hidden;
   margin: 1.5rem 0;
   padding: 1.15rem;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #f9fcfc;
+}
+
+.question-group:not(.opportunity-card)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.15rem;
+  width: 2.8rem;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: rgba(242, 201, 76, .72);
 }
 
 .form-step[data-step="2"] .question-group {
