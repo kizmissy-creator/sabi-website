@@ -695,7 +695,7 @@
   }
 
   function validateStep(stepIndex = current) {
-    addBroadDirectionTag();
+    tagFieldConfigs.forEach(config => addTag(config.name));
     const errors = collectStepErrors(stepIndex);
     if (!errors.length) return true;
     showValidationErrors(errors);
@@ -703,7 +703,7 @@
   }
 
   function validateAllSteps() {
-    addBroadDirectionTag();
+    tagFieldConfigs.forEach(config => addTag(config.name));
     const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
     for (let index = 0; index < activeSteps.length; index++) {
       const errors = collectStepErrors(index);
