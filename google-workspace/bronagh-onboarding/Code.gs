@@ -22,7 +22,54 @@ const ONBOARDING_HEADERS = [
   'career_direction', 'priorities', 'working_arrangements', 'preferred_hours', 'contract_types',
   'availability', 'travel_limit', 'pay_needs', 'job_search_stage', 'job_search_difficulties',
   'example_jobs', 'deadline', 'success_outcomes', 'accessibility_consent', 'accessibility_discussion',
-  'follow_up_discussion', 'working_preferences', 'submission_folder', 'status'
+  'follow_up_discussion', 'working_preferences', 'response_document', 'submission_folder', 'status', 'notification_status'
+];
+
+const ONBOARDING_REPORT_SECTIONS = [
+  {title: 'About you', fields: [
+    ['firstName', 'First name'], ['lastName', 'Last name'], ['preferredName', 'Preferred name'], ['pronouns', 'Pronouns'],
+    ['email', 'Email address'], ['telephone', 'Telephone number'], ['preferredContact', 'Preferred contact'], ['location', 'Area']
+  ]},
+  {title: 'Your situation', fields: [
+    ['currentSituation', 'Current situation'], ['currentSituationOther', 'Anything else about the current situation'],
+    ['searchStageNotes', 'Anything else about where things are now']
+  ]},
+  {title: 'Your experience', fields: [
+    ['noExperience', 'No work or other experience to add'], ['employmentHistory', 'Work and other experience'], ['employmentGaps', 'Employment gaps'],
+    ['noQualifications', 'No qualifications, training, licences or certificates to add'], ['qualifications', 'Qualifications, training, licences or certificates'],
+    ['englishMathsStatus', 'English and maths information']
+  ]},
+  {title: 'What you bring', fields: [
+    ['hobbies', 'Hobbies or interests'], ['interests', 'Tasks that hold attention'], ['caringStrengths', 'Caring responsibilities and transferable strengths'],
+    ['skillsExamples', 'What someone who knows you well might say'], ['strengthAttributes', 'Things you consider yourself good at'],
+    ['practicalSkillAreas', 'Practical skill areas'], ['practicalSkills', 'Practical skills or knowledge'], ['proudOf', 'Something you feel pleased or proud about']
+  ]},
+  {title: 'What comes next', fields: [
+    ['broadDirection', 'Roles or types of work being considered'], ['targetSectors', 'Sectors or settings that interest you'],
+    ['rolesToAvoid', 'Roles or settings to avoid'], ['priorities', 'What matters most'], ['priorityNotes', 'Anything else that matters'],
+    ['workplace', 'Preferred working arrangements'], ['hours', 'Hours or working patterns'], ['hoursOther', 'Other hours or pattern'],
+    ['contractTypes', 'Contract types'], ['travelLimit', 'Maximum commute or travel'], ['availability', 'Available from'], ['payNeeds', 'Pay needs or expectations']
+  ]},
+  {title: 'Your job search', fields: [
+    ['searchStage', 'Current job-search stage'], ['difficultParts', 'Parts of searching or applying that feel hardest'],
+    ['difficultPartsOther', 'Something else that feels difficult'], ['exampleOpportunities', 'Vacancies, roles or organisations of interest'],
+    ['deadlineGate', 'Has a deadline'], ['deadlineType', 'Deadline type'], ['deadline', 'Deadline date'], ['deadlineNotes', 'Deadline notes'],
+    ['applicationDraft', 'Application or supporting statement'], ['successOutcomes', 'What would make the service feel successful'],
+    ['successOutcomeOther', 'Other successful outcome']
+  ]},
+  {title: 'Documents and links', fields: [
+    ['documentUrl', 'Document or profile links'], ['documentNotes', 'Documents to send later']
+  ]},
+  {title: 'Working together', fields: [
+    ['specialCategoryConsent', 'Consent to use health, disability or neurodivergence information'],
+    ['accessibilityNeeds', 'Accessibility or adjustment information'], ['accessibilityDiscussion', 'Who to discuss accessibility or adjustments with'],
+    ['followUpDiscussion', 'Optional follow-up discussion'], ['workingPreferences', 'How to work together'], ['supporter', 'Anyone else involved'],
+    ['supporterName', 'Supporter name'], ['supporterRelationship', 'Supporter relationship'], ['supporterContact', 'Supporter contact details'],
+    ['supporterRole', 'What the supporter may help with']
+  ]},
+  {title: 'Declarations', fields: [
+    ['termsAccepted', 'Terms accepted'], ['earlyStart', 'Early start requested'], ['clientDeclaration', 'Client declaration']
+  ]}
 ];
 
 function configureBronaghOnboarding() {
@@ -367,7 +414,15 @@ function save_(input) {
     delete snapshot.uploads;
     const snapshotBlob = Utilities.newBlob(JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT, 'onboarding-response.json');
     Drive.Files.create({name: 'onboarding-response.json', parents: [submissionFolder.id]}, snapshotBlob);
-    appendSummaryRow_(sheet, input, driveUrl_(submissionFolder.id));
+    const responseDocument = createReadableOnboardingDocument_(snapshot, submissionFolder.id);
+    const summary = appendSummaryRow_(sheet, input, driveUrl_(submissionFolder.id), responseDocument.url);
+    try {
+      sendOnboardingArrivalNotification_(input, responseDocument.url, driveUrl_(submissionFolder.id));
+      sheet.getRange(summary.row, summary.notificationColumn).setValue('Sent');
+    } catch (notificationError) {
+      sheet.getRange(summary.row, summary.notificationColumn).setValue('Failed');
+      console.error('Onboarding arrival notification failed: ' + notificationError.message);
+    }
   } catch (error) {
     throw error;
   }
@@ -421,7 +476,7 @@ function ensureSheet_(spreadsheet) {
   return sheet;
 }
 
-function appendSummaryRow_(sheet, input, folderUrl) {
+function appendSummaryRow_(sheet, input, folderUrl, responseDocumentUrl) {
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(String);
   const values = {
     received_at: new Date(),
@@ -453,10 +508,105 @@ function appendSummaryRow_(sheet, input, folderUrl) {
     accessibility_discussion: input.accessibilityDiscussion,
     follow_up_discussion: input.followUpDiscussion,
     working_preferences: input.workingPreferences,
+    response_document: responseDocumentUrl,
     submission_folder: folderUrl,
-    status: 'New'
+    status: 'New',
+    notification_status: 'Pending'
   };
   sheet.appendRow(headers.map(header => header === 'received_at' ? values[header] : safeCell_(values[header])));
+  return {row: sheet.getLastRow(), notificationColumn: headers.indexOf('notification_status') + 1};
+}
+
+function createReadableOnboardingDocument_(input, folderId) {
+  const clientName = [clean_(input.firstName, 120), clean_(input.lastName, 120)].filter(Boolean).join(' ') || 'Bronagh';
+  const receivedAt = Utilities.formatDate(new Date(), ONBOARDING_CONFIG.timeZone || Session.getScriptTimeZone(), 'd MMMM yyyy, HH:mm');
+  const sections = ONBOARDING_REPORT_SECTIONS.map(section => {
+    const rows = section.fields.map(field => reportRow_(field[1], input[field[0]])).filter(Boolean).join('');
+    return rows ? '<section><h2>' + html_(section.title) + '</h2>' + rows + '</section>' : '';
+  }).filter(Boolean).join('');
+  const files = reportFiles_(input.files || []);
+  const htmlContent = '<!doctype html><html><head><meta charset="utf-8"><style>'
+    + 'body{font-family:Arial,sans-serif;color:#173b3b;line-height:1.5}h1{color:#156d6b;font-size:28px;margin-bottom:4px}'
+    + 'h2{color:#156d6b;font-size:20px;border-bottom:2px solid #f2c94c;padding-bottom:5px;margin-top:28px}'
+    + 'h3{color:#0e5553;font-size:15px;margin:16px 0 4px}p{margin:4px 0 10px}table{border-collapse:collapse;width:100%;margin:8px 0 16px}'
+    + 'th,td{border:1px solid #cbdad9;padding:7px;text-align:left;vertical-align:top}th{background:#e7f3f2}.meta{color:#465756;font-size:12px}'
+    + '.entry{border-left:3px solid #f2c94c;padding-left:12px;margin:10px 0}.empty{color:#687675;font-style:italic}</style></head><body>'
+    + '<h1>SABI Career Partner onboarding</h1><p><strong>' + html_(clientName) + '</strong></p>'
+    + '<p class="meta">Client reference: ' + html_(input.clientReference) + '<br>Submission reference: ' + html_(input.submissionId)
+    + '<br>Received: ' + html_(receivedAt) + '</p><p class="meta">Unanswered optional questions are not shown.</p>'
+    + sections + files + '</body></html>';
+  const blob = Utilities.newBlob(htmlContent, 'text/html', 'Bronagh onboarding response.html');
+  const created = Drive.Files.create({
+    name: 'Bronagh - Onboarding response',
+    mimeType: 'application/vnd.google-apps.document',
+    parents: [folderId]
+  }, blob, {fields: 'id,name,webViewLink'});
+  return {id: created.id, url: created.webViewLink || ('https://docs.google.com/document/d/' + encodeURIComponent(created.id) + '/edit')};
+}
+
+function reportRow_(label, value) {
+  if (!hasReportValue_(value)) return '';
+  return '<div><h3>' + html_(label) + '</h3>' + reportValueHtml_(value) + '</div>';
+}
+
+function hasReportValue_(value) {
+  if (Array.isArray(value)) return value.some(hasReportValue_);
+  if (value && typeof value === 'object') return Object.keys(value).some(key => hasReportValue_(value[key]));
+  if (typeof value === 'boolean') return true;
+  return String(value == null ? '' : value).trim() !== '';
+}
+
+function reportValueHtml_(value) {
+  if (Array.isArray(value)) {
+    if (value.every(item => !item || typeof item !== 'object')) {
+      return '<ul>' + value.filter(hasReportValue_).map(item => '<li>' + html_(humaniseReportValue_(item)) + '</li>').join('') + '</ul>';
+    }
+    return value.filter(hasReportValue_).map((item, index) => '<div class="entry"><strong>Entry ' + (index + 1) + '</strong>' + reportObjectTable_(item) + '</div>').join('');
+  }
+  if (value && typeof value === 'object') return reportObjectTable_(value);
+  const text = humaniseReportValue_(value);
+  return '<p>' + html_(text).replace(/\n/g, '<br>') + '</p>';
+}
+
+function reportObjectTable_(value) {
+  const rows = Object.keys(value || {}).filter(key => hasReportValue_(value[key])).map(key =>
+    '<tr><th>' + html_(humaniseReportKey_(key)) + '</th><td>' + reportValueHtml_(value[key]) + '</td></tr>'
+  ).join('');
+  return rows ? '<table>' + rows + '</table>' : '<p class="empty">No details supplied.</p>';
+}
+
+function humaniseReportKey_(value) {
+  return String(value || '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/^./, first => first.toUpperCase());
+}
+
+function humaniseReportValue_(value) {
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  const text = String(value == null ? '' : value).trim();
+  if (text === 'yes') return 'Yes';
+  if (text === 'no') return 'No';
+  if (/^\d{4}-\d{2}(?:-\d{2})?$/.test(text)) return text;
+  if (/^[a-z0-9]+(?:[_-][a-z0-9]+)+$/i.test(text)) return text.replace(/[_-]+/g, ' ').replace(/^./, first => first.toUpperCase());
+  return text;
+}
+
+function reportFiles_(files) {
+  if (!Array.isArray(files) || !files.length) return '';
+  const rows = files.map(file => '<tr><td>' + html_(humaniseReportKey_(String(file.field || '').replace(/^voice_/, 'Voice answer: ')))
+    + '</td><td>' + html_(file.name) + '</td><td><a href="' + html_(file.url) + '">Open in Drive</a></td></tr>').join('');
+  return '<section><h2>Documents and recordings received</h2><table><tr><th>Type</th><th>File</th><th>Link</th></tr>' + rows + '</table></section>';
+}
+
+function sendOnboardingArrivalNotification_(input, responseDocumentUrl, folderUrl) {
+  const clientName = [clean_(input.firstName, 120), clean_(input.lastName, 120)].filter(Boolean).join(' ') || 'Bronagh';
+  const subject = clientName + "'s onboarding has arrived";
+  const body = clientName + "'s Career Partner onboarding has been received.\n\nSubmission reference: " + input.submissionId
+    + '\nReadable response: ' + responseDocumentUrl + '\nSubmission folder: ' + folderUrl
+    + '\n\nThe email contains no onboarding answers or attachments. Open the restricted Google Doc to review the response.';
+  const htmlBody = '<div style="font-family:Arial,sans-serif;color:#173b3b;line-height:1.6;max-width:640px"><p><strong>' + html_(clientName)
+    + "'s Career Partner onboarding has been received.</strong></p><p>Submission reference: " + html_(input.submissionId)
+    + '</p><p><a href="' + html_(responseDocumentUrl) + '">Open the readable onboarding response</a><br><a href="' + html_(folderUrl)
+    + '">Open the restricted submission folder</a></p><p>This notification contains no onboarding answers or attachments.</p></div>';
+  MailApp.sendEmail({to: ONBOARDING_CONFIG.ownerNotificationEmail, subject: subject, body: body, htmlBody: htmlBody, name: 'SABI Career Support'});
 }
 
 function includesYes_(value) { return value === 'yes' || value === true || (Array.isArray(value) && value.includes('yes')); }
