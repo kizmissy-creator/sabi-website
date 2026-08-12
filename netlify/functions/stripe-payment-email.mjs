@@ -16,16 +16,17 @@ function safeEqual(left, right) {
 }
 
 function validStripeSignature(header, payload, secret) {
-  const values = new Map();
+  let timestamp;
+  const signatures = [];
   for (const part of String(header || "").split(",")) {
     const [key, value] = part.split("=");
-    if (key && value) values.set(key.trim(), value.trim());
+    if (!key || !value) continue;
+    if (key.trim() === "t") timestamp = Number(value.trim());
+    if (key.trim() === "v1") signatures.push(value.trim());
   }
-  const timestamp = Number(values.get("t"));
-  const signature = values.get("v1");
-  if (!Number.isFinite(timestamp) || !signature || Math.abs(Date.now() / 1000 - timestamp) > MAX_WEBHOOK_AGE_SECONDS) return false;
+  if (!Number.isFinite(timestamp) || !signatures.length || Math.abs(Date.now() / 1000 - timestamp) > MAX_WEBHOOK_AGE_SECONDS) return false;
   const expected = createHmac("sha256", secret).update(`${timestamp}.${payload}`).digest("hex");
-  return safeEqual(expected, signature);
+  return signatures.some((signature) => safeEqual(expected, signature));
 }
 
 function signDelivery(secret, payload) {
@@ -87,7 +88,8 @@ export default async function stripePaymentEmail(request) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ ...payload, deliveryToken: signDelivery(deliverySecret, payload) })
     });
-    if (!response.ok) throw new Error(`Google receiver returned ${response.status}`);
+    const result = await response.json().catch(() => null);
+    if (!response.ok || result?.ok !== true) throw new Error(`Google receiver did not confirm delivery (${response.status})`);
   } catch (error) {
     console.error("Payment confirmation email was not delivered", error);
     return json({ ok: false }, 502);
@@ -96,3 +98,4 @@ export default async function stripePaymentEmail(request) {
 }
 
 export const config = { path: "/api/stripe-payment-email" };
+
