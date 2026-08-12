@@ -116,7 +116,7 @@ export default async function clientAuth(request, context) {
       return denied();
     }
 
-    return;
+    return context.next();
   } catch {
     return denied();
   }
