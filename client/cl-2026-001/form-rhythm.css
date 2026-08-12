@@ -112,6 +112,7 @@ select,
 textarea {
   margin-top: .3rem;
   padding: .65rem .8rem;
+  font-size: 1rem;
   line-height: 1.4;
 }
 
@@ -280,6 +281,7 @@ legend small {
 .question-group > h3,
 .group-heading h3 {
   margin: 0;
+  font-size: 1.05rem;
 }
 
 .preference-details {
@@ -362,6 +364,45 @@ legend small {
 
 .prompt-card {
   background: #fff;
+}
+
+.prompt-card > label,
+.prompt-card > fieldset > legend,
+.optional-choice-card-body > fieldset > legend {
+  font-size: .95rem;
+}
+
+.prompt-card label small,
+.optional-choice-card-body > p {
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.optional-choice-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.optional-choice-card > summary {
+  padding: .9rem 1rem;
+  color: var(--teal-dark);
+  font-size: .95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.optional-choice-card[open] > summary {
+  border-bottom: 1px solid var(--line);
+  background: #f5fbfa;
+}
+
+.optional-choice-card-body {
+  padding: .2rem 1rem 1rem;
+}
+
+.optional-choice-card-body > p {
+  margin: .7rem 0 .2rem;
+  color: var(--muted);
 }
 
 .prompt-card > label:first-child,
@@ -557,7 +598,7 @@ legend small {
   .hero .lead {
     max-width: 590px;
     margin: .45rem 0;
-    font-size: .94rem;
+    font-size: 1rem;
     line-height: 1.55;
   }
 
@@ -586,7 +627,7 @@ legend small {
   }
 
   .package-card strong {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
   }
 
   .package-card .price {
@@ -601,6 +642,61 @@ legend small {
 }
 
 @media (max-width: 850px) {
+  .hero {
+    gap: 1.15rem;
+    padding-top: 1.45rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .hero h1 {
+    margin-bottom: .7rem;
+    font-size: clamp(2.35rem, 12vw, 2.7rem);
+    line-height: .98;
+  }
+
+  .hero .eyebrow {
+    margin-bottom: .6rem;
+  }
+
+  .hero .lead {
+    margin: .35rem 0;
+    font-size: .95rem;
+    line-height: 1.55;
+  }
+
+  .hero-support {
+    margin-top: .55rem;
+    font-size: .84rem;
+    line-height: 1.5;
+  }
+
+  .hero .reassurance {
+    margin-top: .55rem;
+    padding: .5rem .7rem;
+    border-radius: 16px;
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+
+  .package-card {
+    max-width: none;
+    padding: 1rem 1.1rem;
+  }
+
+  .package-card strong {
+    font-size: 1.15rem;
+  }
+
+  .package-card .price {
+    font-size: 1.65rem;
+  }
+
+  .package-card ul {
+    margin-top: .55rem;
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+
   .form-shell {
     grid-template-columns: 1fr;
   }

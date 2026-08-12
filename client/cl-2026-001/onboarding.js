@@ -590,7 +590,7 @@
   }
 
   function revealPopulatedPreferenceDetails() {
-    document.querySelectorAll('details.preference-details').forEach(details => {
+    document.querySelectorAll('details.preference-details, details.optional-choice-card').forEach(details => {
       const populatedField = [...details.querySelectorAll('input, select, textarea')].some(field => {
         if (['checkbox', 'radio'].includes(field.type)) return field.checked;
         return String(field.value || '').trim();
@@ -678,11 +678,13 @@
     const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
     const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
     const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
+    const practicalSkillAreas = [...form.querySelectorAll('input[name="practicalSkillAreas"]:checked')].map(field => field.value);
     const preferredContact = form.elements.preferredContact.value;
     const telephone = form.elements.telephone;
     const telephoneHelp = document.getElementById('telephone-help');
     const telephoneNeeded = ['whatsapp', 'phone'].includes(preferredContact);
     if (telephone) telephone.required = telephoneNeeded;
+    document.getElementById('telephone-required-marker')?.classList.toggle('hidden', !telephoneNeeded);
     if (telephoneHelp) telephoneHelp.textContent = telephoneNeeded ? 'Required for this contact choice' : 'Only needed for WhatsApp or telephone contact';
     const showAccessibility = situations.includes('accessibility');
     const accessibilityPanel = document.getElementById('accessibility-details');
@@ -701,6 +703,7 @@
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));
     setConditional('success-outcome-other', successOutcomes.includes('other'));
+    setConditional('practical-skill-examples', practicalSkillAreas.some(value => value !== 'Not sure yet'));
     setConditional('supporter-details', form.elements.supporter.value === 'supporter');
     syncCurrentRoleCards();
     syncCurrentGapCards();
@@ -1083,6 +1086,12 @@
       if (event.target.value === 'not-sure') form.querySelectorAll('input[name="difficultParts"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
       else if (notSure) notSure.checked = false;
     }
+    if (['strengthAttributes', 'practicalSkillAreas'].includes(event.target.name) && event.target.checked) {
+      const group = form.querySelectorAll(`input[name="${event.target.name}"]`);
+      const notSure = form.querySelector(`input[name="${event.target.name}"][value="Not sure yet"]`);
+      if (event.target.value === 'Not sure yet') group.forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (notSure) notSure.checked = false;
+    }
     updateConditional(); scheduleSave();
   });
   form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
@@ -1141,7 +1150,7 @@
       input.value = '';
     }
   });
-  document.getElementById('clear-draft').addEventListener('click', async () => { if (pendingDocumentUploads > 0) { alert('Please wait for the document upload to finish before clearing the form.'); return; } if (confirm('Clear all answers, recordings and uploaded documents? This cannot be undone.')) { discardActiveVoiceRecording(); await deleteAllDocumentUploads(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (pendingDocumentUploads > 0) { alert('Please wait for the document upload to finish before clearing the form.'); return; } if (confirm('Clear all answers, recordings and uploaded documents? This cannot be undone.')) { discardActiveVoiceRecording(); await deleteAllDocumentUploads(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details, details.optional-choice-card').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
 
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (!validateAllSteps()) return;
