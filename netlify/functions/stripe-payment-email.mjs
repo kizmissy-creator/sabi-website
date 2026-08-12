@@ -2,7 +2,6 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const CLIENT_REFERENCE = "CL-2026-001";
 const LIVE_PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
-const TEST_PAYMENT_LINK_ID = "plink_1U2vSwFtDRl3MPZmHMvYptrp";
 const TEST_RECIPIENT = "info@sabigroup.co.uk";
 const AMOUNT_PENCE = 13500;
 const MAX_WEBHOOK_AGE_SECONDS = 5 * 60;
@@ -38,12 +37,14 @@ function signDelivery(secret, payload) {
 }
 
 function checkoutIsEligible(session) {
-  const expectedPaymentLink = session?.livemode === false ? TEST_PAYMENT_LINK_ID : LIVE_PAYMENT_LINK_ID;
+  const paymentLinkIsEligible = session?.livemode === false
+    ? /^plink_[A-Za-z0-9]+$/.test(String(session?.payment_link || ""))
+    : session?.payment_link === LIVE_PAYMENT_LINK_ID;
   return session?.payment_status === "paid"
     && Number(session?.amount_total) === AMOUNT_PENCE
     && String(session?.currency || "").toLowerCase() === "gbp"
     && session?.client_reference_id === CLIENT_REFERENCE
-    && session?.payment_link === expectedPaymentLink;
+    && paymentLinkIsEligible;
 }
 
 export default async function stripePaymentEmail(request) {

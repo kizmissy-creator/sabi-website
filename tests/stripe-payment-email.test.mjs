@@ -88,6 +88,16 @@ test("ignores sandbox events without the client reference", async () => {
   assert.equal(fetchCalled, false);
 });
 
+test("ignores sandbox checkout sessions that did not come from a Payment Link", async () => {
+  configureEnvironment();
+  let fetchCalled = false;
+  global.fetch = async () => { fetchCalled = true; return Response.json({ ok: true }); };
+
+  const response = await stripePaymentEmail(signedRequest(checkoutEvent({ payment_link: null }), TEST_SECRET));
+  assert.deepEqual(await response.json(), { ok: true, ignored: true });
+  assert.equal(fetchCalled, false);
+});
+
 test("ignores sandbox events addressed to anyone other than SABI", async () => {
   configureEnvironment();
   let fetchCalled = false;
