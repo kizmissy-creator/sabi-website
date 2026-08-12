@@ -1,6 +1,6 @@
 [build]
   publish = "client/cl-2026-001"
-  command = "mkdir -p client/cl-2026-001/images && cp images/favicon.png images/sabi-mark-complete.png client/cl-2026-001/images/"
+  command = "mkdir -p client/cl-2026-001/images && cp images/favicon.png images/sabi-mark-complete.png images/sabi-logo.png client/cl-2026-001/images/"
   edge_functions = "netlify/edge-functions"
   functions = "netlify/functions"
 
