@@ -34,12 +34,12 @@ async function hmac(secret, value) {
     .replace(/=+$/g, "");
 }
 
-function accessPage(debug = "") {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Career Partner onboarding | SABI</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fdfd;color:#131d1d;font:16px/1.65 Arial,sans-serif}main{width:min(100%,620px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}h1{color:#156d6b;font:600 clamp(36px,8vw,54px)/1.05 Georgia,serif;margin:.2rem 0 1rem}a{display:inline-block;margin-top:1rem;padding:.8rem 1rem;border-radius:10px;background:#f2c94c;color:#0e5553;font-weight:700;text-decoration:none}</style></head><body><main data-preview-state="${debug}"><p>SABI CAREER SUPPORT</p><h1>Your onboarding is private.</h1><p>This page opens after the Career Partner payment has been verified on this browser.</p><a href="/payment.html">Return to the Career Partner page</a></main></body></html>`;
+function accessPage() {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Career Partner onboarding | SABI</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fdfd;color:#131d1d;font:16px/1.65 Arial,sans-serif}main{width:min(100%,620px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}h1{color:#156d6b;font:600 clamp(36px,8vw,54px)/1.05 Georgia,serif;margin:.2rem 0 1rem}a{display:inline-block;margin-top:1rem;padding:.8rem 1rem;border-radius:10px;background:#f2c94c;color:#0e5553;font-weight:700;text-decoration:none}</style></head><body><main><p>SABI CAREER SUPPORT</p><h1>Your onboarding is private.</h1><p>This page opens after the Career Partner payment has been verified on this browser.</p><a href="/payment.html">Return to the Career Partner page</a></main></body></html>`;
 }
 
-function denied(debug = "") {
-  return new Response(accessPage(debug), {
+function denied() {
+  return new Response(accessPage(), {
     status: 401,
     headers: {
       "content-type": "text/html; charset=utf-8",
@@ -64,12 +64,8 @@ export default async function clientAuth(request, context) {
       Number.isFinite(previewExpiresAt) &&
       Date.now() < previewExpiresAt;
 
-    if (url.searchParams.has("preview_access") && !isWorkingPreview) {
-      return denied(`h${url.hostname === PREVIEW_HOST ? 1 : 0}t${previewToken ? 1 : 0}m${constantTimeEqual(url.searchParams.get("preview_access") || "", previewToken) ? 1 : 0}e${Number.isFinite(previewExpiresAt) ? 1 : 0}v${Date.now() < previewExpiresAt ? 1 : 0}`);
-    }
-
     const secret = Netlify.env.get("BRONAGH_ACCESS_SECRET");
-    if (!secret) return denied(isWorkingPreview ? "secret-missing" : "");
+    if (!secret) return denied();
 
     if (isWorkingPreview) {
       const expires = Math.min(
