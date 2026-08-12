@@ -1337,7 +1337,7 @@ legend small {
 .form-step > .conditional:not(.notice),
 .form-step > .process-details {
   margin: 0;
-  padding: 1.15rem 0 1.25rem;
+  padding: .9rem 0 1rem;
   border: 0;
   border-bottom: 1px solid #dce8e7;
   border-radius: 0;
@@ -1358,7 +1358,7 @@ legend small {
 
 .form-step > .question-group.prompt-card {
   margin: 0;
-  padding: 1.15rem 0 1.25rem;
+  padding: .9rem 0 1rem;
 }
 
 .form-step > details.optional-choice-card,
