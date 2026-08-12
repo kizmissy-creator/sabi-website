@@ -12,7 +12,8 @@ const ONBOARDING_CONFIG = {
   folderProperty: 'BRONAGH_UPLOAD_FOLDER_ID',
   submissionSecretProperty: 'BRONAGH_SUBMISSION_SECRET',
   paymentEmailSecretProperty: 'BRONAGH_PAYMENT_EMAIL_SECRET',
-  paymentEmailSheetName: 'Payment confirmations'
+  paymentEmailSheetName: 'Payment confirmations',
+  ownerNotificationEmail: 'info@sabigroup.co.uk'
 };
 
 const ONBOARDING_HEADERS = [
@@ -98,7 +99,7 @@ function sendPaymentConfirmation_(input) {
       + '<a href="' + safeOnboardingUrl + '" style="display:inline-block;padding:14px 22px;color:#063f3f;font-weight:bold;text-decoration:none">Open your private onboarding form</a>'
       + '</td></tr></table>'
       + '<p>If the button does not open, copy and paste this link into your browser:<br><a href="' + safeOnboardingUrl + '">' + safeOnboardingUrl + '</a></p>'
-      + '<p>Please use the access password sent separately and do not forward the link or password. You can complete the form in your own time.</p>'
+      + '<p>Please use the access password SABI will send separately. For security, the password is not included in this email. Please do not forward the link or password. You can complete the form in your own time.</p>'
       + '<p>' + html_(earlyStartText) + '</p>'
       + '<p>Your Stripe payment receipt will arrive separately. You can save the <a href="' + html_(input.termsUrl) + '">Terms and Conditions</a>, <a href="' + html_(input.privacyUrl) + '">Privacy Policy</a> and <a href="' + html_(input.cancellationUrl) + '">cancellation form</a> from the links provided.</p>'
       + '<p>Once your onboarding is sent, SABI will review it and email any focused follow-up questions.</p>'
@@ -108,6 +109,12 @@ function sendPaymentConfirmation_(input) {
     sheet.appendRow([String(input.deliveryId), new Date(), String(input.checkoutSessionId), String(input.recipient), input.earlyStart ? 'Early start requested' : 'Standard start', 'Sending']);
     const recordRow = sheet.getLastRow();
     try {
+      MailApp.sendEmail({
+        to: ONBOARDING_CONFIG.ownerNotificationEmail,
+        subject: 'Action needed: Bronagh payment received, send access password',
+        body: 'Stripe has confirmed Bronagh\'s £135 Career Partner payment. The onboarding confirmation email is being sent to ' + String(input.recipient) + '. Please now send Bronagh the separate access password. For security, do not include the password in the same email as the onboarding link.',
+        name: 'SABI Career Support'
+      });
       MailApp.sendEmail({
         to: String(input.recipient),
         subject: 'Your SABI Career Support payment and onboarding',

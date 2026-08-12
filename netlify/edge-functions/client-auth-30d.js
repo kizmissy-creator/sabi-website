@@ -1,6 +1,7 @@
 const COOKIE_NAME = "sabi_client_access";
 const CLIENT_REFERENCE = "CL-2026-001";
 const PREVIEW_HOST = "deploy-preview-2--sabi-bronagh-onboarding.netlify.app";
+const SESSION_SECONDS = 30 * 24 * 60 * 60;
 
 function base64UrlDecode(value) {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
@@ -34,13 +35,23 @@ async function hmac(secret, value) {
     .replace(/=+$/g, "");
 }
 
-function accessPage() {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Career Partner onboarding | SABI</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f8fdfd;color:#131d1d;font:16px/1.65 Arial,sans-serif}main{width:min(100%,620px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}h1{color:#156d6b;font:600 clamp(36px,8vw,54px)/1.05 Georgia,serif;margin:.2rem 0 1rem}a{display:inline-block;margin-top:1rem;padding:.8rem 1rem;border-radius:10px;background:#f2c94c;color:#0e5553;font-weight:700;text-decoration:none}</style></head><body><main><p>SABI CAREER SUPPORT</p><h1>Your onboarding is private.</h1><p>This page opens after the Career Partner payment has been verified on this browser.</p><a href="/payment.html">Return to the Career Partner page</a></main></body></html>`;
+function accessPage(message = "") {
+  const notice = message ? `<p class="notice" role="alert">${escapeHtml(message)}</p>` : "";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>Career Partner onboarding | SABI</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f3fbfb;color:#172424;font:17px/1.6 Arial,sans-serif}main{width:min(100%,620px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}.eyebrow{margin:0;color:#126d6a;font-size:.82rem;font-weight:800;letter-spacing:.12em}h1{color:#156d6b;font:600 clamp(38px,8vw,56px)/1.05 Georgia,serif;margin:.35rem 0 1rem}label{display:block;margin:1.5rem 0 .45rem;color:#075956;font-weight:700}input{width:100%;min-height:52px;border:1px solid #789694;border-radius:10px;padding:.75rem 1rem;font:inherit}input:focus{outline:3px solid rgba(242,201,76,.5);outline-offset:2px;border-color:#156d6b}button{margin-top:1rem;border:0;border-radius:10px;background:#f2c94c;color:#0e5553;padding:.85rem 1.15rem;font:700 1rem Arial,sans-serif;cursor:pointer}.notice{border-left:4px solid #cf3c53;background:#fff2f4;padding:.7rem .9rem;color:#7f1730}.quiet{color:#506563;font-size:.94rem}a{color:#075956;font-weight:700}</style></head><body><main><p class="eyebrow">SABI CAREER SUPPORT</p><h1>Your onboarding is private.</h1><p>If you are opening the form on a different device or browser, enter the access password SABI sent you separately.</p>${notice}<form method="post" action="/"><label for="password">Access password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Open my onboarding</button></form><p class="quiet">If you have not received the password yet, contact SABI. The browser used to make the payment should open automatically.</p><p><a href="/payment.html">Return to the Career Partner page</a></p></main></body></html>`;
 }
 
-function denied() {
-  return new Response(accessPage(), {
-    status: 401,
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function denied(message = "", status = 401) {
+  return new Response(accessPage(message), {
+    status,
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "private, no-store, max-age=0",
@@ -64,7 +75,7 @@ export default async function clientAuth(request, context) {
       Number.isFinite(previewExpiresAt) &&
       Date.now() < previewExpiresAt;
 
-    const secret = Netlify.env.get("BRONAGH_ACCESS_SECRET");
+    const secret = Netlify.env.get("BRONAGH_ACCESS_SECRET") || "";
     if (!secret) return denied();
 
     if (isWorkingPreview) {
@@ -98,25 +109,57 @@ export default async function clientAuth(request, context) {
 
     const token = context.cookies.get(COOKIE_NAME) || "";
     const parts = token.split(".");
-    if (parts.length !== 2) return denied();
-
-    let payload;
-    try {
-      payload = base64UrlDecode(parts[0]);
-    } catch {
-      return denied();
+    if (parts.length === 2) {
+      try {
+        const payload = base64UrlDecode(parts[0]);
+        const signature = await hmac(secret, payload);
+        const [clientReference, sessionId, expiresText] = payload.split(".");
+        const expires = Number(expiresText);
+        if (
+          constantTimeEqual(signature, parts[1]) &&
+          clientReference === CLIENT_REFERENCE &&
+          sessionId.startsWith("cs_") &&
+          Number.isFinite(expires) &&
+          expires >= Math.floor(Date.now() / 1000)
+        ) return context.next();
+      } catch {
+        // Continue to the password gate when the saved access cookie is invalid.
+      }
     }
 
+    const pagePassword = Netlify.env.get("BRONAGH_PAGE_PASSWORD") || "";
+    if (!pagePassword) return denied("Password access has not been activated yet. Please contact SABI.", 503);
+    if (request.method !== "POST") return denied();
+
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("application/x-www-form-urlencoded") && !contentType.includes("multipart/form-data")) {
+      return denied("Please enter the access password using the form below.");
+    }
+    const form = await request.formData();
+    const suppliedPassword = String(form.get("password") || "");
+    if (!constantTimeEqual(suppliedPassword, pagePassword)) return denied("That password was not recognised. Please try again.");
+
+    const expires = Math.floor(Date.now() / 1000) + SESSION_SECONDS;
+    const payload = `${CLIENT_REFERENCE}.cs_password.${expires}`;
+    const encodedPayload = base64UrlEncode(payload);
     const signature = await hmac(secret, payload);
-    if (!constantTimeEqual(signature, parts[1])) return denied();
-
-    const [clientReference, sessionId, expiresText] = payload.split(".");
-    const expires = Number(expiresText);
-    if (clientReference !== CLIENT_REFERENCE || !sessionId.startsWith("cs_") || !Number.isFinite(expires) || expires < Math.floor(Date.now() / 1000)) {
-      return denied();
-    }
-
-    return context.next();
+    const cookie = [
+      `${COOKIE_NAME}=${encodedPayload}.${signature}`,
+      "Path=/",
+      `Expires=${new Date(expires * 1000).toUTCString()}`,
+      "Secure",
+      "HttpOnly",
+      "SameSite=Strict"
+    ].join("; ");
+    return new Response(null, {
+      status: 303,
+      headers: {
+        location: "/",
+        "set-cookie": cookie,
+        "cache-control": "private, no-store, max-age=0",
+        "referrer-policy": "no-referrer"
+      }
+    });
   } catch {
     return denied();
   }
