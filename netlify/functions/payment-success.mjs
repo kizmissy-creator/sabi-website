@@ -77,6 +77,7 @@ export default async function paymentSuccess(request) {
     Number(session.amount_total) === AMOUNT_PENCE &&
     String(session.currency || "").toLowerCase() === "gbp" &&
     CLIENT_REFERENCES.has(String(session.client_reference_id || "")) &&
+    session.consent?.terms_of_service === "accepted" &&
     safeEqual(session.payment_link, PAYMENT_LINK_ID);
 
   if (!valid) {
@@ -86,6 +87,7 @@ export default async function paymentSuccess(request) {
       amount_total: session.amount_total,
       currency: session.currency,
       client_reference_id: session.client_reference_id,
+      terms_of_service: session.consent?.terms_of_service,
       payment_link: session.payment_link
     });
     return html(page("Payment could not be matched", "The payment did not match the expected Career Partner purchase. Please contact SABI before continuing."), 403);

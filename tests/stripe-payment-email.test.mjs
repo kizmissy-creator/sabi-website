@@ -29,6 +29,7 @@ function checkoutEvent(overrides = {}) {
         amount_total: 13500,
         currency: "gbp",
         client_reference_id: "CL-2026-001-standard-start",
+        consent: { terms_of_service: "accepted" },
         payment_link: "plink_1U2vSwFtDRl3MPZmHMvYptrp",
         customer_details: { email: "info@sabigroup.co.uk", name: "SABI test" },
         ...overrides
@@ -106,6 +107,16 @@ test("ignores sandbox events without the client reference", async () => {
   global.fetch = async () => { fetchCalled = true; return Response.json({ ok: true }); };
 
   const response = await stripePaymentEmail(signedRequest(checkoutEvent({ client_reference_id: null }), TEST_SECRET));
+  assert.deepEqual(await response.json(), { ok: true, ignored: true });
+  assert.equal(fetchCalled, false);
+});
+
+test("ignores a paid session without recorded terms acceptance", async () => {
+  configureEnvironment();
+  let fetchCalled = false;
+  global.fetch = async () => { fetchCalled = true; return Response.json({ ok: true }); };
+
+  const response = await stripePaymentEmail(signedRequest(checkoutEvent({ consent: null }), TEST_SECRET));
   assert.deepEqual(await response.json(), { ok: true, ignored: true });
   assert.equal(fetchCalled, false);
 });

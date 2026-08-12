@@ -46,6 +46,7 @@ function checkoutIsEligible(session) {
     && Number(session?.amount_total) === AMOUNT_PENCE
     && String(session?.currency || "").toLowerCase() === "gbp"
     && [STANDARD_START_REFERENCE, EARLY_START_REFERENCE].includes(session?.client_reference_id)
+    && session?.consent?.terms_of_service === "accepted"
     && paymentLinkIsEligible;
 }
 
