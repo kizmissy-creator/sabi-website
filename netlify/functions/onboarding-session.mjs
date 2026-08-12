@@ -19,13 +19,19 @@ function base64Url(value) {
   return Buffer.from(value).toString("base64url");
 }
 
-function cookieValue(request, name) {
+function cookieValues(request, name) {
   const cookies = request.headers.get("cookie") || "";
+  const values = [];
   for (const part of cookies.split(";")) {
     const [key, ...rest] = part.trim().split("=");
-    if (key === name) return decodeURIComponent(rest.join("="));
+    if (key !== name) continue;
+    try {
+      values.push(decodeURIComponent(rest.join("=")));
+    } catch {
+      values.push(rest.join("="));
+    }
   }
-  return "";
+  return values;
 }
 
 function secureEqual(a, b) {
@@ -38,19 +44,25 @@ function verifyAccessToken(token, secret) {
   const parts = String(token || "").split(".");
   if (parts.length !== 2) return false;
 
+  const encodedPayload = parts[0];
   let payload;
   try {
-    payload = Buffer.from(parts[0], "base64url").toString("utf8");
+    payload = Buffer.from(encodedPayload, "base64url").toString("utf8");
   } catch {
     return false;
   }
 
-  const expected = createHmac("sha256", secret).update(payload).digest("base64url");
-  if (!secureEqual(expected, parts[1])) return false;
+  const rawSignature = createHmac("sha256", secret).update(payload).digest("base64url");
+  const encodedSignature = createHmac("sha256", secret).update(encodedPayload).digest("base64url");
+  if (!secureEqual(rawSignature, parts[1]) && !secureEqual(encodedSignature, parts[1])) return false;
 
   const [clientReference, sessionId, expiresText] = payload.split(".");
   const expires = Number(expiresText);
   return clientReference === CLIENT_REFERENCE && sessionId.startsWith("cs_") && Number.isFinite(expires) && expires >= Math.floor(Date.now() / 1000);
+}
+
+function hasValidAccess(request, secret) {
+  return cookieValues(request, COOKIE_NAME).some(token => verifyAccessToken(token, secret));
 }
 
 export default async function onboardingSession(request) {
@@ -66,7 +78,7 @@ export default async function onboardingSession(request) {
     return json({ ok: false, error: "The secure submission connection is not active yet." }, 503);
   }
 
-  if (!verifyAccessToken(cookieValue(request, COOKIE_NAME), accessSecret)) {
+  if (!hasValidAccess(request, accessSecret)) {
     return json({ ok: false, error: "Your onboarding access needs to be renewed." }, 401);
   }
 

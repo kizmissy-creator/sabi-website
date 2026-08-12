@@ -15,13 +15,19 @@ function json(body, status = 200) {
   });
 }
 
-function cookieValue(request, name) {
+function cookieValues(request, name) {
   const cookies = request.headers.get("cookie") || "";
+  const values = [];
   for (const part of cookies.split(";")) {
     const [key, ...rest] = part.trim().split("=");
-    if (key === name) return decodeURIComponent(rest.join("="));
+    if (key !== name) continue;
+    try {
+      values.push(decodeURIComponent(rest.join("=")));
+    } catch {
+      values.push(rest.join("="));
+    }
   }
-  return "";
+  return values;
 }
 
 function secureEqual(left, right) {
@@ -36,13 +42,18 @@ function validAccessToken(token, secret) {
   const [encodedPayload, signature] = parts;
   try {
     const payload = Buffer.from(encodedPayload, "base64url").toString("utf8");
-    const expected = createHmac("sha256", secret).update(payload).digest("base64url");
-    if (!secureEqual(expected, signature)) return false;
+    const rawSignature = createHmac("sha256", secret).update(payload).digest("base64url");
+    const encodedSignature = createHmac("sha256", secret).update(encodedPayload).digest("base64url");
+    if (!secureEqual(rawSignature, signature) && !secureEqual(encodedSignature, signature)) return false;
     const [clientReference, sessionId, expiresText] = payload.split(".");
     return clientReference === CLIENT_REFERENCE && sessionId.startsWith("cs_") && Number(expiresText) >= Math.floor(Date.now() / 1000);
   } catch {
     return false;
   }
+}
+
+function hasValidAccess(request, secret) {
+  return cookieValues(request, COOKIE_NAME).some(token => validAccessToken(token, secret));
 }
 
 function submissionToken(submissionId, secret) {
@@ -70,7 +81,7 @@ export default async function onboardingUpload(request) {
   const submissionSecret = process.env.BRONAGH_SUBMISSION_SECRET;
   const endpoint = process.env.BRONAGH_APPS_SCRIPT_ENDPOINT;
   if (!accessSecret || !submissionSecret || !endpoint) return json({ ok: false, error: "The secure upload connection is not active yet." }, 503);
-  if (!validAccessToken(cookieValue(request, COOKIE_NAME), accessSecret)) return json({ ok: false, error: "Your onboarding access needs to be renewed." }, 401);
+  if (!hasValidAccess(request, accessSecret)) return json({ ok: false, error: "Your onboarding access needs to be renewed." }, 401);
 
   const raw = await request.text();
   let input;
