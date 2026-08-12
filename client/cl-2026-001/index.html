@@ -65,8 +65,10 @@
           <summary>Saved-answer options</summary>
           <div>
             <button class="text-button" id="download-draft" type="button">Download a backup</button>
+            <label class="text-button restore-draft-label" for="restore-draft">Restore a backup</label>
+            <input class="visually-hidden" id="restore-draft" type="file" accept=".json,application/json">
             <button class="text-button danger" id="clear-draft" type="button">Clear saved answers</button>
-            <p>Clear saved answers when using a shared device.</p>
+            <p id="restore-draft-message" role="status" aria-live="polite">A backup can restore your typed answers and uploaded-document references. It does not contain the document files or voice recordings. Keep it private.</p>
           </div>
         </details>
       </aside>
@@ -74,7 +76,7 @@
       <form id="onboarding-form" novalidate>
         <input type="hidden" name="clientReference" value="CL-2026-001">
         <input type="hidden" name="serviceCode" value="career_partner_bespoke">
-        <input type="hidden" name="formVersion" value="bronagh-2026-08-11-v52">
+        <input type="hidden" name="formVersion" value="bronagh-2026-08-12-v53">
         <input type="hidden" name="ageEligible" value="yes">
         <input type="hidden" name="submissionId" id="submission-id">
         <p class="honeypot" aria-hidden="true"><label>Leave blank <input name="company" tabindex="-1" autocomplete="off"></label></p>
@@ -151,7 +153,7 @@
           <div class="document-upload" data-upload-field="existingCv"><h3>Existing CV or work-history documents</h3><p>Add any current or older versions that may be useful. PDF, Word or text files, up to 12 MB each.</p><label class="upload-picker">+ Add documents<input class="visually-hidden" type="file" name="existingCv" accept=".pdf,.doc,.docx,.txt" multiple data-document-input></label><div class="upload-list" data-upload-list aria-live="polite"></div></div>
           <div class="document-upload" data-upload-field="vacancyDocument"><h3>Vacancy or role documents</h3><p>Add adverts, job descriptions or person specifications. PDF, Word or text files, up to 12 MB each.</p><label class="upload-picker">+ Add documents<input class="visually-hidden" type="file" name="vacancyDocument" accept=".pdf,.doc,.docx,.txt" multiple data-document-input></label><div class="upload-list" data-upload-list aria-live="polite"></div></div>
           <div class="document-upload" data-upload-field="applicationDocument"><h3>Application documents</h3><p>Add an application draft or supporting statement. PDF, Word or text files, up to 12 MB each.</p><label class="upload-picker">+ Add documents<input class="visually-hidden" type="file" name="applicationDocument" accept=".pdf,.doc,.docx,.txt" multiple data-document-input></label><div class="upload-list" data-upload-list aria-live="polite"></div></div>
-          <label>Document or profile link<input type="url" name="documentUrl" placeholder="https://"></label>
+          <label>Document or profile links<input name="documentUrl" placeholder="https://"></label>
           <label>Notes about documents you will send later<textarea name="documentNotes" rows="3"></textarea></label>
           <div class="notice">Documents upload securely as you add them and are kept in SABI's restricted Google Drive. You can return on this browser and remove or add documents before sending the form.</div>
         </section>
@@ -163,6 +165,13 @@
           <div id="accessibility-details" class="question-group conditional hidden"><h3>Accessibility, disability and workplace adjustments</h3><p>Only complete this if you want to. You do not need a diagnosis or formal label. You can tell me what would make this process easier for you, or what you may want considered in applications or conversations with an employer.</p><label class="choice consent"><input type="checkbox" name="specialCategoryConsent" value="yes" disabled> I consent to SABI using any health, disability or neurodivergence information I choose to enter below to adapt and deliver my career support.</label><p class="consent-note">The questions below are optional. You can leave out a diagnosis and withdraw your consent at any time. The <a href="./documents/privacy-policy.html">Privacy Policy</a> explains how this information is used and kept.</p><label>What would you like me to know or consider? <small>This could be about communication, reading or completing forms, meetings, the pace of the process, applications, interviews or workplace adjustments.</small><textarea name="accessibilityNeeds" rows="5" data-accessibility-detail disabled></textarea></label><fieldset><legend>Who, if anyone, would you like help discussing this with?</legend><label class="choice"><input type="radio" name="accessibilityDiscussion" value="sabi" data-accessibility-detail disabled> SABI only</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="employer" data-accessibility-detail disabled> A current or potential employer</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="both" data-accessibility-detail disabled> SABI and an employer</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-sure" data-accessibility-detail disabled> I am not sure yet</label><label class="choice"><input type="radio" name="accessibilityDiscussion" value="not-now" data-accessibility-detail disabled> I do not want to discuss this now</label></fieldset></div>
           <label>Is there anything practical that would make it easier for us to work together? <small>For example, shorter messages, extra time to reply, written information before a call, reminders, or avoiding phone calls.</small><textarea name="workingPreferences" rows="4"></textarea></label>
           <fieldset><legend>Will anyone else be involved in communication about your support? <span>*</span></legend><label class="choice"><input type="radio" name="supporter" value="no" required> No, communicate only with me</label><label class="choice"><input type="radio" name="supporter" value="payer"> Someone else paid, but they should not receive my private information</label><label class="choice"><input type="radio" name="supporter" value="supporter"> I may want a supporter involved and will agree separately what SABI may share</label></fieldset>
+          <div id="supporter-details" class="question-group conditional hidden">
+            <h3>About the person supporting your communication</h3>
+            <p>Share only what is useful. I will still check with you before sharing private information or discussing your support with them.</p>
+            <div class="grid two"><label>Their name<input name="supporterName" disabled></label><label>Their relationship to you<input name="supporterRelationship" placeholder="For example, parent, partner or support worker" disabled></label></div>
+            <label>Their contact details <small>Email address, telephone number or WhatsApp number.</small><input name="supporterContact" disabled></label>
+            <label>What would you like them to help with? <small>For example, receiving reminders, helping you understand questions or joining a discussion.</small><textarea name="supporterRole" rows="3" disabled></textarea></label>
+          </div>
         </section>
 
         <section class="form-step" data-step="8">

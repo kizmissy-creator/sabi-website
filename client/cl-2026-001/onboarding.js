@@ -62,6 +62,16 @@
       legend: 'Roles or settings you want to avoid',
       help: 'Add anything you already know would not suit you.',
       placeholder: 'For example, night work'
+    },
+    {
+      name: 'documentUrl',
+      id: 'document-links',
+      legend: 'Document or profile links',
+      help: 'Add one link at a time. You can add more than one.',
+      placeholder: 'https://example.com',
+      inputType: 'url',
+      maxLength: 500,
+      maxItems: 12
     }
   ];
   const tagFields = new Map();
@@ -309,15 +319,26 @@
   function addTag(name) {
     const field = tagFields.get(name);
     if (!field) return false;
-    const {input, tags} = field;
-    const value = input.value.replace(/\s+/g, ' ').trim().slice(0, 120);
+    const {config, input, tags} = field;
+    const value = input.value.replace(/\s+/g, ' ').trim().slice(0, config.maxLength || 120);
     if (!value) {
       renderTagField(name);
       return false;
     }
+    if (config.inputType === 'url') {
+      try {
+        const url = new URL(value);
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported link');
+      } catch {
+        input.setCustomValidity('Enter a full link beginning with http:// or https://');
+        input.reportValidity();
+        return false;
+      }
+    }
     const exists = tags.some(existing => existing.toLowerCase() === value.toLowerCase());
-    if (!exists && tags.length < 20) tags.push(value);
+    if (!exists && tags.length < (config.maxItems || 20)) tags.push(value);
     input.value = '';
+    input.setCustomValidity('');
     renderTagField(name);
     scheduleSave();
     return true;
@@ -326,7 +347,7 @@
   function loadTagField(name) {
     const field = tagFields.get(name);
     if (!field) return;
-    field.tags.splice(0, field.tags.length, ...String(field.source.value || '').split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 20));
+    field.tags.splice(0, field.tags.length, ...String(field.source.value || '').split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, field.config.maxItems || 20));
     renderTagField(name);
   }
 
@@ -340,7 +361,7 @@
     const fieldset = document.createElement('fieldset');
     fieldset.className = 'tag-fieldset';
     const requiredMark = config.required ? ' <span>*</span>' : '';
-    fieldset.innerHTML = `<legend>${config.legend}${requiredMark}</legend><p class="tag-help" id="${config.id}-help">${config.help}</p><div class="tag-entry-row"><label class="visually-hidden" for="${config.id}-entry">Add to ${config.legend.toLowerCase()}</label><input id="${config.id}-entry" class="tag-entry-input" autocomplete="off" maxlength="120" placeholder="${config.placeholder}" aria-describedby="${config.id}-help" data-error-label="${config.legend}"><button type="button" class="tag-add-button">Add</button></div><ul id="${config.id}-tags" class="tag-list" aria-label="${config.legend} added" aria-live="polite"></ul>`;
+    fieldset.innerHTML = `<legend>${config.legend}${requiredMark}</legend><p class="tag-help" id="${config.id}-help">${config.help}</p><div class="tag-entry-row"><label class="visually-hidden" for="${config.id}-entry">Add to ${config.legend.toLowerCase()}</label><input id="${config.id}-entry" class="tag-entry-input" type="${config.inputType || 'text'}" autocomplete="off" maxlength="${config.maxLength || 120}" placeholder="${config.placeholder}" aria-describedby="${config.id}-help" data-error-label="${config.legend}"><button type="button" class="tag-add-button">Add</button></div><ul id="${config.id}-tags" class="tag-list" aria-label="${config.legend} added" aria-live="polite"></ul>`;
     originalLabel.before(fieldset);
     const input = fieldset.querySelector('.tag-entry-input');
     tagFields.set(config.name, {config, source, input, list: fieldset.querySelector('.tag-list'), tags: []});
@@ -579,30 +600,64 @@
     });
   }
 
+  function validBackup(draft) {
+    return Boolean(draft && typeof draft === 'object' && draft.data && typeof draft.data === 'object'
+      && draft.data.clientReference === 'CL-2026-001'
+      && draft.data.serviceCode === 'career_partner_bespoke');
+  }
+
+  function safeBackupUploads(uploads) {
+    if (!Array.isArray(uploads)) return [];
+    return uploads.slice(0, 60).filter(upload => upload && typeof upload === 'object'
+      && documentFieldNames.includes(upload.field)
+      && /^[a-zA-Z0-9_-]{10,180}$/.test(String(upload.id || ''))
+      && typeof upload.name === 'string' && upload.name.length <= 240);
+  }
+
+  function applyDraft(draft) {
+    if (!validBackup(draft)) return false;
+    form.reset();
+    tagFields.forEach((field, name) => {
+      field.tags.splice(0);
+      field.input.value = '';
+      renderTagField(name);
+    });
+    migrateDraftChoices(draft.data);
+    const safeUploads = safeBackupUploads(draft.uploads);
+    documentFieldNames.forEach(name => uploadedDocuments.set(name, safeUploads.filter(upload => upload.field === name)));
+    repeaterNames.forEach(name => {
+      const container = document.querySelector(`[data-repeater="${name}"]`);
+      container.replaceChildren();
+      const entries = Array.isArray(draft.data[name]) ? draft.data[name] : [];
+      entries.slice(0, 40).forEach(entry => addEntry(name, entry));
+    });
+    for (const [name, value] of Object.entries(draft.data)) {
+      if (fixedDraftFields.has(name)) continue;
+      const fields = [...form.elements].filter(el => el.name === name);
+      fields.forEach(el => {
+        if (el.type === 'checkbox') el.checked = Array.isArray(value) && value.includes(el.value);
+        else if (el.type === 'radio') el.checked = value === el.value;
+        else if (typeof value === 'string' || typeof value === 'number') el.value = value;
+      });
+    }
+    tagFieldConfigs.forEach(config => loadTagField(config.name));
+    current = Number.isInteger(draft.current) ? Math.max(0, Math.min(draft.current, steps.length - 1)) : 0;
+    documentFieldNames.forEach(renderDocumentUploads);
+    updateConditional();
+    revealPopulatedPreferenceDetails();
+    return true;
+  }
+
   function restore() {
     try {
-      const draft = JSON.parse(localStorage.getItem(storageKey)); if (!draft?.data) return;
-      migrateDraftChoices(draft.data);
-      documentFieldNames.forEach(name => uploadedDocuments.set(name, (draft.uploads || []).filter(upload => upload.field === name)));
-      repeaterNames.forEach(name => {
-        const container = document.querySelector(`[data-repeater="${name}"]`);
-        container.replaceChildren();
-        const entries = Array.isArray(draft.data[name]) ? draft.data[name] : [];
-        entries.forEach(entry => addEntry(name, entry));
-      });
-      for (const [name, value] of Object.entries(draft.data)) {
-        if (fixedDraftFields.has(name)) continue;
-        const fields = [...form.elements].filter(el => el.name === name);
-        fields.forEach(el => {
-          if (el.type === 'checkbox') el.checked = Array.isArray(value) && value.includes(el.value);
-          else if (el.type === 'radio') el.checked = value === el.value;
-          else el.value = value;
-        });
-      }
-      current = 0;
-      documentFieldNames.forEach(renderDocumentUploads);
+      const rawDraft = localStorage.getItem(storageKey);
+      if (!rawDraft) return;
+      const draft = JSON.parse(rawDraft);
+      if (!applyDraft(draft)) throw new Error('Invalid saved draft');
       saveState.textContent = `Draft restored from ${new Date(draft.savedAt).toLocaleString()}`;
-    } catch { localStorage.removeItem(storageKey); }
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
   }
 
   function updateConditional() {
@@ -646,6 +701,7 @@
     setConditional('hours-other-detail', hourPatterns.includes('other'));
     setConditional('difficult-parts-other', difficultParts.includes('other'));
     setConditional('success-outcome-other', successOutcomes.includes('other'));
+    setConditional('supporter-details', form.elements.supporter.value === 'supporter');
     syncCurrentRoleCards();
     syncCurrentGapCards();
     syncQualificationCards();
@@ -970,10 +1026,11 @@
         ['Deadline', selectedLabels('deadlineGate')], ['Deadline type', f.deadlineType.value], ['Deadline date', f.deadline.value], ['Deadline notes', f.deadlineNotes.value],
         ['Application or supporting statement', selectedLabels('applicationDraft')], ['What would make the service successful', selectedLabels('successOutcomes')], ['Other successful outcome', f.successOutcomeOther.value]
       ]},
-      {title:'Documents', step:6, rows:[['Files selected', files], ['Document link', f.documentUrl.value], ['Documents to send later', f.documentNotes.value]]},
+      {title:'Documents', step:6, rows:[['Files selected', files], ['Document or profile links', f.documentUrl.value], ['Documents to send later', f.documentNotes.value]]},
       {title:'Working together', step:7, rows:[
         ['Accessibility consent', selectedLabels('specialCategoryConsent')], ['Accessibility or adjustment information', f.accessibilityNeeds.value],
-        ['Who you would like to discuss this with', selectedLabels('accessibilityDiscussion')], ['Optional follow-up discussion', selectedLabels('followUpDiscussion')], ['How we work together', f.workingPreferences.value], ['Anyone else involved', selectedLabels('supporter')]
+        ['Who you would like to discuss this with', selectedLabels('accessibilityDiscussion')], ['Optional follow-up discussion', selectedLabels('followUpDiscussion')], ['How we work together', f.workingPreferences.value], ['Anyone else involved', selectedLabels('supporter')],
+        ['Supporter name', f.supporterName.value], ['Supporter relationship', f.supporterRelationship.value], ['Supporter contact details', f.supporterContact.value], ['What the supporter may help with', f.supporterRole.value]
       ]}
     ];
 
@@ -1050,6 +1107,39 @@
   document.getElementById('download-draft').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
+  document.getElementById('restore-draft').addEventListener('change', async event => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    const message = document.getElementById('restore-draft-message');
+    if (!file) return;
+    if (pendingDocumentUploads > 0) {
+      message.textContent = 'Please wait for the current document upload to finish before restoring a backup.';
+      input.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      message.textContent = 'That backup is too large. Choose the JSON file downloaded from this form.';
+      input.value = '';
+      return;
+    }
+    try {
+      const draft = JSON.parse(await file.text());
+      if (!validBackup(draft)) throw new Error('This is not a backup for this client form.');
+      if (!confirm('Restore this backup? It will replace the answers currently saved on this device. Saved voice recordings will stay on this device.')) {
+        input.value = '';
+        return;
+      }
+      if (!applyDraft(draft)) throw new Error('The backup could not be restored.');
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+      message.textContent = 'Backup restored. Your typed answers and uploaded-document references are back in the form.';
+      saveState.textContent = 'Backup restored on this device';
+      showStep(current, {focusHeading:false});
+    } catch (error) {
+      message.textContent = error.message || 'That file could not be restored. Choose a backup downloaded from this form.';
+    } finally {
+      input.value = '';
+    }
   });
   document.getElementById('clear-draft').addEventListener('click', async () => { if (pendingDocumentUploads > 0) { alert('Please wait for the document upload to finish before clearing the form.'); return; } if (confirm('Clear all answers, recordings and uploaded documents? This cannot be undone.')) { discardActiveVoiceRecording(); await deleteAllDocumentUploads(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
 

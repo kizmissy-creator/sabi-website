@@ -14,9 +14,10 @@ body {
 }
 
 .form-shell {
-  max-width: 1040px;
-  grid-template-columns: 230px minmax(0, 760px);
-  gap: 1.5rem;
+  max-width: 960px;
+  grid-template-columns: 205px minmax(0, 715px);
+  gap: 1.25rem;
+  margin-bottom: 3.5rem;
 }
 
 .hero-support {
@@ -86,7 +87,7 @@ summary:focus-visible {
 }
 
 form {
-  padding: clamp(1.25rem, 3vw, 2.25rem);
+  padding: clamp(1.2rem, 2.4vw, 1.75rem);
 }
 
 .form-step h2,
@@ -95,7 +96,7 @@ form {
 }
 
 .intro {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 label:not(.choice) {
@@ -202,8 +203,8 @@ legend small {
 }
 
 .question-group {
-  margin: 1.5rem 0;
-  padding: 1.15rem;
+  margin: 1.2rem 0;
+  padding: 1rem;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: #f9fcfc;
@@ -457,16 +458,17 @@ legend small {
   align-items: center;
   margin: .65rem 0 .3rem;
   padding: .5rem .75rem;
-  border: 1px solid #d1ad38;
+  border: 1px solid #91aaa7;
+  border-left: 3px solid #d5b43e;
   border-radius: 8px;
-  background: #fff1b8;
+  background: #fff;
   color: var(--teal-dark);
   font-size: .9rem;
   text-decoration: none;
 }
 
 .add-button.entry-add-action:hover {
-  background: #f6d66d;
+  background: #fff9e7;
 }
 
 .inline-choice {
@@ -538,48 +540,63 @@ legend small {
 
 @media (min-width: 851px) {
   .hero {
-    max-width: 1040px;
-    grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr);
-    gap: 2.5rem;
-    padding-top: 2.75rem;
-    padding-bottom: 2.25rem;
+    max-width: 960px;
+    grid-template-columns: minmax(0, 1.6fr) 260px;
+    gap: 2rem;
+    padding-top: 1.8rem;
+    padding-bottom: 1.5rem;
     align-items: center;
   }
 
   .hero h1 {
-    font-size: clamp(3rem, 3.6vw, 3.25rem);
-    line-height: 1;
-    margin-bottom: 1rem;
+    font-size: clamp(2.5rem, 3vw, 2.8rem);
+    line-height: 1.02;
+    margin-bottom: .65rem;
   }
 
   .hero .lead {
-    max-width: 620px;
-    font-size: 1.025rem;
-    line-height: 1.6;
+    max-width: 590px;
+    margin: .45rem 0;
+    font-size: .94rem;
+    line-height: 1.55;
   }
 
   .hero-support {
-    margin-top: .75rem;
+    max-width: 590px;
+    margin-top: .45rem;
+    font-size: .86rem;
+    line-height: 1.5;
+  }
+
+  .hero .eyebrow {
+    margin-bottom: .55rem;
+  }
+
+  .hero .reassurance {
+    margin-top: .45rem;
+    padding: .45rem .7rem;
+    font-size: .8rem;
   }
 
   .package-card {
     width: 100%;
-    max-width: 310px;
-    padding: 1.4rem;
+    max-width: 260px;
+    padding: 1.05rem 1.15rem;
     justify-self: end;
   }
 
   .package-card strong {
-    font-size: 1.6rem;
+    font-size: 1.35rem;
   }
 
   .package-card .price {
-    font-size: 2.15rem;
+    font-size: 1.8rem;
   }
 
   .package-card ul {
-    font-size: .85rem;
-    line-height: 1.5;
+    margin-top: .55rem;
+    font-size: .74rem;
+    line-height: 1.4;
   }
 }
 
@@ -667,6 +684,18 @@ legend small {
   color: var(--muted);
   font-size: .72rem;
   line-height: 1.4;
+}
+
+.draft-options .restore-draft-label {
+  display: block;
+  width: fit-content;
+  margin: 0;
+  padding: .3rem 0;
+  color: var(--teal);
+  font-size: .78rem;
+  font-weight: 400;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .review-summary {
@@ -1015,9 +1044,10 @@ legend small {
   width: auto;
   margin: 0;
   padding: .55rem .8rem;
-  border: 1px solid #d1ad38;
+  border: 1px solid #91aaa7;
+  border-left: 3px solid #d5b43e;
   border-radius: 8px;
-  background: #fff1b8;
+  background: #fff;
   color: var(--teal-dark);
   font-size: .9rem;
   font-weight: 800;
@@ -1025,7 +1055,7 @@ legend small {
 }
 
 .upload-picker:hover {
-  background: #f6d66d;
+  background: #fff9e7;
 }
 
 .upload-picker:focus-within {
