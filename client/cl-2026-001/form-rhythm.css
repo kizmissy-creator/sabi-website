@@ -1435,3 +1435,51 @@ legend small {
     white-space: normal;
   }
 }
+
+/* About you contains short answers, so keep its rows compact without shrinking tap targets. */
+.compact-details > .grid,
+.compact-details > .compact-choices,
+.compact-details > label:not(.choice) {
+  padding-top: .7rem;
+  padding-bottom: .8rem;
+}
+
+.compact-details > .grid:first-of-type {
+  padding-top: .25rem;
+}
+
+.compact-details .grid > label:not(.choice) {
+  margin: .2rem 0;
+}
+
+.compact-details .grid + .grid,
+.compact-details .grid + .compact-choices,
+.compact-details .compact-choices + label {
+  margin-top: 0;
+}
+
+.compact-details .compact-choices {
+  gap: .4rem;
+}
+
+.compact-details .compact-choices legend {
+  margin-bottom: .5rem;
+}
+
+.compact-details .form-privacy {
+  margin-top: .75rem;
+  padding-top: .65rem;
+}
+
+@media (max-width: 520px) {
+  .compact-details > .grid,
+  .compact-details > .compact-choices,
+  .compact-details > label:not(.choice) {
+    padding-top: .65rem;
+    padding-bottom: .75rem;
+  }
+
+  .compact-details .grid {
+    gap: .35rem;
+  }
+}
