@@ -1,7 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const CLIENT_REFERENCE = "CL-2026-001";
-const PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
+const LIVE_PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
+const TEST_PAYMENT_LINK_ID = "plink_1U2vSwFtDRl3MPZmHMvYptrp";
+const TEST_RECIPIENT = "info@sabigroup.co.uk";
 const AMOUNT_PENCE = 13500;
 const MAX_WEBHOOK_AGE_SECONDS = 5 * 60;
 
@@ -36,26 +38,30 @@ function signDelivery(secret, payload) {
 }
 
 function checkoutIsEligible(session) {
+  const expectedPaymentLink = session?.livemode === false ? TEST_PAYMENT_LINK_ID : LIVE_PAYMENT_LINK_ID;
   return session?.payment_status === "paid"
     && Number(session?.amount_total) === AMOUNT_PENCE
     && String(session?.currency || "").toLowerCase() === "gbp"
     && session?.client_reference_id === CLIENT_REFERENCE
-    && session?.payment_link === PAYMENT_LINK_ID;
+    && session?.payment_link === expectedPaymentLink;
 }
 
 export default async function stripePaymentEmail(request) {
   if (request.method !== "POST") return json({ ok: false, error: "Method not allowed." }, 405);
 
-  const stripeWebhookSecret = process.env.STRIPE_PAYMENT_EMAIL_WEBHOOK_SECRET;
+  const stripeWebhookSecrets = [
+    process.env.STRIPE_PAYMENT_EMAIL_WEBHOOK_SECRET,
+    process.env.STRIPE_PAYMENT_EMAIL_TEST_WEBHOOK_SECRET
+  ].filter(Boolean);
   const appScriptEndpoint = process.env.BRONAGH_APPS_SCRIPT_ENDPOINT;
   const deliverySecret = process.env.BRONAGH_PAYMENT_EMAIL_SECRET;
-  if (!stripeWebhookSecret || !appScriptEndpoint || !deliverySecret) {
+  if (!stripeWebhookSecrets.length || !appScriptEndpoint || !deliverySecret) {
     console.error("Payment confirmation email is not configured.");
     return json({ ok: false }, 503);
   }
 
   const rawBody = await request.text();
-  if (!validStripeSignature(request.headers.get("stripe-signature"), rawBody, stripeWebhookSecret)) return json({ ok: false }, 400);
+  if (!stripeWebhookSecrets.some((secret) => validStripeSignature(request.headers.get("stripe-signature"), rawBody, secret))) return json({ ok: false }, 400);
 
   let event;
   try { event = JSON.parse(rawBody); } catch { return json({ ok: false }, 400); }
@@ -65,6 +71,7 @@ export default async function stripePaymentEmail(request) {
   if (!checkoutIsEligible(session)) return json({ ok: true, ignored: true });
   const recipient = String(session?.customer_details?.email || session?.customer_email || "").trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) return json({ ok: false }, 422);
+  if (session?.livemode === false && recipient !== TEST_RECIPIENT) return json({ ok: true, ignored: true });
 
   const origin = new URL(request.url).origin;
   const payload = {
@@ -74,6 +81,7 @@ export default async function stripePaymentEmail(request) {
     recipient,
     firstName: String(session?.customer_details?.name || "").trim().split(/\s+/)[0] || "there",
     amountPence: AMOUNT_PENCE,
+    testMode: session?.livemode === false,
     earlyStart: false,
     onboardingUrl: `${origin}/`,
     termsUrl: `${origin}/documents/terms-and-conditions.html`,
