@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import test from "node:test";
-import stripePaymentEmail from "./stripe-payment-email.mjs";
+import stripePaymentEmail from "../netlify/functions/stripe-payment-email.mjs";
 
 const LIVE_SECRET = "whsec_live_test_value";
 const TEST_SECRET = "whsec_sandbox_test_value";
