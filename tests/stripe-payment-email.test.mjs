@@ -28,7 +28,7 @@ function checkoutEvent(overrides = {}) {
         payment_status: "paid",
         amount_total: 13500,
         currency: "gbp",
-        client_reference_id: "CL-2026-001",
+        client_reference_id: "CL-2026-001-standard-start",
         payment_link: "plink_1U2vSwFtDRl3MPZmHMvYptrp",
         customer_details: { email: "info@sabigroup.co.uk", name: "SABI test" },
         ...overrides
@@ -56,6 +56,7 @@ test("accepts the configured sandbox link and sends only to the SABI test addres
   assert.equal(response.status, 200);
   assert.equal(delivered.recipient, "info@sabigroup.co.uk");
   assert.equal(delivered.testMode, true);
+  assert.equal(delivered.earlyStart, false);
 });
 
 test("continues to accept the configured live Career Partner link", async () => {
@@ -76,6 +77,27 @@ test("continues to accept the configured live Career Partner link", async () => 
   assert.equal(response.status, 200);
   assert.equal(delivered.recipient, "bronagh@example.com");
   assert.equal(delivered.testMode, false);
+  assert.equal(delivered.earlyStart, false);
+});
+
+test("records an early-start request from the completed Checkout Session", async () => {
+  configureEnvironment();
+  let delivered;
+  global.fetch = async (_url, options) => {
+    delivered = JSON.parse(options.body);
+    return Response.json({ ok: true });
+  };
+  const event = checkoutEvent({
+    id: "cs_live_bronagh_early_start",
+    livemode: true,
+    client_reference_id: "CL-2026-001-early-start",
+    payment_link: "plink_1U1JeFFtDRl3MPZmzTTHjBWx",
+    customer_details: { email: "bronagh@example.com", name: "Bronagh" }
+  });
+
+  const response = await stripePaymentEmail(signedRequest(event, LIVE_SECRET));
+  assert.equal(response.status, 200);
+  assert.equal(delivered.earlyStart, true);
 });
 
 test("ignores sandbox events without the client reference", async () => {

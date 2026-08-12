@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const CLIENT_REFERENCE = "CL-2026-001";
+const STANDARD_START_REFERENCE = `${CLIENT_REFERENCE}-standard-start`;
+const EARLY_START_REFERENCE = `${CLIENT_REFERENCE}-early-start`;
 const LIVE_PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
 const TEST_RECIPIENT = "info@sabigroup.co.uk";
 const AMOUNT_PENCE = 13500;
@@ -43,8 +45,12 @@ function checkoutIsEligible(session) {
   return session?.payment_status === "paid"
     && Number(session?.amount_total) === AMOUNT_PENCE
     && String(session?.currency || "").toLowerCase() === "gbp"
-    && session?.client_reference_id === CLIENT_REFERENCE
+    && [STANDARD_START_REFERENCE, EARLY_START_REFERENCE].includes(session?.client_reference_id)
     && paymentLinkIsEligible;
+}
+
+function earlyStartRequested(session) {
+  return session?.client_reference_id === EARLY_START_REFERENCE;
 }
 
 export default async function stripePaymentEmail(request) {
@@ -83,7 +89,7 @@ export default async function stripePaymentEmail(request) {
     firstName: String(session?.customer_details?.name || "").trim().split(/\s+/)[0] || "there",
     amountPence: AMOUNT_PENCE,
     testMode: session?.livemode === false,
-    earlyStart: false,
+    earlyStart: earlyStartRequested(session),
     onboardingUrl: `${origin}/`,
     termsUrl: `${origin}/documents/terms-and-conditions.html`,
     privacyUrl: `${origin}/documents/privacy-policy.html`,

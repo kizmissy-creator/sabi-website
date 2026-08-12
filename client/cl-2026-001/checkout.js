@@ -1,5 +1,6 @@
 (() => {
   const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/4gMaEX0t36c9dKW8Ql7Zu00";
+  const CLIENT_REFERENCE = "CL-2026-001";
   const terms = document.getElementById("accept-terms");
   const earlyStart = document.getElementById("early-start");
   const button = document.getElementById("pay-button");
@@ -26,7 +27,8 @@
 
     try {
       const checkoutUrl = new URL(STRIPE_PAYMENT_LINK);
-      checkoutUrl.searchParams.set("client_reference_id", "CL-2026-001");
+      const startArrangement = earlyStart.checked ? "early-start" : "standard-start";
+      checkoutUrl.searchParams.set("client_reference_id", `${CLIENT_REFERENCE}-${startArrangement}`);
       checkoutUrl.searchParams.set("utm_source", "private_client_page");
       checkoutUrl.searchParams.set("utm_medium", "direct");
       checkoutUrl.searchParams.set("utm_campaign", "career_partner_bespoke");

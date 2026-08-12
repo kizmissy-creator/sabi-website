@@ -2,6 +2,10 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const COOKIE_NAME = "sabi_client_access";
 const CLIENT_REFERENCE = "CL-2026-001";
+const CLIENT_REFERENCES = new Set([
+  `${CLIENT_REFERENCE}-standard-start`,
+  `${CLIENT_REFERENCE}-early-start`
+]);
 const PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
 const AMOUNT_PENCE = 13500;
 const ACCESS_SECONDS = 30 * 24 * 60 * 60;
@@ -72,7 +76,7 @@ export default async function paymentSuccess(request) {
     session.payment_status === "paid" &&
     Number(session.amount_total) === AMOUNT_PENCE &&
     String(session.currency || "").toLowerCase() === "gbp" &&
-    safeEqual(session.client_reference_id, CLIENT_REFERENCE) &&
+    CLIENT_REFERENCES.has(String(session.client_reference_id || "")) &&
     safeEqual(session.payment_link, PAYMENT_LINK_ID);
 
   if (!valid) {
