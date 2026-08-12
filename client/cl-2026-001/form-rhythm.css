@@ -1325,3 +1325,113 @@ legend small {
     justify-content: flex-start;
   }
 }
+
+/* One visual grammar across every page: questions are rows, not floating cards. */
+.form-step > .grid,
+.form-step > label:not(.choice),
+.form-step > fieldset,
+.form-step > .question-group,
+.form-step > .document-upload,
+.form-step > .preference-details,
+.form-step > .accessibility-gate,
+.form-step > .conditional:not(.notice),
+.form-step > .process-details {
+  margin: 0;
+  padding: 1.15rem 0 1.25rem;
+  border: 0;
+  border-bottom: 1px solid #dce8e7;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.form-step > .grid:first-of-type,
+.form-step > label:not(.choice):first-of-type,
+.form-step > fieldset:first-of-type,
+.form-step > .question-group:first-of-type,
+.form-step > .document-upload:first-of-type,
+.form-step > .preference-details:first-of-type,
+.form-step > .accessibility-gate:first-of-type,
+.form-step > .process-details:first-of-type {
+  padding-top: .35rem;
+}
+
+.form-step > .question-group.prompt-card {
+  margin: 0;
+  padding: 1.15rem 0 1.25rem;
+}
+
+.form-step > details.optional-choice-card,
+.form-step > details.preference-details,
+.form-step > details.process-details {
+  overflow: visible;
+}
+
+.form-step > details.optional-choice-card > summary,
+.form-step > details.preference-details > summary,
+.form-step > details.process-details > summary {
+  padding: .25rem 0;
+  background: transparent;
+  border: 0;
+}
+
+.form-step > details.optional-choice-card[open] > summary,
+.form-step > details.preference-details[open] > summary,
+.form-step > details.process-details[open] > summary {
+  padding-bottom: .75rem;
+  border-bottom: 1px solid #e3eceb;
+  background: transparent;
+}
+
+.form-step > details.optional-choice-card .optional-choice-card-body,
+.form-step > details.preference-details .preference-details-body {
+  padding: .2rem 0 0;
+  background: transparent;
+}
+
+.form-step > details.process-details ol {
+  padding: .85rem .2rem 0 1.45rem;
+}
+
+.practical-preferences-details .preference-details-body {
+  gap: 0;
+}
+
+.preference-question {
+  padding: 1rem 0;
+  border: 0;
+  border-bottom: 1px solid #e3eceb;
+  border-radius: 0;
+  background: transparent;
+}
+
+.preference-question:last-child {
+  border-bottom: 0;
+}
+
+.opportunity-card,
+.employment-gap-details,
+.practical-preferences-details,
+.qualification-group,
+.form-step[data-step="2"] .question-group {
+  border-left: 0;
+  background: transparent;
+}
+
+.document-upload h3,
+.question-group > h3,
+.group-heading h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 520px) {
+  .process-details > summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .15rem;
+  }
+
+  .process-details > summary small {
+    white-space: normal;
+  }
+}
