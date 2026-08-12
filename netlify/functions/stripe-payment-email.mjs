@@ -98,3 +98,4 @@ export default async function stripePaymentEmail(request) {
 }
 
 export const config = { path: "/api/stripe-payment-email" };
+
