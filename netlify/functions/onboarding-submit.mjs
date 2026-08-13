@@ -94,6 +94,13 @@ export default async function onboardingSubmit(request) {
     received = {};
   }
   if (!response.ok || !received.ok || received.submissionId !== input.submissionId) {
+    console.error("Onboarding receiver confirmation mismatch", JSON.stringify({
+      responseStatus: response.status,
+      responseUrl: response.url,
+      responseType: response.headers.get("content-type"),
+      responseBody: responseText.slice(0, 500),
+      expectedSubmissionId: input.submissionId
+    }));
     return json({ ok: false, error: "The secure record did not confirm receipt. Your answers are still saved on this device." }, 502);
   }
   return json({ ok: true, submissionId: input.submissionId });
