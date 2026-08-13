@@ -30,7 +30,10 @@ function safePath(request) {
   let path;
   try { path = decodeURIComponent(rawPath); } catch { return "/"; }
   path = path.replace(/[\u200B-\u200D\u2060\uFEFF]/g, "");
-  return path.startsWith("/") && !path.startsWith("//") ? path : "/";
+  if (!path.startsWith("/") || path.startsWith("//")) return "/";
+  // Some mobile Netlify routes do not resolve the folder root reliably.
+  // Always use the concrete form file after password access.
+  return path === "/" ? "/index.html" : path;
 }
 
 function isPublicTesterPage(path) {
