@@ -100,17 +100,17 @@
 
         <section class="form-step" data-step="2">
           <p class="eyebrow">STEP 3</p><h2 tabindex="-1">Your experience</h2><p class="intro">Add any paid work, self-employment, volunteering, placements, education or other relevant experience.</p>
+          <label class="upload-instead-choice"><input type="checkbox" name="willUploadCv" value="yes"><span><strong>I will upload a CV or other documents</strong><small>They can cover your experience and qualifications, so you do not need to repeat what is already in them.</small></span></label>
           <div class="question-group">
             <div class="group-heading"><div><h3>Work and other experience</h3><p>Add employment, self-employment, volunteering, placements or other relevant experience separately.</p></div></div>
             <div id="experience-entry-area">
               <button class="add-button entry-add-action" type="button" data-add-entry="employmentHistory">+ Add an experience</button>
               <div class="repeater" data-repeater="employmentHistory"></div>
             </div>
-            <label class="none-entry-choice"><input type="checkbox" name="willUploadCv" value="yes"> I will upload my CV or work-history documents instead. I do not need to repeat them here.</label>
-            <label class="none-entry-choice"><input type="checkbox" name="noExperience" value="yes" id="no-experience"> No, I do not have any work, volunteering, placements or other experience to add here</label>
+            <label class="none-entry-choice"><input type="checkbox" name="noExperience" value="yes" id="no-experience"> I do not have any experience to add</label>
           </div>
           <details id="employment-gap-section" class="preference-details employment-gap-details conditional hidden"><summary>Have you had a gap in employment?</summary><div class="preference-details-body"><p>Add only periods you may want explained. You can keep the reason brief and do not need to share personal details.</p><div class="repeater" data-repeater="employmentGaps"></div><button class="add-button" type="button" data-add-entry="employmentGaps">+ Add an employment gap</button></div></details>
-          <div class="question-group qualification-group"><div class="group-heading"><div><h3>Qualifications, training, licences or certificates</h3><p>Add anything you would like included, one at a time. Please include English and maths separately if you have them.</p></div></div><div id="qualification-entry-area"><div class="qualification-actions"><button class="add-button entry-add-action" type="button" data-add-entry="qualifications">+ Add a qualification</button></div><div class="repeater" data-repeater="qualifications"></div></div><label class="none-entry-choice"><input type="checkbox" name="noQualifications" value="yes" id="no-qualifications"> No, I do not have any qualifications, training, licences or certificates to add</label></div>
+          <div class="question-group qualification-group"><div class="group-heading"><div><h3>Qualifications, training, licences or certificates</h3><p>Add anything you would like included, one at a time. Please include English and maths separately if you have them.</p></div></div><div id="qualification-entry-area"><div class="qualification-actions"><button class="add-button entry-add-action" type="button" data-add-entry="qualifications">+ Add a qualification</button></div><div class="repeater" data-repeater="qualifications"></div></div><label class="none-entry-choice"><input type="checkbox" name="noQualifications" value="yes" id="no-qualifications"> I do not have any qualifications or training to add</label></div>
         </section>
 
         <section class="form-step" data-step="3">
