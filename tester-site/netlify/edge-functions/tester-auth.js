@@ -1,3 +1,4 @@
+
 const COOKIE_NAME = "sabi_tester_access";
 const CLIENT_REFERENCE = "TEST-CAREER-PARTNER";
 const SESSION_SECONDS = 7 * 24 * 60 * 60;
@@ -25,20 +26,26 @@ async function sign(secret, value) {
   return encode(String.fromCharCode(...new Uint8Array(signature)));
 }
 
-function accessPage(message = "") {
-  const notice = message ? `<p class="notice" role="alert">${message}</p>` : "";
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>SABI tester access</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f3fbfb;color:#172424;font:17px/1.6 Arial,sans-serif}main{width:min(100%,620px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}.mode{display:inline-block;background:#fff1b8;color:#543f00;padding:.35rem .6rem;border-radius:999px;font-weight:800;font-size:.8rem}.eyebrow{margin:1rem 0 0;color:#126d6a;font-size:.82rem;font-weight:800;letter-spacing:.12em}h1{color:#156d6b;font:600 clamp(38px,8vw,56px)/1.05 Georgia,serif;margin:.35rem 0 1rem}label{display:block;margin:1.5rem 0 .45rem;color:#075956;font-weight:700}input{width:100%;min-height:52px;border:1px solid #789694;border-radius:10px;padding:.75rem 1rem;font:inherit}input:focus{outline:3px solid rgba(242,201,76,.5);outline-offset:2px;border-color:#156d6b}button{margin-top:1rem;border:0;border-radius:10px;background:#f2c94c;color:#0e5553;padding:.85rem 1.15rem;font:700 1rem Arial,sans-serif;cursor:pointer}.notice{border-left:4px solid #cf3c53;background:#fff2f4;padding:.7rem .9rem;color:#7f1730}.quiet{color:#506563;font-size:.94rem}</style></head><body><main><span class="mode">TEST MODE</span><p class="eyebrow">SABI CAREER SUPPORT</p><h1>Tester access</h1><p>This copy uses Stripe Sandbox and does not create a real payment or client record.</p>${notice}<form method="post" action="/"><label for="password">Tester password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Open the tester form</button></form><p class="quiet">Answers remain on this browser only. Do not enter real confidential information.</p></main></body></html>`;
+function safePath(request) {
+  const path = new URL(request.url).pathname;
+  return path.startsWith("/") && !path.startsWith("//") ? path : "/";
 }
 
-function denied(message = "", status = 401) {
-  return new Response(accessPage(message), { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow, noarchive", "x-frame-options": "DENY" } });
+function accessPage(message = "", action = "/") {
+  const notice = message ? `<p class="notice" role="alert">${message}</p>` : "";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>SABI tester access</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#f3fbfb;color:#172424;font:17px/1.6 Arial,sans-serif}main{width:min(100%,620px);background:#fff;border:1px solid #cbdad9;border-radius:20px;padding:clamp(28px,6vw,52px);box-shadow:0 18px 50px rgba(22,73,72,.1)}.mode{display:inline-block;background:#fff1b8;color:#543f00;padding:.35rem .6rem;border-radius:999px;font-weight:800;font-size:.8rem}.eyebrow{margin:1rem 0 0;color:#126d6a;font-size:.82rem;font-weight:800;letter-spacing:.12em}h1{color:#156d6b;font:600 clamp(38px,8vw,56px)/1.05 Georgia,serif;margin:.35rem 0 1rem}label{display:block;margin:1.5rem 0 .45rem;color:#075956;font-weight:700}input{width:100%;min-height:52px;border:1px solid #789694;border-radius:10px;padding:.75rem 1rem;font:inherit}input:focus{outline:3px solid rgba(242,201,76,.5);outline-offset:2px;border-color:#156d6b}button{margin-top:1rem;border:0;border-radius:10px;background:#f2c94c;color:#0e5553;padding:.85rem 1.15rem;font:700 1rem Arial,sans-serif;cursor:pointer}.notice{border-left:4px solid #cf3c53;background:#fff2f4;padding:.7rem .9rem;color:#7f1730}.quiet{color:#506563;font-size:.94rem}</style></head><body><main><span class="mode">TEST MODE</span><p class="eyebrow">SABI CAREER SUPPORT</p><h1>Tester access</h1><p>This copy uses Stripe Sandbox and does not create a real payment or client record.</p>${notice}<form method="post" action="${action}"><label for="password">Tester password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Open the tester page</button></form><p class="quiet">Answers remain on this browser only. Do not enter real confidential information.</p></main></body></html>`;
+}
+
+function denied(message = "", status = 401, action = "/") {
+  return new Response(accessPage(message, action), { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow, noarchive", "x-frame-options": "DENY" } });
 }
 
 export default async function testerAuth(request, context) {
   try {
+    const returnPath = safePath(request);
     const secret = Netlify.env.get("TESTER_ACCESS_SECRET") || "";
     const password = Netlify.env.get("TESTER_PAGE_PASSWORD") || "";
-    if (!secret || !password) return denied("Tester access has not been configured yet.", 503);
+    if (!secret || !password) return denied("Tester access has not been configured yet.", 503, returnPath);
 
     const token = context.cookies.get(COOKIE_NAME) || "";
     const [payloadPart, signature] = token.split(".");
@@ -48,15 +55,16 @@ export default async function testerAuth(request, context) {
       if (reference === CLIENT_REFERENCE && session.startsWith("test_") && Number(expiresText) >= Math.floor(Date.now() / 1000) && equal(await sign(secret, payload), signature)) return context.next();
     }
 
-    if (request.method !== "POST") return denied();
+    if (request.method !== "POST") return denied("", 401, returnPath);
     const form = await request.formData();
-    if (!equal(String(form.get("password") || ""), password)) return denied("That tester password was not recognised.");
+    if (!equal(String(form.get("password") || ""), password)) return denied("That tester password was not recognised.", 401, returnPath);
 
     const expires = Math.floor(Date.now() / 1000) + SESSION_SECONDS;
     const payload = `${CLIENT_REFERENCE}.test_password.${expires}`;
     const cookie = `${COOKIE_NAME}=${encode(payload)}.${await sign(secret, payload)}; Path=/; Expires=${new Date(expires * 1000).toUTCString()}; Secure; HttpOnly; SameSite=Strict`;
-    return new Response(null, { status: 303, headers: { location: "/", "set-cookie": cookie, "cache-control": "private, no-store" } });
+    return new Response(null, { status: 303, headers: { location: returnPath, "set-cookie": cookie, "cache-control": "private, no-store" } });
   } catch {
     return denied();
   }
 }
+
