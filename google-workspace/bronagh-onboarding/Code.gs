@@ -342,6 +342,7 @@ function validate_(input) {
   const situationOptions = ['employed', 'self-employed', 'not-working', 'first-job', 'education', 'caring', 'redundancy', 'leave', 'returning', 'employment-gap'];
   if (!Array.isArray(input.currentSituation) || !input.currentSituation.some(value => situationOptions.includes(value))) throw new Error('Current situation required.');
   if (input.ageEligible !== 'yes') throw new Error('Age eligibility required.');
+  if (!includesYes_(input.termsAccepted)) throw new Error('Terms acceptance missing.');
   if (!includesYes_(input.clientDeclaration)) throw new Error('Client declaration missing.');
   if (clean_(input.accessibilityNeeds, 5000) && !includesYes_(input.specialCategoryConsent)) throw new Error('Sensitive information supplied without consent.');
   (input.files || []).forEach(file => {
