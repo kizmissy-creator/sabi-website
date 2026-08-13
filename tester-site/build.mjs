@@ -31,6 +31,12 @@ async function transformFile(path) {
     .replaceAll("Uploaded securely", "Selected for this test only")
     .replaceAll("Uploading securelyâ€¦", "Preparing test fileâ€¦")
     .replaceAll("Confirming secure uploadâ€¦", "Checking test fileâ€¦");
+  text = text
+    .replaceAll("\u00c2\u00b7", "·")
+    .replaceAll("\u00c2\u00a3", "£")
+    .replaceAll("\u00e2\u20ac\u2122", "’")
+    .replaceAll("\u00e2\u20ac\u00a6", "…")
+    .replaceAll("\u00e2\u0153\u201c", "✓");
   await writeFile(path, text);
 }
 
@@ -53,7 +59,7 @@ for (const name of rootPages) {
   const path = join(output, name);
   let html = await readFile(path, "utf8");
   html = html.replace("</head>", '  <link rel="stylesheet" href="./tester.css">\n</head>');
-  html = html.replace(/<body([^>]*)>/, '<body$1><div class="tester-banner" role="status">TEST MODE Â· No real payment or client record will be created</div>');
+  html = html.replace(/<body([^>]*)>/, '<body$1><div class="tester-banner" role="status">TEST MODE · No real payment or client record will be created</div>');
   await writeFile(path, html);
 }
 
