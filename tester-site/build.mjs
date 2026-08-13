@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 1.1 seconds
+Output:
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,8 +31,8 @@ async function transformFile(path) {
     .replaceAll("Private client page", "Tester page")
     .replaceAll("Private SABI client page", "SABI tester page")
     .replaceAll("Uploaded securely", "Selected for this test only")
-    .replaceAll("Uploading securelyâ€¦", "Preparing test fileâ€¦")
-    .replaceAll("Confirming secure uploadâ€¦", "Checking test fileâ€¦");
+    .replaceAll("Uploading securely…", "Preparing test file…")
+    .replaceAll("Confirming secure upload…", "Checking test file…");
   await writeFile(path, text);
 }
 
@@ -52,7 +55,7 @@ for (const name of rootPages) {
   const path = join(output, name);
   let html = await readFile(path, "utf8");
   html = html.replace("</head>", '  <link rel="stylesheet" href="./tester.css">\n</head>');
-  html = html.replace(/<body([^>]*)>/, '<body$1><div class="tester-banner" role="status">TEST MODE Â· No real payment or client record will be created</div>');
+  html = html.replace(/<body([^>]*)>/, '<body$1><div class="tester-banner" role="status">TEST MODE · No real payment or client record will be created</div>');
   await writeFile(path, html);
 }
 
@@ -70,7 +73,11 @@ const paymentConfirmationPath = join(output, "payment-confirmation.html");
 let paymentConfirmation = await readFile(paymentConfirmationPath, "utf8");
 paymentConfirmation = paymentConfirmation
   .replace("PAYMENT RECEIVED", "TEST PAYMENT COMPLETED")
-  .replace("Your payment has been received. Youâ€™re ready to begin your SABI Career Partner onboarding.", "Stripe Sandbox accepted the test payment. No money was taken.")
+  .replace("Your payment has been received. You’re ready to begin your SABI Career Partner onboarding.", "Stripe Sandbox accepted the test payment. No money was taken.")
+  .replace("Open your private onboarding form using the button below.", "Open the tester onboarding form using the button below.")
+  .replace("Your private onboarding link will also be sent to you by email.", "No onboarding email will be sent during this test.")
+  .replace("Complete it in your own time. Your answers save on this browser and device.", "Try as much or as little as you like. Test answers stay on this browser and device.")
+  .replace("When you send it, SABI will review everything and email any focused follow-up questions.", "Sending the tester form only simulates a submission. Nothing is sent to SABI or Google Drive.")
   .replace("Stripe will send your payment receipt separately by email.", "This was a Sandbox payment, so no real receipt or charge will be created.");
 await writeFile(paymentConfirmationPath, paymentConfirmation);
 
@@ -80,3 +87,4 @@ await writeFile(join(output, "tester.css"), `
 `);
 
 console.log(`Built safe tester site in ${output}`);
+
