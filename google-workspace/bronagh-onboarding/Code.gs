@@ -339,7 +339,7 @@ function validate_(input) {
   if (!['email', 'whatsapp', 'phone'].includes(String(input.preferredContact || ''))) throw new Error('Preferred contact required.');
   if (['whatsapp', 'phone'].includes(String(input.preferredContact || '')) && !String(input.telephone || '').trim()) throw new Error('Telephone number required for the selected contact method.');
   if (!['no', 'payer', 'supporter'].includes(String(input.supporter || ''))) throw new Error('Communication involvement choice required.');
-  const situationOptions = ['employed', 'self-employed', 'not-working', 'first-job', 'education', 'caring', 'redundancy', 'leave', 'returning'];
+  const situationOptions = ['employed', 'self-employed', 'not-working', 'first-job', 'education', 'caring', 'redundancy', 'leave', 'returning', 'employment-gap'];
   if (!Array.isArray(input.currentSituation) || !input.currentSituation.some(value => situationOptions.includes(value))) throw new Error('Current situation required.');
   if (input.ageEligible !== 'yes') throw new Error('Age eligibility required.');
   if (!includesYes_(input.clientDeclaration)) throw new Error('Client declaration missing.');
