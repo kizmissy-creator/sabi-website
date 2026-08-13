@@ -29,8 +29,6 @@ function safePath(request) {
   const rawPath = new URL(request.url).pathname;
   let path;
   try { path = decodeURIComponent(rawPath); } catch { return "/"; }
-  // Messaging apps can accidentally add an invisible character to a copied URL.
-  // Remove those characters before sending the tester back to the requested page.
   path = path.replace(/[\u200B-\u200D\u2060\uFEFF]/g, "");
   return path.startsWith("/") && !path.startsWith("//") ? path : "/";
 }
@@ -39,6 +37,7 @@ function isPublicTesterPage(path) {
   return path === "/payment.html"
     || path === "/payment-confirmation.html"
     || path === "/payment.css"
+    || path === "/onboarding.css"
     || path === "/checkout.js"
     || path === "/tester.css"
     || path.startsWith("/images/");
