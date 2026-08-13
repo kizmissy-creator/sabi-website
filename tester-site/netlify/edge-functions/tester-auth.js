@@ -36,7 +36,12 @@ function safePath(request) {
 }
 
 function isPublicTesterPage(path) {
-  return path === "/payment.html" || path === "/payment-confirmation.html";
+  return path === "/payment.html"
+    || path === "/payment-confirmation.html"
+    || path === "/payment.css"
+    || path === "/checkout.js"
+    || path === "/tester.css"
+    || path.startsWith("/images/");
 }
 
 function accessPage(message = "", action = "/") {
