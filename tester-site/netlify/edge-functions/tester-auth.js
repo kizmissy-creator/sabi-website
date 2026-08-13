@@ -1,4 +1,3 @@
-
 const COOKIE_NAME = "sabi_tester_access";
 const CLIENT_REFERENCE = "TEST-CAREER-PARTNER";
 const SESSION_SECONDS = 7 * 24 * 60 * 60;
@@ -27,8 +26,17 @@ async function sign(secret, value) {
 }
 
 function safePath(request) {
-  const path = new URL(request.url).pathname;
+  const rawPath = new URL(request.url).pathname;
+  let path;
+  try { path = decodeURIComponent(rawPath); } catch { return "/"; }
+  // Messaging apps can accidentally add an invisible character to a copied URL.
+  // Remove those characters before sending the tester back to the requested page.
+  path = path.replace(/[\u200B-\u200D\u2060\uFEFF]/g, "");
   return path.startsWith("/") && !path.startsWith("//") ? path : "/";
+}
+
+function isPublicTesterPage(path) {
+  return path === "/payment.html" || path === "/payment-confirmation.html";
 }
 
 function accessPage(message = "", action = "/") {
@@ -42,7 +50,14 @@ function denied(message = "", status = 401, action = "/") {
 
 export default async function testerAuth(request, context) {
   try {
+    const rawPath = new URL(request.url).pathname;
     const returnPath = safePath(request);
+    if (rawPath !== returnPath) {
+      const url = new URL(request.url);
+      url.pathname = returnPath;
+      return Response.redirect(url.toString(), 302);
+    }
+    if (isPublicTesterPage(returnPath)) return context.next();
     const secret = Netlify.env.get("TESTER_ACCESS_SECRET") || "";
     const password = Netlify.env.get("TESTER_PAGE_PASSWORD") || "";
     if (!secret || !password) return denied("Tester access has not been configured yet.", 503, returnPath);
@@ -67,4 +82,3 @@ export default async function testerAuth(request, context) {
     return denied();
   }
 }
-
