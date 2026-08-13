@@ -7,6 +7,7 @@ const repo = resolve(here, "..");
 const source = join(repo, "client", "cl-2026-001");
 const output = join(here, "dist");
 const sandboxPaymentLink = "https://buy.stripe.com/test_fZu6oH0t3gQN7my7Mh7Zu01";
+const assetVersion = "20260813b";
 
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
