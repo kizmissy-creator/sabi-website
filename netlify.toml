@@ -6,15 +6,7 @@
 
 [[edge_functions]]
   function = "tester-auth"
-  path = "/"
-
-[[edge_functions]]
-  function = "tester-auth"
-  path = "/index.html"
-
-[[edge_functions]]
-  function = "tester-auth"
-  path = "/confirmation.html"
+  path = "/*"
 
 [[headers]]
   for = "/*"
