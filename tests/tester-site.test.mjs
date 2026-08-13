@@ -1,3 +1,4 @@
+
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile, readdir } from "node:fs/promises";
@@ -33,3 +34,13 @@ test("tester build is isolated from the live Bronagh journey", async () => {
   assert.doesNotMatch(bundle, /CL-2026-001/);
   assert.doesNotMatch(bundle, /Bronagh/i);
 });
+
+test("tester password protection covers the entire tester journey", async () => {
+  const netlifyConfig = await readFile(join(tester, "netlify.toml"), "utf8");
+  const auth = await readFile(join(tester, "netlify", "edge-functions", "tester-auth.js"), "utf8");
+
+  assert.match(netlifyConfig, /path = "\/\*"/);
+  assert.match(auth, /location: returnPath/);
+  assert.match(auth, /action="\$\{action\}"/);
+});
+
