@@ -40,6 +40,7 @@ function isPublicTesterPage(path) {
     || path === "/onboarding.css"
     || path === "/checkout.js"
     || path === "/tester.css"
+    || path.startsWith("/documents/")
     || path.startsWith("/images/");
 }
 
