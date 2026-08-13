@@ -69,3 +69,43 @@ test("invalid access remains rejected", async () => {
   assert.equal(response.status, 401);
   assert.equal((await response.json()).error, "Your onboarding access needs to be renewed.");
 });
+
+test("submission confirmation is retried once after an incomplete Google response", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    if (calls === 1) return new Response("", {status: 200, headers: {"content-type": "text/html"}});
+    return Response.json({ok: true, submissionId: validSessionBody.submissionId});
+  };
+  try {
+    const response = await onboardingSubmit(request("https://example.test/api/onboarding-submit", {
+      ...validSessionBody,
+      submissionToken: "signed-test-token"
+    }, `${cookieName}=${encodeURIComponent(accessToken(false))}`));
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), {ok: true, submissionId: validSessionBody.submissionId});
+    assert.equal(calls, 2);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("an explicit receiver rejection is not retried", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return Response.json({ok: false, error: "Invalid submission."});
+  };
+  try {
+    const response = await onboardingSubmit(request("https://example.test/api/onboarding-submit", {
+      ...validSessionBody,
+      submissionToken: "signed-test-token"
+    }, `${cookieName}=${encodeURIComponent(accessToken(false))}`));
+    assert.equal(response.status, 502);
+    assert.equal(calls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
