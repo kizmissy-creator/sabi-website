@@ -3,6 +3,13 @@ const CLIENT_REFERENCE = "CL-2026-001";
 const PREVIEW_HOST = "deploy-preview-2--sabi-bronagh-onboarding.netlify.app";
 const SESSION_SECONDS = 30 * 24 * 60 * 60;
 
+function isPublicPaymentResource(path) {
+  return path === "/payment-confirmation.html"
+    || path === "/onboarding.css"
+    || path.startsWith("/documents/")
+    || path.startsWith("/images/");
+}
+
 function base64UrlDecode(value) {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
   return atob(padded);
@@ -66,6 +73,7 @@ function denied(message = "", status = 401) {
 export default async function clientAuth(request, context) {
   try {
     const url = new URL(request.url);
+    if (isPublicPaymentResource(url.pathname)) return context.next();
     const previewToken = Netlify.env.get("BRONAGH_PREVIEW_TOKEN") || "";
     const previewExpiresAt = Date.parse(Netlify.env.get("BRONAGH_PREVIEW_EXPIRES_AT") || "");
     const isWorkingPreview =
