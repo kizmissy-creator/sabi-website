@@ -1,3 +1,4 @@
+
 [build]
   publish = "dist"
   command = "node build.mjs"
@@ -5,15 +6,7 @@
 
 [[edge_functions]]
   function = "tester-auth"
-  path = "/"
-
-[[edge_functions]]
-  function = "tester-auth"
-  path = "/index.html"
-
-[[edge_functions]]
-  function = "tester-auth"
-  path = "/confirmation.html"
+  path = "/*"
 
 [[headers]]
   for = "/*"
@@ -25,3 +18,4 @@
     Referrer-Policy = "no-referrer"
     X-Frame-Options = "DENY"
     Permissions-Policy = "camera=(), microphone=(self), geolocation=(), payment=()"
+
