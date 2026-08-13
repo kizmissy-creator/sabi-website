@@ -16,6 +16,15 @@ const ONBOARDING_CONFIG = {
   ownerNotificationEmail: 'info@sabigroup.co.uk'
 };
 
+const TESTER_ONBOARDING_CONFIG = Object.assign({}, ONBOARDING_CONFIG, {
+  sheetName: 'Tester Onboarding',
+  allowedClientReference: 'TEST-CAREER-PARTNER',
+  allowedServiceCode: 'career_partner_test',
+  folderProperty: 'TESTER_UPLOAD_FOLDER_ID',
+  submissionSecretProperty: 'TESTER_SUBMISSION_SECRET',
+  testMode: true
+});
+
 const ONBOARDING_HEADERS = [
   'received_at', 'submission_id', 'client_reference', 'first_name', 'last_name', 'email', 'preferred_contact',
   'current_situation', 'work_history', 'employment_gaps', 'qualifications', 'things_you_do_well',
@@ -84,6 +93,31 @@ function configureBronaghOnboarding() {
   return 'Configured. Keep the spreadsheet and upload folder Restricted.';
 }
 
+function configureCareerPartnerTester() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  if (!spreadsheet) throw new Error('Open this script from the dedicated onboarding spreadsheet.');
+  ensureSheet_(spreadsheet, TESTER_ONBOARDING_CONFIG);
+  const properties = PropertiesService.getScriptProperties();
+  if (!properties.getProperty(TESTER_ONBOARDING_CONFIG.folderProperty)) {
+    const folder = Drive.Files.create({name: 'TEST ONLY - Career Partner form submissions', mimeType: 'application/vnd.google-apps.folder'});
+    properties.setProperty(TESTER_ONBOARDING_CONFIG.folderProperty, folder.id);
+  }
+  return 'Tester record configured. Keep the tester sheet and folder Restricted.';
+}
+
+function setCareerPartnerTesterSubmissionSecret(secret) {
+  const value = String(secret || '').trim();
+  if (value.length < 32) throw new Error('Use a randomly generated secret of at least 32 characters.');
+  PropertiesService.getScriptProperties().setProperty(TESTER_ONBOARDING_CONFIG.submissionSecretProperty, value);
+  return 'Tester submission secret saved.';
+}
+
+function onboardingProfile_(input) {
+  if (input.clientReference === ONBOARDING_CONFIG.allowedClientReference && input.serviceCode === ONBOARDING_CONFIG.allowedServiceCode) return ONBOARDING_CONFIG;
+  if (input.clientReference === TESTER_ONBOARDING_CONFIG.allowedClientReference && input.serviceCode === TESTER_ONBOARDING_CONFIG.allowedServiceCode) return TESTER_ONBOARDING_CONFIG;
+  throw new Error('Wrong client reference or service code.');
+}
+
 function updateBronaghOnboardingSheet() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   if (!spreadsheet) throw new Error('Open this script from the dedicated onboarding spreadsheet.');
@@ -141,7 +175,7 @@ function sendPaymentConfirmation_(input) {
     const safeOnboardingUrl = html_(input.onboardingUrl);
     const htmlBody = '<div style="font-family:Arial,sans-serif;color:#173b3b;line-height:1.6;max-width:640px">'
       + '<p>Hello ' + safeName + ',</p>'
-      + '<p>Thank you for your payment of £135 for the SABI Bespoke Career Partner Package.</p>'
+      + '<p>Thank you for your payment of Â£135 for the SABI Bespoke Career Partner Package.</p>'
       + '<table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px 0"><tr><td style="border-radius:8px;background:#f2c94c">'
       + '<a href="' + safeOnboardingUrl + '" style="display:inline-block;padding:14px 22px;color:#063f3f;font-weight:bold;text-decoration:none">Open your private onboarding form</a>'
       + '</td></tr></table>'
@@ -159,13 +193,13 @@ function sendPaymentConfirmation_(input) {
       MailApp.sendEmail({
         to: ONBOARDING_CONFIG.ownerNotificationEmail,
         subject: 'Action needed: Bronagh payment received, send access password',
-        body: 'Stripe has confirmed Bronagh\'s £135 Career Partner payment. The onboarding confirmation email is being sent to ' + String(input.recipient) + '. Please now send Bronagh the separate access password. For security, do not include the password in the same email as the onboarding link.',
+        body: 'Stripe has confirmed Bronagh\'s Â£135 Career Partner payment. The onboarding confirmation email is being sent to ' + String(input.recipient) + '. Please now send Bronagh the separate access password. For security, do not include the password in the same email as the onboarding link.',
         name: 'SABI Career Support'
       });
       MailApp.sendEmail({
         to: String(input.recipient),
         subject: 'Your SABI Career Support payment and onboarding',
-        body: 'Thank you for your £135 payment for the SABI Bespoke Career Partner Package. Open your private onboarding form: ' + input.onboardingUrl,
+        body: 'Thank you for your Â£135 payment for the SABI Bespoke Career Partner Package. Open your private onboarding form: ' + input.onboardingUrl,
         htmlBody: htmlBody,
         name: 'SABI Career Support'
       });
@@ -204,8 +238,7 @@ function ensurePaymentConfirmationSheet_(spreadsheet) {
 }
 
 function validateUploadIdentity_(input) {
-  if (input.clientReference !== ONBOARDING_CONFIG.allowedClientReference) throw new Error('Wrong client reference.');
-  if (input.serviceCode !== ONBOARDING_CONFIG.allowedServiceCode) throw new Error('Wrong service code.');
+  onboardingProfile_(input);
   if (!/^[a-z0-9-]{20,80}$/i.test(String(input.submissionId || ''))) throw new Error('Invalid submission ID.');
   verifySubmissionToken_(input.submissionToken, input);
 }
@@ -222,6 +255,7 @@ function validateDocumentFile_(file) {
 
 function uploadFile_(input) {
   validateUploadIdentity_(input);
+  const profile = onboardingProfile_(input);
   const requestId = String(input.uploadRequestId || '');
   if (!/^[a-z0-9-]{20,80}$/i.test(requestId)) throw new Error('Invalid upload request ID.');
   try {
@@ -232,7 +266,7 @@ function uploadFile_(input) {
     lock.waitLock(20000);
     let result;
     try {
-      const folder = getOrCreateSubmissionFolder_(input.submissionId);
+      const folder = getOrCreateSubmissionFolder_(input.submissionId, profile);
       const safeName = safeFileName_(input.file.name);
       const blob = Utilities.newBlob(bytes, input.file.type || 'application/octet-stream', safeName);
       const created = Drive.Files.create({name: safeName, parents: [folder.id]}, blob);
@@ -263,17 +297,18 @@ function uploadStatus_(input) {
 }
 
 function uploadResultKey_(requestId) {
-  return 'bronagh-upload-' + requestId;
+  return 'onboarding-upload-' + requestId;
 }
 
 function deleteFile_(input) {
   validateUploadIdentity_(input);
+  const profile = onboardingProfile_(input);
   const uploadId = String(input.uploadId || '');
   if (!/^[a-z0-9_-]{10,180}$/i.test(uploadId)) throw new Error('Invalid upload reference.');
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    const folder = findSubmissionFolder_(input.submissionId);
+    const folder = findSubmissionFolder_(input.submissionId, profile);
     if (!folder) return json_({ok: true, missing: true});
     const file = Drive.Files.get(uploadId, {fields: 'id,parents,trashed'});
     if (file.trashed || !Array.isArray(file.parents) || !file.parents.includes(folder.id)) throw new Error('Upload does not belong to this submission.');
@@ -290,8 +325,9 @@ function safeFileName_(name) {
   return safe;
 }
 
-function findSubmissionFolder_(submissionId) {
-  const rootId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
+function findSubmissionFolder_(submissionId, profile) {
+  profile = profile || ONBOARDING_CONFIG;
+  const rootId = PropertiesService.getScriptProperties().getProperty(profile.folderProperty);
   if (!rootId) throw new Error('Upload folder not configured.');
   const escapedName = String(submissionId).replace(/'/g, "\\'");
   const result = Drive.Files.list({
@@ -302,10 +338,12 @@ function findSubmissionFolder_(submissionId) {
   return result.files && result.files.length ? result.files[0] : null;
 }
 
-function getOrCreateSubmissionFolder_(submissionId) {
-  const existing = findSubmissionFolder_(submissionId);
+function getOrCreateSubmissionFolder_(submissionId, profile) {
+  profile = profile || ONBOARDING_CONFIG;
+  const existing = findSubmissionFolder_(submissionId, profile);
   if (existing) return existing;
-  const rootId = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.folderProperty);
+  const rootId = PropertiesService.getScriptProperties().getProperty(profile.folderProperty);
+  if (!rootId) throw new Error('Upload folder not configured for this submission type.');
   return Drive.Files.create({
     name: String(submissionId),
     mimeType: 'application/vnd.google-apps.folder',
@@ -330,8 +368,7 @@ function verifiedStoredUploads_(input, folderId) {
 }
 
 function validate_(input) {
-  if (input.clientReference !== ONBOARDING_CONFIG.allowedClientReference) throw new Error('Wrong client reference.');
-  if (input.serviceCode !== ONBOARDING_CONFIG.allowedServiceCode) throw new Error('Wrong service code.');
+  onboardingProfile_(input);
   if (!/^[a-z0-9-]{20,80}$/i.test(String(input.submissionId || ''))) throw new Error('Invalid submission ID.');
   verifySubmissionToken_(input.submissionToken, input);
   if (!clean_(input.firstName, 120) || !clean_(input.lastName, 120)) throw new Error('Name required.');
@@ -359,7 +396,8 @@ function validate_(input) {
 }
 
 function verifySubmissionToken_(token, input) {
-  const secret = PropertiesService.getScriptProperties().getProperty(ONBOARDING_CONFIG.submissionSecretProperty);
+  const profile = onboardingProfile_(input);
+  const secret = PropertiesService.getScriptProperties().getProperty(profile.submissionSecretProperty);
   if (!secret) throw new Error('Submission secret not configured.');
   const parts = String(token || '').split('.');
   if (parts.length !== 2) throw new Error('Missing submission token.');
@@ -394,10 +432,11 @@ function constantTimeEqual_(left, right) {
 }
 
 function save_(input) {
-  const sheet = ensureSheet_(SpreadsheetApp.getActiveSpreadsheet());
+  const profile = onboardingProfile_(input);
+  const sheet = ensureSheet_(SpreadsheetApp.getActiveSpreadsheet(), profile);
   const existing = sheet.getRange('B:B').createTextFinder(input.submissionId).matchEntireCell(true).findNext();
   if (existing) return;
-  const submissionFolder = getOrCreateSubmissionFolder_(input.submissionId);
+  const submissionFolder = getOrCreateSubmissionFolder_(input.submissionId, profile);
   const uploadRows = verifiedStoredUploads_(input, submissionFolder.id);
   try {
     (input.files || []).forEach(file => {
@@ -413,10 +452,10 @@ function save_(input) {
     delete snapshot.uploads;
     const snapshotBlob = Utilities.newBlob(JSON.stringify(snapshot, null, 2), MimeType.PLAIN_TEXT, 'onboarding-response.json');
     Drive.Files.create({name: 'onboarding-response.json', parents: [submissionFolder.id]}, snapshotBlob);
-    const responseDocument = createReadableOnboardingDocument_(snapshot, submissionFolder.id);
+    const responseDocument = createReadableOnboardingDocument_(snapshot, submissionFolder.id, profile);
     const summary = appendSummaryRow_(sheet, input, driveUrl_(submissionFolder.id), responseDocument.url);
     try {
-      sendOnboardingArrivalNotification_(input, responseDocument.url, driveUrl_(submissionFolder.id));
+      sendOnboardingArrivalNotification_(input, responseDocument.url, driveUrl_(submissionFolder.id), profile);
       sheet.getRange(summary.row, summary.notificationColumn).setValue('Sent');
     } catch (notificationError) {
       sheet.getRange(summary.row, summary.notificationColumn).setValue('Failed');
@@ -461,9 +500,10 @@ function cleanupAbandonedBronaghUploads() {
   return 'Removed ' + removed + ' abandoned upload folder(s).';
 }
 
-function ensureSheet_(spreadsheet) {
-  let sheet = spreadsheet.getSheetByName(ONBOARDING_CONFIG.sheetName);
-  if (!sheet) sheet = spreadsheet.insertSheet(ONBOARDING_CONFIG.sheetName);
+function ensureSheet_(spreadsheet, profile) {
+  profile = profile || ONBOARDING_CONFIG;
+  let sheet = spreadsheet.getSheetByName(profile.sheetName);
+  if (!sheet) sheet = spreadsheet.insertSheet(profile.sheetName);
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(ONBOARDING_HEADERS);
     sheet.setFrozenRows(1);
@@ -516,8 +556,9 @@ function appendSummaryRow_(sheet, input, folderUrl, responseDocumentUrl) {
   return {row: sheet.getLastRow(), notificationColumn: headers.indexOf('notification_status') + 1};
 }
 
-function createReadableOnboardingDocument_(input, folderId) {
-  const clientName = [clean_(input.firstName, 120), clean_(input.lastName, 120)].filter(Boolean).join(' ') || 'Bronagh';
+function createReadableOnboardingDocument_(input, folderId, profile) {
+  profile = profile || ONBOARDING_CONFIG;
+  const clientName = [clean_(input.firstName, 120), clean_(input.lastName, 120)].filter(Boolean).join(' ') || (profile.testMode ? 'Tester' : 'Bronagh');
   const receivedAt = Utilities.formatDate(new Date(), ONBOARDING_CONFIG.timeZone || Session.getScriptTimeZone(), 'd MMMM yyyy, HH:mm');
   const sections = ONBOARDING_REPORT_SECTIONS.map(section => {
     const rows = section.fields.map(field => reportRow_(field[1], input[field[0]])).filter(Boolean).join('');
@@ -534,9 +575,10 @@ function createReadableOnboardingDocument_(input, folderId) {
     + '<p class="meta">Client reference: ' + html_(input.clientReference) + '<br>Submission reference: ' + html_(input.submissionId)
     + '<br>Received: ' + html_(receivedAt) + '</p><p class="meta">Unanswered optional questions are not shown.</p>'
     + sections + files + '</body></html>';
-  const blob = Utilities.newBlob(htmlContent, 'text/html', 'Bronagh onboarding response.html');
+  const filePrefix = profile.testMode ? 'TEST - Career Partner' : 'Bronagh';
+  const blob = Utilities.newBlob(htmlContent, 'text/html', filePrefix + ' onboarding response.html');
   const created = Drive.Files.create({
-    name: 'Bronagh - Onboarding response',
+    name: filePrefix + ' - Onboarding response',
     mimeType: 'application/vnd.google-apps.document',
     parents: [folderId]
   }, blob, {fields: 'id,name,webViewLink'});
@@ -595,9 +637,10 @@ function reportFiles_(files) {
   return '<section><h2>Documents and recordings received</h2><table><tr><th>Type</th><th>File</th><th>Link</th></tr>' + rows + '</table></section>';
 }
 
-function sendOnboardingArrivalNotification_(input, responseDocumentUrl, folderUrl) {
-  const clientName = [clean_(input.firstName, 120), clean_(input.lastName, 120)].filter(Boolean).join(' ') || 'Bronagh';
-  const subject = clientName + "'s onboarding has arrived";
+function sendOnboardingArrivalNotification_(input, responseDocumentUrl, folderUrl, profile) {
+  profile = profile || ONBOARDING_CONFIG;
+  const clientName = [clean_(input.firstName, 120), clean_(input.lastName, 120)].filter(Boolean).join(' ') || (profile.testMode ? 'Tester' : 'Bronagh');
+  const subject = (profile.testMode ? '[TEST] ' : '') + clientName + "'s onboarding has arrived";
   const body = clientName + "'s Career Partner onboarding has been received.\n\nSubmission reference: " + input.submissionId
     + '\nReadable response: ' + responseDocumentUrl + '\nSubmission folder: ' + folderUrl
     + '\n\nThe email contains no onboarding answers or attachments. Open the restricted Google Doc to review the response.';

@@ -3,6 +3,7 @@
   publish = "dist"
   command = "node build.mjs"
   edge_functions = "netlify/edge-functions"
+  functions = "netlify/functions"
 
 [[edge_functions]]
   function = "tester-auth"
@@ -11,7 +12,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Robots-Tag = "noindex, nofollow, noarchive, nosnippet, noimageindex"
+    X-Robots-Tag = "noindex, nofollow,noarchive,nosnippet,noimageindex"
     Cache-Control = "private, no-store, max-age=0"
     Pragma = "no-cache"
     X-Content-Type-Options = "nosniff"

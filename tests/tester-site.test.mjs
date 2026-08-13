@@ -1,4 +1,3 @@
-
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { readFile, readdir } from "node:fs/promises";
@@ -29,10 +28,26 @@ test("tester build is isolated from the live Bronagh journey", async () => {
 
   assert.match(bundle, /buy\.stripe\.com\/test_fZu6oH0t3gQN7my7Mh7Zu01/);
   assert.match(bundle, /TEST MODE/);
-  assert.match(bundle, /Nothing was sent to SABI or saved in Google Drive/);
+  assert.match(bundle, /separate restricted tester record/);
+  assert.match(bundle, /career_partner_test/);
   assert.doesNotMatch(bundle, /buy\.stripe\.com\/4gMaEX0t36c9dKW8Ql7Zu00/);
   assert.doesNotMatch(bundle, /CL-2026-001/);
   assert.doesNotMatch(bundle, /Bronagh/i);
+});
+
+test("tester submission, uploads and recordings use the isolated receiver", async () => {
+  const config = await readFile(join(tester, "test-config.js"), "utf8");
+  const functions = await Promise.all([
+    "tester-common.mjs", "test-onboarding-session.mjs", "test-onboarding-upload.mjs", "test-onboarding-submit.mjs"
+  ].map(name => readFile(join(tester, "netlify", "functions", name), "utf8")));
+  const bundle = functions.join("\n");
+
+  assert.match(config, /\/api\/test-onboarding-submit/);
+  assert.doesNotMatch(config, /window\.fetch\s*=/);
+  assert.match(bundle, /TESTER_APPS_SCRIPT_ENDPOINT/);
+  assert.match(bundle, /TESTER_SUBMISSION_SECRET/);
+  assert.match(bundle, /TEST-CAREER-PARTNER/);
+  assert.doesNotMatch(bundle, /BRONAGH_/);
 });
 
 test("tester password protection covers the entire tester journey", async () => {
@@ -43,4 +58,3 @@ test("tester password protection covers the entire tester journey", async () => 
   assert.match(auth, /location: returnPath/);
   assert.match(auth, /action="\$\{action\}"/);
 });
-

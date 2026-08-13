@@ -1,8 +1,8 @@
-
 [build]
   publish = "dist"
   command = "node build.mjs"
   edge_functions = "netlify/edge-functions"
+  functions = "netlify/functions"
 
 [[edge_functions]]
   function = "tester-auth"
@@ -18,4 +18,3 @@
     Referrer-Policy = "no-referrer"
     X-Frame-Options = "DENY"
     Permissions-Policy = "camera=(), microphone=(self), geolocation=(), payment=()"
-
