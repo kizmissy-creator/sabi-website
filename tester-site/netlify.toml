@@ -1,0 +1,27 @@
+[build]
+  publish = "dist"
+  command = "node build.mjs"
+  edge_functions = "netlify/edge-functions"
+
+[[edge_functions]]
+  function = "tester-auth"
+  path = "/"
+
+[[edge_functions]]
+  function = "tester-auth"
+  path = "/index.html"
+
+[[edge_functions]]
+  function = "tester-auth"
+  path = "/confirmation.html"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive, nosnippet, noimageindex"
+    Cache-Control = "private, no-store, max-age=0"
+    Pragma = "no-cache"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(self), geolocation=(), payment=()"
