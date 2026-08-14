@@ -1,19 +1,18 @@
 [build]
-  publish = "client/cl-2026-001"
-  command = "mkdir -p client/cl-2026-001/images && cp images/favicon.png images/sabi-mark-complete.png client/cl-2026-001/images/"
+  publish = "dist"
+  command = "node build.mjs"
   edge_functions = "netlify/edge-functions"
-  functions = "netlify/functions"
 
 [[edge_functions]]
-  function = "client-auth-30d"
+  function = "tester-auth"
   path = "/"
 
 [[edge_functions]]
-  function = "client-auth-30d"
+  function = "tester-auth"
   path = "/index.html"
 
 [[edge_functions]]
-  function = "client-auth-30d"
+  function = "tester-auth"
   path = "/confirmation.html"
 
 [[headers]]

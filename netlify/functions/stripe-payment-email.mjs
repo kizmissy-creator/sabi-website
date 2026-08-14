@@ -1,0 +1,117 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+const CLIENT_REFERENCE = "CL-2026-001";
+const STANDARD_START_REFERENCE = `${CLIENT_REFERENCE}-standard-start`;
+const EARLY_START_REFERENCE = `${CLIENT_REFERENCE}-early-start`;
+const LIVE_PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
+const TEST_RECIPIENT = "info@sabigroup.co.uk";
+const AMOUNT_PENCE = 13500;
+const MAX_WEBHOOK_AGE_SECONDS = 5 * 60;
+
+function json(body, status = 200) {
+  return Response.json(body, { status, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
+}
+
+function safeEqual(left, right) {
+  const a = Buffer.from(String(left));
+  const b = Buffer.from(String(right));
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+function validStripeSignature(header, payload, secret) {
+  let timestamp;
+  const signatures = [];
+  for (const part of String(header || "").split(",")) {
+    const [key, value] = part.split("=");
+    if (!key || !value) continue;
+    if (key.trim() === "t") timestamp = Number(value.trim());
+    if (key.trim() === "v1") signatures.push(value.trim());
+  }
+  if (!Number.isFinite(timestamp) || !signatures.length || Math.abs(Date.now() / 1000 - timestamp) > MAX_WEBHOOK_AGE_SECONDS) return false;
+  const expected = createHmac("sha256", secret).update(`${timestamp}.${payload}`).digest("hex");
+  return signatures.some((signature) => safeEqual(expected, signature));
+}
+
+function signDelivery(secret, payload) {
+  const encoded = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = createHmac("sha256", secret).update(encoded).digest("base64url");
+  return `${encoded}.${signature}`;
+}
+
+function checkoutIsEligible(session) {
+  const paymentLinkIsEligible = session?.livemode === false
+    ? /^plink_[A-Za-z0-9]+$/.test(String(session?.payment_link || ""))
+    : session?.payment_link === LIVE_PAYMENT_LINK_ID;
+  return session?.payment_status === "paid"
+    && Number(session?.amount_total) === AMOUNT_PENCE
+    && String(session?.currency || "").toLowerCase() === "gbp"
+    && [STANDARD_START_REFERENCE, EARLY_START_REFERENCE].includes(session?.client_reference_id)
+    && session?.consent?.terms_of_service === "accepted"
+    && paymentLinkIsEligible;
+}
+
+function earlyStartRequested(session) {
+  return session?.client_reference_id === EARLY_START_REFERENCE;
+}
+
+export default async function stripePaymentEmail(request) {
+  if (request.method !== "POST") return json({ ok: false, error: "Method not allowed." }, 405);
+
+  const stripeWebhookSecrets = [
+    process.env.STRIPE_PAYMENT_EMAIL_WEBHOOK_SECRET,
+    process.env.STRIPE_PAYMENT_EMAIL_TEST_WEBHOOK_SECRET
+  ].filter(Boolean);
+  const appScriptEndpoint = process.env.BRONAGH_APPS_SCRIPT_ENDPOINT;
+  const deliverySecret = process.env.BRONAGH_PAYMENT_EMAIL_SECRET;
+  if (!stripeWebhookSecrets.length || !appScriptEndpoint || !deliverySecret) {
+    console.error("Payment confirmation email is not configured.");
+    return json({ ok: false }, 503);
+  }
+
+  const rawBody = await request.text();
+  if (!stripeWebhookSecrets.some((secret) => validStripeSignature(request.headers.get("stripe-signature"), rawBody, secret))) return json({ ok: false }, 400);
+
+  let event;
+  try { event = JSON.parse(rawBody); } catch { return json({ ok: false }, 400); }
+  if (event?.type !== "checkout.session.completed") return json({ ok: true, ignored: true });
+
+  const session = event?.data?.object;
+  if (!checkoutIsEligible(session)) return json({ ok: true, ignored: true });
+  const recipient = String(session?.customer_details?.email || session?.customer_email || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) return json({ ok: false }, 422);
+  if (session?.livemode === false && recipient !== TEST_RECIPIENT) return json({ ok: true, ignored: true });
+
+  const origin = new URL(request.url).origin;
+  const payload = {
+    action: "payment_confirmation",
+    deliveryId: String(event.id || session.id),
+    checkoutSessionId: String(session.id),
+    recipient,
+    firstName: String(session?.customer_details?.name || "").trim().split(/\s+/)[0] || "there",
+    amountPence: AMOUNT_PENCE,
+    testMode: session?.livemode === false,
+    earlyStart: earlyStartRequested(session),
+    onboardingUrl: `${origin}/`,
+    termsUrl: `${origin}/documents/terms-and-conditions.html`,
+    privacyUrl: `${origin}/documents/privacy-policy.html`,
+    cancellationUrl: `${origin}/documents/cancellation-form.html`,
+    sentAt: new Date().toISOString()
+  };
+
+  try {
+    const response = await fetch(appScriptEndpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...payload, deliveryToken: signDelivery(deliverySecret, payload) })
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || result?.ok !== true) throw new Error(`Google receiver did not confirm delivery (${response.status})`);
+  } catch (error) {
+    console.error("Payment confirmation email was not delivered", error);
+    return json({ ok: false }, 502);
+  }
+  return json({ ok: true });
+}
+
+export const config = { path: "/api/stripe-payment-email" };
+
