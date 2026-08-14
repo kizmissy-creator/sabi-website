@@ -1,6 +1,6 @@
 (() => {
-  const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/4gMaEX0t36c9dKW8Ql7Zu00";
   const CLIENT_REFERENCE = "CL-2026-001";
+  const SERVICE_CODE = "career_partner_bespoke";
   const terms = document.getElementById("accept-terms");
   const earlyStart = document.getElementById("early-start");
   const button = document.getElementById("pay-button");
@@ -16,7 +16,7 @@
   terms.addEventListener("change", refresh);
   refresh();
 
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     if (!terms.checked || button.disabled) return;
 
     button.disabled = true;
@@ -26,18 +26,19 @@
     message.classList.add("hidden");
 
     try {
-      const checkoutUrl = new URL(STRIPE_PAYMENT_LINK);
-      const startArrangement = earlyStart.checked ? "early-start" : "standard-start";
-      checkoutUrl.searchParams.set("client_reference_id", `${CLIENT_REFERENCE}-${startArrangement}`);
-      checkoutUrl.searchParams.set("utm_source", "private_client_page");
-      checkoutUrl.searchParams.set("utm_medium", "direct");
-      checkoutUrl.searchParams.set("utm_campaign", "career_partner_bespoke");
-      checkoutUrl.searchParams.set(
-        "utm_content",
-        earlyStart.checked ? "early_start_requested" : "standard_start"
-      );
-
-      location.assign(checkoutUrl.toString());
+      const response = await fetch("/api/create-career-partner-checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          clientReference: CLIENT_REFERENCE,
+          serviceCode: SERVICE_CODE,
+          termsAccepted: true,
+          earlyStart: earlyStart.checked
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.checkoutUrl) throw new Error(result.error || "Secure payment could not be opened. Please try again.");
+      location.assign(result.checkoutUrl);
     } catch (error) {
       message.textContent = error.message || "Secure payment could not be opened. Please try again.";
       message.classList.remove("hidden");
