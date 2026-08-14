@@ -19,6 +19,7 @@ function stripeBody(origin, input) {
   body.set("mode", "payment");
   body.set("success_url", `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`);
   body.set("cancel_url", `${origin}/payment.html?cancelled=1`);
+  body.set("client_reference_id", `${CLIENT_REFERENCE}-${input.earlyStart ? "early-start" : "standard-start"}`);
   body.set("line_items[0][price_data][currency]", "gbp");
   body.set("line_items[0][price_data][unit_amount]", String(AMOUNT_PENCE));
   body.set("line_items[0][price_data][product_data][name]", "SABI Bespoke Career Partner Package");
