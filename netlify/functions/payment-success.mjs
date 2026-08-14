@@ -6,7 +6,6 @@ const CLIENT_REFERENCES = new Set([
   `${CLIENT_REFERENCE}-standard-start`,
   `${CLIENT_REFERENCE}-early-start`
 ]);
-const PAYMENT_LINK_ID = "plink_1U1JeFFtDRl3MPZmzTTHjBWx";
 const AMOUNT_PENCE = 13500;
 const ACCESS_SECONDS = 30 * 24 * 60 * 60;
 
@@ -77,8 +76,10 @@ export default async function paymentSuccess(request) {
     Number(session.amount_total) === AMOUNT_PENCE &&
     String(session.currency || "").toLowerCase() === "gbp" &&
     CLIENT_REFERENCES.has(String(session.client_reference_id || "")) &&
-    session.consent?.terms_of_service === "accepted" &&
-    safeEqual(session.payment_link, PAYMENT_LINK_ID);
+    safeEqual(session.metadata?.client_reference, CLIENT_REFERENCE) &&
+    safeEqual(session.metadata?.service_code, "career_partner_bespoke") &&
+    safeEqual(session.metadata?.terms_accepted, "yes") &&
+    safeEqual(session.metadata?.privacy_policy_provided, "yes");
 
   if (!valid) {
     console.error("Rejected checkout session", {
@@ -87,8 +88,7 @@ export default async function paymentSuccess(request) {
       amount_total: session.amount_total,
       currency: session.currency,
       client_reference_id: session.client_reference_id,
-      terms_of_service: session.consent?.terms_of_service,
-      payment_link: session.payment_link
+      metadata: session.metadata
     });
     return html(page("Payment could not be matched", "The payment did not match the expected Career Partner purchase. Please contact SABI before continuing."), 403);
   }
