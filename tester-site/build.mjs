@@ -91,4 +91,6 @@ await writeFile(join(output, "tester.css"), `
 .site-header{top:0}
 `);
 
+// Copy the dedicated test build after the legacy onboarding text substitutions.
+await cp(join(here, 'follow-up-public'), join(output, 'follow-up'), { recursive: true });
 console.log(`Built safe tester site in ${output}`);

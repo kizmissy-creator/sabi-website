@@ -15,7 +15,7 @@ async function textFiles(path) {
   const found = [];
   for (const entry of await readdir(path, { withFileTypes: true })) {
     const child = join(path, entry.name);
-    if (entry.isDirectory()) found.push(...await textFiles(child));
+    if (entry.isDirectory() && entry.name !== 'follow-up') found.push(...await textFiles(child));
     else if ([".html", ".css", ".js"].includes(extname(child))) found.push(child);
   }
   return found;
@@ -33,6 +33,11 @@ test("tester build is isolated from the live Bronagh journey", async () => {
   assert.doesNotMatch(bundle, /buy\.stripe\.com\/4gMaEX0t36c9dKW8Ql7Zu00/);
   assert.doesNotMatch(bundle, /CL-2026-001/);
   assert.doesNotMatch(bundle, /Bronagh/i);
+  const followUpFiles = await textFiles(join(dist, 'follow-up'));
+  const followUp = (await Promise.all(followUpFiles.map(file => readFile(file, 'utf8')))).join('\n');
+  assert.match(followUp, /Test sending is not connected yet/);
+  assert.match(await readFile(join(repo, 'follow-up-app', 'src', 'delivery.ts'), 'utf8'), /\/api\/test-follow-up-submit/);
+  assert.doesNotMatch(followUp, /\/api\/follow-up-submit/);
 });
 
 test("tester submission, uploads and recordings use the isolated receiver", async () => {
@@ -43,7 +48,8 @@ test("tester submission, uploads and recordings use the isolated receiver", asyn
   const bundle = functions.join("\n");
 
   assert.match(config, /\/api\/test-onboarding-submit/);
-  assert.doesNotMatch(config, /window\.fetch\s*=/);
+  assert.match(config, /nativeFetch\(config\.sessionEndpoint/);
+  assert.match(config, /submission\.submissionToken = session\.token/);
   assert.match(bundle, /TESTER_APPS_SCRIPT_ENDPOINT/);
   assert.match(bundle, /TESTER_SUBMISSION_SECRET/);
   assert.match(bundle, /TEST-CAREER-PARTNER/);

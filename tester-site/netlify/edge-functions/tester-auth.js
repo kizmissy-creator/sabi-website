@@ -53,7 +53,8 @@ function accessPage(message = "", action = "/") {
 }
 
 function denied(message = "", status = 401, action = "/") {
-  return new Response(accessPage(message, action), { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow, noarchive", "x-frame-options": "DENY" } });
+  const page = accessPage(message, action).replace('Answers remain on this browser only. Do not enter real confidential information.', 'Use fictional answers only. Sending saves them to the separate test record, not a client file.');
+  return new Response(page, { status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow, noarchive", "x-frame-options": "DENY" } });
 }
 
 export default async function testerAuth(request, context) {
