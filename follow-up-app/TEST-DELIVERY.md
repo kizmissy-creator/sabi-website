@@ -8,6 +8,8 @@ Build `follow-up-app` using pnpm; commit the generated `tester-site/follow-up-pu
 
 Current mode: form testing only. `testSendingAvailable` is false in the frontend and `TESTER_FOLLOW_UP_ENABLED` is unset, so the button is disabled and the endpoint rejects sends without forwarding anything.
 
+Published on 13 September 2026 from `13995acee6573e0ee25e69fdddc0afb59731189d`, Netlify deploy `6aa72821f5737700081fc25f`. Verified the live `/follow-up/` opens with the existing tester session and displays the device-local test notice. Password unchanged. No fictional or real submission was sent. TypeScript, Vite, four Node tests and browser checks at 320/390/768/1280 passed; local draft reload and disabled sending were verified.
+
 The shared receiver update was blocked by the safety reviewer pending explicit approval. Its two saved edits were reversed through the editor; the deployed receiver remains version 11. The local `FollowUp.gs` contains the proposed, unit-tested addition only. Do not deploy it without approval.
 
 For full delivery testing after approval: deploy the additive tester-signature check in `FollowUp.gs` to the existing receiver; set `TESTER_FOLLOW_UP_ENABLED=true` on the tester project only; enable `testSendingAvailable` and rebuild. Submit a fictional response and inspect the test sheet, JSON and Google Doc. Do not call delivery verified until that readback passes. Keep the client production gate closed.
