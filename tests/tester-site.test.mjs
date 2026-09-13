@@ -35,7 +35,7 @@ test("tester build is isolated from the live Bronagh journey", async () => {
   assert.doesNotMatch(bundle, /Bronagh/i);
   const followUpFiles = await textFiles(join(dist, 'follow-up'));
   const followUp = (await Promise.all(followUpFiles.map(file => readFile(file, 'utf8')))).join('\n');
-  assert.match(followUp, /Test sending is not connected yet/);
+  assert.match(followUp, /\/api\/test-follow-up-submit/);
   assert.match(await readFile(join(repo, 'follow-up-app', 'src', 'delivery.ts'), 'utf8'), /\/api\/test-follow-up-submit/);
   assert.doesNotMatch(followUp, /\/api\/follow-up-submit/);
 });

@@ -118,7 +118,7 @@ const clientReference = 'CL-2026-001'
 // Owner-requested clean review. Old test drafts stay isolated as a safety copy.
 // Keep this revision stable on future deployments so new answers survive updates.
 const testDelivery = true
-const testSendingAvailable = false
+const testSendingAvailable = true
 const reviewRevision = 'tester-site-follow-up-v1'
 const draftKey = `sabi-${formVersion}-${reviewRevision}-draft`
 const submissionKey = `sabi-${formVersion}-${reviewRevision}-submission`
