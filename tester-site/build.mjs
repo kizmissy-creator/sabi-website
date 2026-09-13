@@ -10,7 +10,7 @@ const sandboxPaymentLink = "https://buy.stripe.com/test_fZu6oH0t3gQN7my7Mh7Zu01"
 
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
-await cp(source, output, { recursive: true });
+await cp(source, output, { recursive: true, filter: path => path !== join(source, 'follow-up') });
 await mkdir(join(output, "images"), { recursive: true });
 await cp(join(repo, "images", "favicon.png"), join(output, "images", "favicon.png"));
 await cp(join(repo, "images", "sabi-mark-complete.png"), join(output, "images", "sabi-mark-complete.png"));

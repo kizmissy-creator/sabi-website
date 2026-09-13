@@ -5,6 +5,14 @@
   functions = "netlify/functions"
 
 [[edge_functions]]
+  function = "follow-up-auth"
+  path = "/follow-up/*"
+
+[[edge_functions]]
+  function = "follow-up-auth"
+  path = "/follow-up"
+
+[[edge_functions]]
   function = "client-auth-30d"
   path = "/"
 

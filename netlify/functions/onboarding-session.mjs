@@ -61,7 +61,7 @@ function verifyAccessToken(token, secret) {
   return clientReference === CLIENT_REFERENCE && sessionId.startsWith("cs_") && Number.isFinite(expires) && expires >= Math.floor(Date.now() / 1000);
 }
 
-function hasValidAccess(request, secret) {
+export function hasValidAccess(request, secret) {
   return cookieValues(request, COOKIE_NAME).some(token => verifyAccessToken(token, secret));
 }
 

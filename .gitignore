@@ -1,3 +1,6 @@
 __pycache__/
 *.py[cod]
 tester-site/dist/
+follow-up-app/node_modules/
+follow-up-app/*.tsbuildinfo
+test-artifacts/

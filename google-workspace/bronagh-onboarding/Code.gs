@@ -110,6 +110,7 @@ function doPost(e) {
     const raw = String(e && e.postData && e.postData.contents || '');
     if (!raw || raw.length > ONBOARDING_CONFIG.maxRequestBytes) throw new Error('Invalid request size.');
     const input = JSON.parse(raw);
+    if (input.action === 'career_partner_follow_up') return receiveCareerFollowUp_(input);
     if (input.action === 'payment_confirmation') return sendPaymentConfirmation_(input);
     if (input.action === 'file_upload') return uploadFile_(input);
     if (input.action === 'file_status') return uploadStatus_(input);
@@ -451,7 +452,7 @@ function cleanupAbandonedBronaghUploads() {
       pageToken: pageToken
     });
     (result.files || []).forEach(folder => {
-      if (!submittedIds.has(String(folder.name)) && new Date(folder.createdTime).getTime() < cutoff) {
+      if (!/^(TEST - )?Follow-up - /.test(String(folder.name)) && !submittedIds.has(String(folder.name)) && new Date(folder.createdTime).getTime() < cutoff) {
         Drive.Files.update({trashed: true}, folder.id);
         removed += 1;
       }
