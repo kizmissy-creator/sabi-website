@@ -1,0 +1,23 @@
+footer {
+  padding: 1.75rem 1.5rem;
+}
+
+footer p {
+  margin: 0.3rem 0;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+  color: var(--teal);
+  font: 700 1.55rem/1 Newsreader, serif;
+}
+
+.footer-brand img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
