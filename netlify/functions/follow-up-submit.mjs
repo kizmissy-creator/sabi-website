@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { hasValidAccess } from './onboarding-session.mjs';
+import { followUpSession } from '../shared/follow-up-access.js';
 
 const reply = (body, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'private, no-store', 'x-content-type-options': 'nosniff' } });
 export default async function followUpSubmit(request) {
@@ -9,7 +10,8 @@ export default async function followUpSubmit(request) {
   const access = process.env.BRONAGH_ACCESS_SECRET;
   const endpoint = process.env.BRONAGH_APPS_SCRIPT_ENDPOINT;
   if (!secret || !access || !endpoint) return reply({ ok: false, error: 'The secure connection is not available yet.' }, 503);
-  if (!hasValidAccess(request, access)) return reply({ ok: false, error: 'Please reopen your private follow-up link to renew access. Your draft is still saved.' }, 401);
+  const linkSession = await followUpSession(request, access, process.env.BRONAGH_FOLLOW_UP_LINKS);
+  if (!linkSession && !hasValidAccess(request, access)) return reply({ ok: false, error: 'Please reopen your private follow-up link to renew access. Your draft is still saved.' }, 401);
   const raw = await request.text();
   if (Buffer.byteLength(raw) > 500000) return reply({ ok: false, error: 'This response is too large to send.' }, 413);
   let input;
@@ -19,6 +21,7 @@ export default async function followUpSubmit(request) {
     !input.answers || typeof input.answers !== 'object' || Array.isArray(input.answers) ||
     typeof input.reviewText !== 'string' || !input.reviewText.trim() || input.reviewText.length > 200000 ||
     typeof input.testMode !== 'boolean') return reply({ ok: false, error: 'The follow-up response is incomplete.' }, 400);
+  if (linkSession && linkSession.testMode !== input.testMode) return reply({ ok: false, error: 'Please use the matching private follow-up link. Test answers cannot be sent to the client file.' }, 403);
   if (!input.testMode && process.env.BRONAGH_FOLLOW_UP_ENABLED !== 'true') return reply({ ok: false, error: 'Sending is not open yet. Your draft is safe on this device.' }, 503);
   const submission = { clientReference: 'CL-2026-001', formType: 'career_partner_follow_up', formVersion: input.formVersion,
     submissionId: input.submissionId, testMode: input.testMode, answers: input.answers,
