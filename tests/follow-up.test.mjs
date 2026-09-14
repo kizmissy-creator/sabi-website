@@ -68,4 +68,17 @@ assert.equal(files[0].parents[0],'private-test-root');
 assert.equal(notifications.length,0);
 assert.ok(!files[1].blob.text.includes('signature'));
 assert.ok(files[2].blob.text.includes('FICTIONAL QA ONLY'));
+const signed = submission => {
+  const payload = JSON.stringify({ action: 'career_partner_follow_up', submission, expiresAt: Date.now() + 60000 });
+  return { payload, signature: createHmac('sha256', properties.BRONAGH_SUBMISSION_SECRET).update('follow-up-v1\n'+payload).digest('base64url') };
+};
+const production = { ...input, testMode: false, submissionId: '22222222-2222-4222-8222-222222222222' };
+assert.equal(context.receiveCareerFollowUp_(signed(production)).ok, true);
+assert.equal(files[3].parents[0], 'private-client-root');
+assert.equal(sheets.get('Bronagh Follow-up').rows.length, 2);
+assert.equal(notifications.length, 1);
+assert.ok(!notifications[0].body.includes('FICTIONAL QA ONLY'), 'notification must not expose answers');
+assert.equal(context.receiveCareerFollowUp_(signed(production)).ok, true);
+assert.equal(notifications.length, 1, 'duplicate receipt must not send a second notification');
+assert.equal(files.length, 6);
 console.log('PASS: client auth, origin, payload validation, signed delivery, production gate, mismatched receipt, offline failure, test isolation, partial-save recovery and duplicate prevention');
