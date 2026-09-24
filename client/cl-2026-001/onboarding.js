@@ -1,0 +1,1179 @@
+(() => {
+  const form = document.getElementById('onboarding-form');
+  const steps = [...document.querySelectorAll('.form-step')];
+  const stepItems = [...document.querySelectorAll('#step-list li')];
+  const previous = document.getElementById('previous');
+  const next = document.getElementById('next');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const stepMenuToggle = document.getElementById('step-menu-toggle');
+  const stepList = document.getElementById('step-list');
+  const saveState = document.getElementById('save-state');
+  const errorSummary = document.getElementById('error-summary');
+  const storageKey = 'sabi-onboarding-cl-2026-001-v23';
+  const config = window.SABI_ONBOARDING_CONFIG || {};
+  const repeaterNames = ['employmentHistory', 'employmentGaps', 'qualifications', 'exampleOpportunities'];
+  const fixedDraftFields = new Set(['clientReference', 'serviceCode', 'formVersion', 'ageEligible']);
+  const defaultResultDetails = { label: 'Result or status', prompt: 'Choose result or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure', 'Other'] };
+  const gcseResultDetails = { label: 'Grade or result', prompt: 'Choose grade or result', options: ['9', '8', '7', '6', '5', '4', '3', '2', '1', 'A*', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'U', 'Pass', 'In progress', 'Not sure'] };
+  const qualificationResultDetails = {
+    'GCSE': gcseResultDetails,
+    'GCSE or equivalent': gcseResultDetails,
+    'Functional Skills': { label: 'Level or status', prompt: 'Choose level or status', options: ['Level 2', 'Level 1', 'Entry Level 3', 'Entry Level 2', 'Entry Level 1', 'Pass', 'In progress', 'Not sure'] },
+    'Scottish National qualification': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['A', 'B', 'C', 'D', 'Pass', 'In progress', 'Not sure'] },
+    'Essential Skills qualification': { label: 'Level or status', prompt: 'Choose level or status', options: ['Level 2', 'Level 1', 'Entry Level 3', 'Entry Level 2', 'Entry Level 1', 'Pass', 'In progress', 'Not sure'] },
+    'Overseas qualification': defaultResultDetails,
+    'Another equivalent or not sure': defaultResultDetails,
+    'A level or equivalent': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['A*', 'A', 'B', 'C', 'D', 'E', 'U', 'Pass', 'In progress', 'Not sure'] },
+    'BTEC': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction*', 'Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'T Level': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction*', 'Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'NVQ or SVQ': { label: 'Outcome or status', prompt: 'Choose outcome or status', options: ['Competent', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure'] },
+    'Apprenticeship': { label: 'Outcome or status', prompt: 'Choose outcome or status', options: ['Distinction', 'Merit', 'Pass', 'Completed', 'In progress', 'No grade or result applies', 'Not sure'] },
+    'HNC or HND': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'Undergraduate degree': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['First', 'Upper second (2:1)', 'Lower second (2:2)', 'Third', 'Pass', 'In progress', 'Not sure'] },
+    'Postgraduate degree': { label: 'Grade or result', prompt: 'Choose grade or result', options: ['Distinction', 'Merit', 'Pass', 'In progress', 'Not sure'] },
+    'Professional qualification': { label: 'Outcome or status', prompt: 'Choose outcome or status', options: ['Passed', 'Completed', 'In progress', 'Not yet taken', 'No grade or result applies', 'Not sure'] },
+    'Licence or certificate': { label: 'Status', prompt: 'Choose status', options: ['Valid or current', 'Passed', 'Completed', 'In progress', 'Expired', 'No grade or result applies', 'Not sure'] },
+    'Short course or training': { label: 'Status', prompt: 'Choose status', options: ['Completed', 'In progress', 'Attended', 'Passed', 'No grade or result applies', 'Not sure'] },
+    'Not listed': defaultResultDetails
+  };
+  const renewableQualificationTypes = new Set(['Professional qualification', 'Licence or certificate']);
+  let current = 0;
+  let saveTimer;
+  const tagFieldConfigs = [
+    {
+      name: 'broadDirection',
+      id: 'broad-direction',
+      legend: 'Roles or types of work you are considering',
+      help: 'Add one idea at a time. It is fine to be unsure or to add broad ideas rather than exact job titles.',
+      placeholder: 'For example, administrator',
+      required: false
+    },
+    {
+      name: 'targetSectors',
+      id: 'target-sectors',
+      legend: 'Sectors or settings that interest you',
+      help: 'Add any workplaces, sectors or environments that appeal to you.',
+      placeholder: 'For example, education'
+    },
+    {
+      name: 'rolesToAvoid',
+      id: 'roles-to-avoid',
+      legend: 'Roles or settings you want to avoid',
+      help: 'Add anything you already know would not suit you.',
+      placeholder: 'For example, night work'
+    },
+    {
+      name: 'documentUrl',
+      id: 'document-links',
+      legend: 'Document or profile links',
+      help: 'Add one link at a time. You can add more than one.',
+      placeholder: 'https://example.com',
+      inputType: 'url',
+      maxLength: 500,
+      maxItems: 12
+    }
+  ];
+  const tagFields = new Map();
+  const voiceQuestionNames = ['hobbies', 'interests', 'caringStrengths', 'skillsExamples', 'proudOf'];
+  const voiceRecordings = new Map();
+  const voiceDatabaseName = 'sabi-onboarding-voice-cl-2026-001';
+  const voiceStoreName = 'recordings';
+  const maxVoiceSeconds = 300;
+  let activeVoiceRecording = null;
+  const documentFieldNames = ['existingCv', 'vacancyDocument', 'applicationDocument'];
+  const uploadedDocuments = new Map(documentFieldNames.map(name => [name, []]));
+  let pendingDocumentUploads = 0;
+
+  function openVoiceDatabase() {
+    return new Promise((resolve, reject) => {
+      if (!window.indexedDB) return reject(new Error('Browser storage is not available.'));
+      const request = indexedDB.open(voiceDatabaseName, 1);
+      request.onupgradeneeded = () => request.result.createObjectStore(voiceStoreName, {keyPath: 'field'});
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function useVoiceStore(mode, action) {
+    const database = await openVoiceDatabase();
+    try {
+      return await new Promise((resolve, reject) => {
+        const transaction = database.transaction(voiceStoreName, mode);
+        const request = action(transaction.objectStore(voiceStoreName));
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    } finally {
+      database.close();
+    }
+  }
+
+  const saveVoiceToBrowser = recording => useVoiceStore('readwrite', store => store.put(recording));
+  const removeVoiceFromBrowser = field => useVoiceStore('readwrite', store => store.delete(field));
+  const clearSavedVoice = () => useVoiceStore('readwrite', store => store.clear()).catch(() => {});
+
+  function voiceFileExtension(type) {
+    if (type.includes('ogg')) return 'ogg';
+    if (type.includes('mp4')) return 'm4a';
+    return 'webm';
+  }
+
+  function voiceTime(seconds) {
+    const remaining = Math.max(0, maxVoiceSeconds - seconds);
+    return `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+  }
+
+  function renderVoiceRecording(field) {
+    const controls = document.querySelector(`[data-voice-controls="${field}"]`);
+    if (!controls) return;
+    const recording = voiceRecordings.get(field);
+    const audio = controls.querySelector('audio');
+    const start = controls.querySelector('[data-voice-start]');
+    const remove = controls.querySelector('[data-voice-delete]');
+    const saveChoice = controls.querySelector('[data-voice-save]');
+    if (audio.dataset.objectUrl) URL.revokeObjectURL(audio.dataset.objectUrl);
+    audio.hidden = !recording;
+    remove.hidden = !recording;
+    saveChoice.closest('label').hidden = !recording;
+    start.textContent = recording ? 'Record again' : 'Record an answer';
+    if (recording) {
+      const objectUrl = URL.createObjectURL(recording.blob);
+      audio.src = objectUrl;
+      audio.dataset.objectUrl = objectUrl;
+      saveChoice.checked = Boolean(recording.saved);
+    } else {
+      audio.removeAttribute('src');
+      delete audio.dataset.objectUrl;
+      saveChoice.checked = false;
+    }
+  }
+
+  function stopActiveVoiceRecording() {
+    if (activeVoiceRecording?.recorder?.state === 'recording') activeVoiceRecording.recorder.stop();
+  }
+
+  function discardActiveVoiceRecording() {
+    if (!activeVoiceRecording) return;
+    activeVoiceRecording.discard = true;
+    stopActiveVoiceRecording();
+  }
+
+  async function beginVoiceRecording(field) {
+    const controls = document.querySelector(`[data-voice-controls="${field}"]`);
+    const status = controls.querySelector('[data-voice-status]');
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      status.textContent = 'Voice recording is not supported in this browser. You can still type your answer.';
+      return;
+    }
+    if (activeVoiceRecording) {
+      status.textContent = 'Please stop the other recording before starting this one.';
+      return;
+    }
+    try {
+      status.textContent = 'Waiting for microphone permission...';
+      const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+      const preferredTypes = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'];
+      const mimeType = preferredTypes.find(type => MediaRecorder.isTypeSupported?.(type));
+      const options = {audioBitsPerSecond: 64000};
+      if (mimeType) options.mimeType = mimeType;
+      let recorder;
+      try { recorder = new MediaRecorder(stream, options); }
+      catch { recorder = new MediaRecorder(stream); }
+      const chunks = [];
+      const startedAt = Date.now();
+      const start = controls.querySelector('[data-voice-start]');
+      const stop = controls.querySelector('[data-voice-stop]');
+      const timer = controls.querySelector('[data-voice-timer]');
+      start.hidden = true;
+      stop.hidden = false;
+      timer.textContent = voiceTime(0);
+      status.textContent = 'Recording. You can stop whenever you have finished.';
+      recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
+      recorder.onstop = async () => {
+        const active = activeVoiceRecording;
+        clearInterval(active?.interval);
+        stream.getTracks().forEach(track => track.stop());
+        const type = recorder.mimeType || chunks[0]?.type || 'audio/webm';
+        const blob = new Blob(chunks, {type});
+        activeVoiceRecording = null;
+        start.hidden = false;
+        stop.hidden = true;
+        timer.textContent = voiceTime(0);
+        if (active?.discard) {
+          status.textContent = 'Recording discarded.';
+          return;
+        }
+        if (!blob.size) {
+          status.textContent = 'No audio was recorded. Please try again or type your answer.';
+          return;
+        }
+        const previous = voiceRecordings.get(field);
+        if (previous?.saved) await removeVoiceFromBrowser(field).catch(() => {});
+        voiceRecordings.set(field, {
+          field,
+          blob,
+          type,
+          saved: false,
+          name: `voice-${field}-${Date.now()}.${voiceFileExtension(type)}`
+        });
+        renderVoiceRecording(field);
+        status.textContent = 'Recording ready. Listen back, record again or delete it.';
+      };
+      recorder.start(1000);
+      const interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        timer.textContent = voiceTime(elapsed);
+        if (elapsed >= maxVoiceSeconds) stopActiveVoiceRecording();
+      }, 250);
+      activeVoiceRecording = {field, recorder, interval};
+    } catch (error) {
+      status.textContent = error?.name === 'NotAllowedError'
+        ? 'Microphone access was not allowed. You can change the browser permission or type your answer.'
+        : 'The microphone could not start. Please try again or type your answer.';
+    }
+  }
+
+  function createVoiceControls() {
+    voiceQuestionNames.forEach(field => {
+      const textarea = form.elements[field];
+      const card = textarea?.closest('.question-group');
+      if (!card || card.querySelector('[data-voice-controls]')) return;
+      const controls = document.createElement('details');
+      controls.className = 'voice-answer';
+      controls.dataset.voiceControls = field;
+      controls.innerHTML = `<summary><span>Prefer to answer by voice?</span><small>Up to 5 minutes</small></summary><div class="voice-answer-body"><p class="voice-intro">Record an answer and listen back before sending.</p><div class="voice-actions"><button type="button" class="voice-button" data-voice-start>Record an answer</button><button type="button" class="voice-button voice-stop" data-voice-stop hidden>Stop recording</button><span class="voice-timer" data-voice-timer>5:00</span></div><p class="voice-status" data-voice-status aria-live="polite">Nothing is recorded yet.</p><audio controls preload="metadata" hidden></audio><div class="voice-recorded-actions"><button type="button" class="voice-delete" data-voice-delete hidden>Delete recording</button><label class="voice-save-choice" hidden><input type="checkbox" data-voice-save> Save this recording on this device so I can return to it later</label></div><p class="voice-privacy">If you do not choose to save it, the recording stays only in this open page. It uploads to SABI only when you send the completed form.</p></div>`;
+      card.insertBefore(controls, card.querySelector('.prompt-help'));
+      controls.querySelector('[data-voice-start]').addEventListener('click', () => beginVoiceRecording(field));
+      controls.querySelector('[data-voice-stop]').addEventListener('click', stopActiveVoiceRecording);
+      controls.querySelector('[data-voice-delete]').addEventListener('click', async () => {
+        const recording = voiceRecordings.get(field);
+        if (recording?.saved) await removeVoiceFromBrowser(field).catch(() => {});
+        voiceRecordings.delete(field);
+        renderVoiceRecording(field);
+        controls.querySelector('[data-voice-status]').textContent = 'Recording deleted.';
+      });
+      controls.querySelector('[data-voice-save]').addEventListener('change', async event => {
+        const recording = voiceRecordings.get(field);
+        if (!recording) return;
+        try {
+          if (event.target.checked) {
+            recording.saved = true;
+            await saveVoiceToBrowser(recording);
+            controls.querySelector('[data-voice-status]').textContent = 'Recording saved on this device.';
+          } else {
+            recording.saved = false;
+            await removeVoiceFromBrowser(field);
+            controls.querySelector('[data-voice-status]').textContent = 'Recording removed from browser storage. It remains in this open page.';
+          }
+        } catch {
+          recording.saved = false;
+          event.target.checked = false;
+          controls.querySelector('[data-voice-status]').textContent = 'This browser could not save the recording. It remains in this open page.';
+        }
+      });
+    });
+  }
+
+  async function restoreVoiceRecordings() {
+    try {
+      const saved = await useVoiceStore('readonly', store => store.getAll());
+      saved.forEach(recording => {
+        recording.saved = true;
+        voiceRecordings.set(recording.field, recording);
+        renderVoiceRecording(recording.field);
+        const status = document.querySelector(`[data-voice-controls="${recording.field}"] [data-voice-status]`);
+        if (status) status.textContent = 'Saved recording restored from this device.';
+      });
+    } catch {}
+  }
+
+  function renderTagField(name) {
+    const field = tagFields.get(name);
+    if (!field) return;
+    const {config, input, list, source, tags} = field;
+    list.replaceChildren();
+    tags.forEach((value, index) => {
+      const item = document.createElement('li');
+      item.className = 'tag-chip';
+      const text = document.createElement('span');
+      text.textContent = value;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.setAttribute('aria-label', `Remove ${value}`);
+      remove.addEventListener('click', () => {
+        tags.splice(index, 1);
+        renderTagField(name);
+        input.focus();
+        scheduleSave();
+      });
+      item.append(text, remove);
+      list.appendChild(item);
+    });
+    source.value = tags.join('\n');
+    input.required = Boolean(config.required && tags.length === 0);
+    input.setCustomValidity(config.required && !tags.length ? 'Add at least one role or type of work.' : '');
+  }
+
+  function addTag(name) {
+    const field = tagFields.get(name);
+    if (!field) return false;
+    const {config, input, tags} = field;
+    const value = input.value.replace(/\s+/g, ' ').trim().slice(0, config.maxLength || 120);
+    if (!value) {
+      renderTagField(name);
+      return false;
+    }
+    if (config.inputType === 'url') {
+      try {
+        const url = new URL(value);
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported link');
+      } catch {
+        input.setCustomValidity('Enter a full link beginning with http:// or https://');
+        input.reportValidity();
+        return false;
+      }
+    }
+    const exists = tags.some(existing => existing.toLowerCase() === value.toLowerCase());
+    if (!exists && tags.length < (config.maxItems || 20)) tags.push(value);
+    input.value = '';
+    input.setCustomValidity('');
+    renderTagField(name);
+    scheduleSave();
+    return true;
+  }
+
+  function loadTagField(name) {
+    const field = tagFields.get(name);
+    if (!field) return;
+    field.tags.splice(0, field.tags.length, ...String(field.source.value || '').split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, field.config.maxItems || 20));
+    renderTagField(name);
+  }
+
+  function setupTagField(config) {
+    const source = form.elements[config.name];
+    const originalLabel = source?.closest('label');
+    if (!source || !originalLabel) return;
+    source.required = false;
+    originalLabel.classList.add('tag-source-label');
+    originalLabel.hidden = true;
+    const fieldset = document.createElement('fieldset');
+    fieldset.className = 'tag-fieldset';
+    const requiredMark = config.required ? ' <span>*</span>' : '';
+    fieldset.innerHTML = `<legend>${config.legend}${requiredMark}</legend><p class="tag-help" id="${config.id}-help">${config.help}</p><div class="tag-entry-row"><label class="visually-hidden" for="${config.id}-entry">Add to ${config.legend.toLowerCase()}</label><input id="${config.id}-entry" class="tag-entry-input" type="${config.inputType || 'text'}" autocomplete="off" maxlength="${config.maxLength || 120}" placeholder="${config.placeholder}" aria-describedby="${config.id}-help" data-error-label="${config.legend}"><button type="button" class="tag-add-button">Add</button></div><ul id="${config.id}-tags" class="tag-list" aria-label="${config.legend} added" aria-live="polite"></ul>`;
+    originalLabel.before(fieldset);
+    const input = fieldset.querySelector('.tag-entry-input');
+    tagFields.set(config.name, {config, source, input, list: fieldset.querySelector('.tag-list'), tags: []});
+    fieldset.querySelector('.tag-add-button').addEventListener('click', () => addTag(config.name));
+    input.addEventListener('input', () => input.setCustomValidity(''));
+    input.addEventListener('blur', () => { if (input.value.trim()) addTag(config.name); });
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addTag(config.name);
+      } else if (event.key === 'Backspace' && !input.value && tagFields.get(config.name).tags.length) {
+        tagFields.get(config.name).tags.pop();
+        renderTagField(config.name);
+        scheduleSave();
+      }
+    });
+    renderTagField(config.name);
+  }
+
+  stepMenuToggle?.addEventListener('click', () => {
+    const isOpen = stepMenuToggle.getAttribute('aria-expanded') === 'true';
+    stepMenuToggle.setAttribute('aria-expanded', String(!isOpen));
+    stepMenuToggle.firstChild.textContent = isOpen ? 'Show all steps ' : 'Hide all steps ';
+    stepList?.classList.toggle('open', !isOpen);
+  });
+
+  const makeId = () => window.crypto?.randomUUID?.() || `CL-2026-001-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  document.getElementById('submission-id').value = makeId();
+
+  function renumberEntries(name) {
+    const cards = [...document.querySelector(`[data-repeater="${name}"]`).children];
+    cards.forEach(card => {
+      const number = card.querySelector('[data-entry-number]');
+      if (number) number.textContent = '';
+      const remove = card.querySelector('[data-remove-entry]');
+      if (remove) remove.hidden = false;
+    });
+  }
+
+  function addEntry(name, values = {}, options = {}) {
+    const container = document.querySelector(`[data-repeater="${name}"]`);
+    const template = document.getElementById(`${name}-template`);
+    if (!container || !template) return;
+    const card = template.content.firstElementChild.cloneNode(true);
+    card.querySelectorAll('[data-month-select]').forEach(select => {
+      select.innerHTML = '<option value="">Month</option>' + ['January','February','March','April','May','June','July','August','September','October','November','December'].map(month => `<option>${month}</option>`).join('');
+    });
+    card.querySelectorAll('[data-year-select]').forEach(select => {
+      const thisYear = new Date().getFullYear();
+      select.innerHTML = '<option value="">Year</option>' + Array.from({length: 70}, (_, index) => thisYear - index).map(year => `<option>${year}</option>`).join('');
+    });
+    card.querySelectorAll('[data-completion-year-select]').forEach(select => {
+      const thisYear = new Date().getFullYear();
+      select.innerHTML = '<option value="">Choose year</option>' + Array.from({length: 81}, (_, index) => thisYear + 10 - index).map(year => `<option>${year}</option>`).join('');
+    });
+    card.querySelectorAll('[data-repeat-field]').forEach(field => {
+      const value = values[field.dataset.repeatField];
+      if (field.type === 'checkbox') field.checked = value === true || value === 'yes';
+      else field.value = value || '';
+    });
+    if (name === 'qualifications') syncQualificationCard(card, values.grade || '');
+    if (options.prepend) container.prepend(card);
+    else container.appendChild(card);
+    renumberEntries(name);
+    syncCurrentRoleCards();
+    syncCurrentGapCards();
+    return card;
+  }
+
+  function collectRepeater(name) {
+    if (name === 'employmentHistory' && document.getElementById('no-experience')?.checked) return [];
+    if (name === 'qualifications' && document.getElementById('no-qualifications')?.checked) return [];
+    return [...document.querySelector(`[data-repeater="${name}"]`).children].map(card => {
+      const entry = {};
+      card.querySelectorAll('[data-repeat-field]').forEach(field => {
+        if (field.disabled) return;
+        entry[field.dataset.repeatField] = field.type === 'checkbox' ? field.checked : field.value.trim();
+      });
+      return entry;
+    }).filter(entry => Object.values(entry).some(value => value === true || (typeof value === 'string' && value.trim())));
+  }
+
+  function summariseEntry(entry, labels) {
+    return labels.map(([key, label]) => entry[key] ? `${label}: ${entry[key]}` : '').filter(Boolean).join('; ');
+  }
+
+  function addCompatibilityFields(data) {
+    const jobs = data.employmentHistory || [];
+    const formatMonth = value => {
+      if (!/^\d{4}-\d{2}$/.test(value || '')) return value || '';
+      const [year, month] = value.split('-').map(Number);
+      return new Intl.DateTimeFormat('en-GB', {month:'long', year:'numeric'}).format(new Date(year, month - 1, 1));
+    };
+    const datedJobs = jobs.map(entry => ({...entry, startDate: formatMonth(entry.startDate || [entry.startMonth, entry.startYear].filter(Boolean).join(' ')), endDate: entry.current ? 'Current' : formatMonth(entry.endDate || [entry.endMonth, entry.endYear].filter(Boolean).join(' '))}));
+    data.currentRole = datedJobs[0] ? summariseEntry(datedJobs[0], [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End']]) : '';
+    data.workHistory = datedJobs.map(entry => summariseEntry(entry, [['experienceType','Type'],['jobTitle','Role'],['organisation','Organisation'],['startDate','Start'],['endDate','End'],['responsibilities','Responsibilities'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])).join('\n\n');
+    data.employmentGapsSummary = (data.employmentGaps || []).map(entry => summariseEntry({...entry, startDate: formatMonth(entry.startDate), endDate: entry.current ? 'Ongoing' : formatMonth(entry.endDate)}, [['startDate','Start'],['endDate','End'],['reason','Reason']])).join('\n');
+    data.qualificationsSummary = cleanSummary_([(data.qualifications || []).map(entry => summariseEntry({...entry, expiry: formatMonth(entry.expiry)}, [['qualificationType','Type'],['subject','Subject or course'],['grade','Grade, result or status'],['resultNotes','Result or equivalency details'],['completionYear','Completion year'],['provider','Provider'],['expiry','Expiry']])).join('\n'), Array.isArray(data.englishMathsStatus) ? `English and maths: ${data.englishMathsStatus.join(', ')}` : '']);
+    data.skills = cleanSummary_([Array.isArray(data.strengthAttributes) ? data.strengthAttributes.join(', ') : '', Array.isArray(data.practicalSkillAreas) ? data.practicalSkillAreas.join(', ') : '', data.practicalSkills, data.selfStrengths, data.skillsExamples, data.interests, data.hobbies, data.caringStrengths]);
+    data.achievementsSummary = data.proudOf || '';
+    data.exampleJobs = (data.exampleOpportunities || []).map(entry => summariseEntry(entry, [['role','Role'],['organisation','Organisation'],['url','Link']])).join('\n');
+    data.successOutcome = cleanSummary_([Array.isArray(data.successOutcomes) ? data.successOutcomes.filter(value => value !== 'other').join(', ') : '', data.successOutcomeOther]);
+    return data;
+  }
+
+  function syncCurrentRoleCards() {
+    document.querySelectorAll('[data-repeater="employmentHistory"] .repeat-card').forEach(card => {
+      const currentField = card.querySelector('[data-repeat-field="current"]');
+      const endFields = card.querySelectorAll('[data-repeat-field="endDate"], [data-repeat-field="endMonth"], [data-repeat-field="endYear"]');
+      const endGroup = card.querySelector('[data-end-date-group]');
+      if (!currentField || !endFields.length) return;
+      if (endGroup) endGroup.hidden = currentField.checked;
+      endFields.forEach(field => {
+        field.disabled = currentField.checked;
+        if (currentField.checked) field.value = '';
+      });
+    });
+  }
+
+  function syncCurrentGapCards() {
+    document.querySelectorAll('[data-repeater="employmentGaps"] .repeat-card').forEach(card => {
+      const currentField = card.querySelector('[data-repeat-field="current"]');
+      const endField = card.querySelector('[data-repeat-field="endDate"]');
+      const endGroup = card.querySelector('[data-gap-end-date]');
+      if (!currentField || !endField) return;
+      if (endGroup) endGroup.hidden = currentField.checked;
+      endField.disabled = currentField.checked;
+      if (currentField.checked) endField.value = '';
+    });
+  }
+
+  function syncExperienceChoice() {
+    const noExperience = document.getElementById('no-experience')?.checked;
+    const area = document.getElementById('experience-entry-area');
+    if (area) area.hidden = noExperience;
+  }
+
+  function syncQualificationChoice() {
+    const noQualifications = document.getElementById('no-qualifications')?.checked;
+    const area = document.getElementById('qualification-entry-area');
+    if (area) area.hidden = noQualifications;
+  }
+
+  function syncQualificationCard(card, selectedGrade = '') {
+    const typeField = card.querySelector('[data-repeat-field="qualificationType"]');
+    const gradeField = card.querySelector('[data-grade-select]');
+    const gradeLabel = card.querySelector('[data-grade-label]');
+    const expiryGroup = card.querySelector('[data-expiry-field]');
+    const expiryField = card.querySelector('[data-repeat-field="expiry"]');
+    const resultNotesGroup = card.querySelector('[data-result-notes-field]');
+    const resultNotesField = card.querySelector('[data-repeat-field="resultNotes"]');
+    if (!typeField || !gradeField) return;
+    const currentGrade = selectedGrade || gradeField.value;
+    const details = qualificationResultDetails[typeField.value] || defaultResultDetails;
+    const results = typeField.value ? details.options : [];
+    if (gradeLabel) gradeLabel.textContent = typeField.value ? details.label : 'Grade, result or status';
+    gradeField.disabled = !typeField.value;
+    gradeField.innerHTML = `<option value="">${typeField.value ? details.prompt : 'Choose the type first'}</option>` + results.map(result => `<option>${result}</option>`).join('');
+    gradeField.value = results.includes(currentGrade) ? currentGrade : '';
+    const showExpiry = renewableQualificationTypes.has(typeField.value);
+    expiryGroup?.classList.toggle('hidden', !showExpiry);
+    if (expiryField) {
+      expiryField.disabled = !showExpiry;
+      if (!showExpiry) expiryField.value = '';
+    }
+    const showResultNotes = ['Overseas qualification', 'Another equivalent or not sure'].includes(typeField.value);
+    resultNotesGroup?.classList.toggle('hidden', !showResultNotes);
+    if (resultNotesField) {
+      resultNotesField.disabled = !showResultNotes;
+      if (!showResultNotes) resultNotesField.value = '';
+    }
+  }
+
+  function syncQualificationCards() {
+    document.querySelectorAll('[data-repeater="qualifications"] .repeat-card').forEach(card => syncQualificationCard(card));
+  }
+
+  function cleanSummary_(values) {
+    return values.filter(value => value && String(value).trim()).join('\n');
+  }
+
+  function setConditional(id, visible) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.classList.toggle('hidden', !visible);
+    element.querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !visible; });
+  }
+
+  function serialise() {
+    const data = {};
+    for (const el of form.elements) {
+      if (!el.name || el.disabled || el.type === 'file' || el.name === 'company') continue;
+      if (el.type === 'checkbox') {
+        if (!data[el.name]) data[el.name] = [];
+        if (el.checked) data[el.name].push(el.value);
+      } else if (el.type === 'radio') {
+        if (el.checked) data[el.name] = el.value;
+      } else data[el.name] = el.value;
+    }
+    repeaterNames.forEach(name => { data[name] = collectRepeater(name); });
+    addCompatibilityFields(data);
+    return {data, uploads: documentFieldNames.flatMap(name => uploadedDocuments.get(name) || []), current, savedAt: new Date().toISOString()};
+  }
+
+  function save() {
+    localStorage.setItem(storageKey, JSON.stringify(serialise()));
+    saveState.textContent = `Saved on this device at ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}`;
+  }
+
+  function scheduleSave() {
+    saveState.textContent = 'Saving…'; clearTimeout(saveTimer); saveTimer = setTimeout(save, 350);
+  }
+
+  function migrateDraftChoices(data) {
+    const difficultPartMap = {
+      'tailoring-cv': 'tailoring-documents',
+      'cover-letters': 'tailoring-documents',
+      confidence: 'confidence-responses',
+      responses: 'confidence-responses',
+      interviews: 'interviews-assessments',
+      assessments: 'interviews-assessments'
+    };
+    if (Array.isArray(data.difficultParts)) data.difficultParts = [...new Set(data.difficultParts.map(value => difficultPartMap[value] || value))];
+    const combinedDirection = 'Feel clearer about suitable roles and my career direction';
+    if (Array.isArray(data.successOutcomes)) data.successOutcomes = [...new Set(data.successOutcomes.map(value => ['Feel clearer about my career direction', 'Know which roles may suit me'].includes(value) ? combinedDirection : value))];
+  }
+
+  function revealPopulatedPreferenceDetails() {
+    document.querySelectorAll('details.preference-details, details.optional-choice-card').forEach(details => {
+      const populatedField = [...details.querySelectorAll('input, select, textarea')].some(field => {
+        if (['checkbox', 'radio'].includes(field.type)) return field.checked;
+        return String(field.value || '').trim();
+      });
+      const populatedRepeater = [...details.querySelectorAll('.repeater')].some(repeater => repeater.children.length);
+      if (populatedField || populatedRepeater) details.open = true;
+    });
+  }
+
+  function validBackup(draft) {
+    return Boolean(draft && typeof draft === 'object' && draft.data && typeof draft.data === 'object'
+      && draft.data.clientReference === 'CL-2026-001'
+      && draft.data.serviceCode === 'career_partner_bespoke');
+  }
+
+  function safeBackupUploads(uploads) {
+    if (!Array.isArray(uploads)) return [];
+    return uploads.slice(0, 60).filter(upload => upload && typeof upload === 'object'
+      && documentFieldNames.includes(upload.field)
+      && /^[a-zA-Z0-9_-]{10,180}$/.test(String(upload.id || ''))
+      && typeof upload.name === 'string' && upload.name.length <= 240);
+  }
+
+  function applyDraft(draft) {
+    if (!validBackup(draft)) return false;
+    form.reset();
+    tagFields.forEach((field, name) => {
+      field.tags.splice(0);
+      field.input.value = '';
+      renderTagField(name);
+    });
+    migrateDraftChoices(draft.data);
+    const safeUploads = safeBackupUploads(draft.uploads);
+    documentFieldNames.forEach(name => uploadedDocuments.set(name, safeUploads.filter(upload => upload.field === name)));
+    repeaterNames.forEach(name => {
+      const container = document.querySelector(`[data-repeater="${name}"]`);
+      container.replaceChildren();
+      const entries = Array.isArray(draft.data[name]) ? draft.data[name] : [];
+      entries.slice(0, 40).forEach(entry => addEntry(name, entry));
+    });
+    for (const [name, value] of Object.entries(draft.data)) {
+      if (fixedDraftFields.has(name)) continue;
+      const fields = [...form.elements].filter(el => el.name === name);
+      fields.forEach(el => {
+        if (el.type === 'checkbox') el.checked = Array.isArray(value) && value.includes(el.value);
+        else if (el.type === 'radio') el.checked = value === el.value;
+        else if (typeof value === 'string' || typeof value === 'number') el.value = value;
+      });
+    }
+    tagFieldConfigs.forEach(config => loadTagField(config.name));
+    current = Number.isInteger(draft.current) ? Math.max(0, Math.min(draft.current, steps.length - 1)) : 0;
+    documentFieldNames.forEach(renderDocumentUploads);
+    updateConditional();
+    revealPopulatedPreferenceDetails();
+    return true;
+  }
+
+  function restore() {
+    try {
+      const rawDraft = localStorage.getItem(storageKey);
+      if (!rawDraft) return;
+      const draft = JSON.parse(rawDraft);
+      if (!applyDraft(draft)) throw new Error('Invalid saved draft');
+      saveState.textContent = `Draft restored from ${new Date(draft.savedAt).toLocaleString()}`;
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
+  }
+
+  function updateConditional() {
+    const deadlineGate = form.elements.deadlineGate.value;
+    setConditional('deadline-details', deadlineGate === 'yes');
+    const deadline = deadlineGate === 'yes' ? form.elements.deadline.value : '';
+    let urgent = false;
+    if (deadline) {
+      const date = new Date(`${deadline}T12:00:00`); const cursor = new Date(); let days = 0;
+      while (cursor < date && days <= 10) { cursor.setDate(cursor.getDate() + 1); if (![0,6].includes(cursor.getDay())) days++; }
+      urgent = date >= new Date() && days <= 10;
+    }
+    document.getElementById('urgent-warning').classList.toggle('hidden', !urgent);
+    const situations = [...form.querySelectorAll('input[name="currentSituation"]:checked')].map(field => field.value);
+    const gapSituationSelected = ['employment-gap', 'returning', 'not-working', 'redundancy', 'leave'].some(value => situations.includes(value));
+    const gapSection = document.getElementById('employment-gap-section');
+    const gapSectionWasHidden = gapSection?.classList.contains('hidden');
+    const hourPatterns = [...form.querySelectorAll('input[name="hours"]:checked')].map(field => field.value);
+    const difficultParts = [...form.querySelectorAll('input[name="difficultParts"]:checked')].map(field => field.value);
+    const successOutcomes = [...form.querySelectorAll('input[name="successOutcomes"]:checked')].map(field => field.value);
+    const practicalSkillAreas = [...form.querySelectorAll('input[name="practicalSkillAreas"]:checked')].map(field => field.value);
+    const preferredContact = form.elements.preferredContact.value;
+    const telephone = form.elements.telephone;
+    const telephoneHelp = document.getElementById('telephone-help');
+    const telephoneNeeded = ['whatsapp', 'phone'].includes(preferredContact);
+    if (telephone) telephone.required = telephoneNeeded;
+    document.getElementById('telephone-required-marker')?.classList.toggle('hidden', !telephoneNeeded);
+    if (telephoneHelp) telephoneHelp.textContent = telephoneNeeded ? 'Required for this contact choice' : 'Only needed for WhatsApp or telephone contact';
+    const showAccessibility = situations.includes('accessibility');
+    const accessibilityPanel = document.getElementById('accessibility-details');
+    const consent = form.elements.specialCategoryConsent;
+    accessibilityPanel?.classList.toggle('hidden', !showAccessibility);
+    if (consent) consent.disabled = !showAccessibility;
+    accessibilityPanel?.querySelectorAll('[data-accessibility-detail]').forEach(field => {
+      field.disabled = !showAccessibility || !consent?.checked;
+    });
+    const activeStepCount = steps.filter(step => !step.matches('[data-conditional-step].hidden')).length;
+    progressBar.style.width = `${((current + 1) / activeStepCount) * 100}%`;
+    progressText.textContent = `Step ${current + 1} of ${activeStepCount}`;
+    setConditional('employment-gap-section', gapSituationSelected);
+    if (gapSituationSelected && gapSectionWasHidden && gapSection) gapSection.open = false;
+    setConditional('caring-strengths', situations.includes('caring'));
+    setConditional('hours-other-detail', hourPatterns.includes('other'));
+    setConditional('difficult-parts-other', difficultParts.includes('other'));
+    setConditional('success-outcome-other', successOutcomes.includes('other'));
+    setConditional('practical-skill-examples', practicalSkillAreas.some(value => value !== 'Not sure yet'));
+    setConditional('supporter-details', form.elements.supporter.value === 'supporter');
+    syncCurrentRoleCards();
+    syncCurrentGapCards();
+    syncQualificationCards();
+    syncExperienceChoice();
+    syncQualificationChoice();
+  }
+
+  function showStep(index, {focusHeading = true} = {}) {
+    const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+    const activeItems = stepItems.filter(item => !item.matches('[data-conditional-step].hidden'));
+    current = Math.max(0, Math.min(index, activeSteps.length - 1));
+    steps.forEach(step => step.classList.remove('active'));
+    activeSteps[current].classList.add('active');
+    stepItems.forEach(item => item.classList.remove('active', 'done'));
+    activeItems.forEach((item, i) => {
+      const isCurrent = i === current;
+      item.classList.toggle('active', isCurrent);
+      item.classList.toggle('done', i < current);
+      const button = item.querySelector('button');
+      if (button) {
+        if (isCurrent) button.setAttribute('aria-current', 'step');
+        else button.removeAttribute('aria-current');
+      }
+    });
+    const eyebrow = activeSteps[current].querySelector(':scope > .eyebrow');
+    if (eyebrow) eyebrow.textContent = `STEP ${current + 1}`;
+    progressBar.style.width = `${((current + 1) / activeSteps.length) * 100}%`;
+    progressText.textContent = `Step ${current + 1} of ${activeSteps.length}`;
+    previous.hidden = current === 0; next.hidden = current === activeSteps.length - 1;
+    if (current === activeSteps.length - 1) buildReview();
+    errorSummary.classList.add('hidden'); updateConditional(); scheduleSave();
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelector('.form-shell').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth', block:'start'});
+    if (focusHeading) activeSteps[current].querySelector('h2')?.focus({preventScroll:true});
+  }
+
+  stepItems.forEach((item, index) => {
+    item.querySelector('button')?.addEventListener('click', () => {
+      const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+      const target = steps[index];
+      const targetIndex = activeSteps.indexOf(target);
+      if (targetIndex < 0) return;
+      showStep(targetIndex);
+      stepMenuToggle?.setAttribute('aria-expanded', 'false');
+      stepMenuToggle && (stepMenuToggle.firstChild.textContent = 'Show all steps ');
+      stepList?.classList.remove('open');
+    });
+  });
+
+  function fieldErrorLabel(field) {
+    if (field.dataset.errorLabel) return field.dataset.errorLabel;
+    if (field.type === 'radio') {
+      const groupLegend = field.closest('fieldset')?.querySelector(':scope > legend');
+      const legendText = groupLegend?.childNodes[0]?.textContent?.trim().replace(/\s*\*$/, '');
+      if (legendText) return legendText;
+    }
+    const label = field.closest('label');
+    const firstText = [...(label?.childNodes || [])].find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    if (firstText) return firstText.textContent.trim().replace(/\s*\*$/, '');
+    const legend = field.closest('fieldset')?.querySelector(':scope > legend');
+    return legend?.childNodes[0]?.textContent?.trim().replace(/\s*\*$/, '') || 'Required answer';
+  }
+
+  function collectStepErrors(stepIndex) {
+    const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+    const step = activeSteps[stepIndex];
+    if (!step) return [];
+    const errors = [...step.querySelectorAll('[required]')]
+      .filter(field => !field.disabled && !field.checkValidity())
+      .map(field => ({label: fieldErrorLabel(field), target: field}));
+    step.querySelectorAll('[data-required-checkbox-group]').forEach(group => {
+      const name = group.dataset.requiredCheckboxGroup;
+      if (!group.querySelector(`input[name="${name}"]:checked`)) {
+        errors.push({label: group.dataset.errorLabel || 'Required choice', target: group});
+      }
+    });
+    return errors.filter((error, index, list) => list.findIndex(item => item.label === error.label) === index);
+  }
+
+  function showValidationErrors(errors) {
+    document.querySelectorAll('.invalid, .invalid-group').forEach(element => element.classList.remove('invalid', 'invalid-group'));
+    errors.forEach(error => error.target.classList.add(error.target.matches('fieldset') ? 'invalid-group' : 'invalid'));
+    errorSummary.replaceChildren();
+    const heading = document.createElement('strong');
+    heading.textContent = 'Please check this step.';
+    const explanation = document.createElement('p');
+    explanation.textContent = errors.length === 1 ? 'One required answer is missing or incomplete.' : `${errors.length} required answers are missing or incomplete.`;
+    const list = document.createElement('ul');
+    errors.forEach(error => {
+      const item = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = error.label;
+      button.addEventListener('click', () => {
+        const focusTarget = error.target.matches('fieldset') ? error.target.querySelector('input, select, textarea') : error.target;
+        focusTarget?.focus();
+      });
+      item.appendChild(button);
+      list.appendChild(item);
+    });
+    errorSummary.append(heading, explanation, list);
+    errorSummary.classList.remove('hidden');
+    errorSummary.focus();
+  }
+
+  function validateStep(stepIndex = current) {
+    tagFieldConfigs.forEach(config => addTag(config.name));
+    const errors = collectStepErrors(stepIndex);
+    if (!errors.length) return true;
+    showValidationErrors(errors);
+    return false;
+  }
+
+  function validateAllSteps() {
+    tagFieldConfigs.forEach(config => addTag(config.name));
+    const activeSteps = steps.filter(step => !step.matches('[data-conditional-step].hidden'));
+    for (let index = 0; index < activeSteps.length; index++) {
+      const errors = collectStepErrors(index);
+      if (!errors.length) continue;
+      showStep(index, {focusHeading:false});
+      showValidationErrors(errors);
+      return false;
+    }
+    return true;
+  }
+
+  const formatFileSize = bytes => `${(Number(bytes) / (1024 * 1024)).toFixed(Number(bytes) >= 1024 * 1024 ? 1 : 2)} MB`;
+
+  function renderDocumentUploads(fieldName) {
+    const card = document.querySelector(`[data-upload-field="${fieldName}"]`);
+    const list = card?.querySelector('[data-upload-list]');
+    if (!list) return;
+    list.replaceChildren();
+    (uploadedDocuments.get(fieldName) || []).forEach(upload => {
+      const row = document.createElement('div');
+      row.className = 'upload-item upload-complete';
+      const details = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = upload.name;
+      const meta = document.createElement('small');
+      meta.textContent = `${formatFileSize(upload.size)} · Uploaded securely`;
+      details.append(name, meta);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'upload-remove';
+      remove.textContent = 'Remove';
+      remove.addEventListener('click', () => removeDocumentUpload(fieldName, upload, remove));
+      row.append(details, remove);
+      list.append(row);
+    });
+  }
+
+  function readFileWithProgress(file, progress) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onprogress = event => { if (event.lengthComputable) progress(Math.round((event.loaded / event.total) * 35)); };
+      reader.onload = () => resolve(String(reader.result).split(',')[1]);
+      reader.onerror = () => reject(new Error(`${file.name} could not be read.`));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+  async function requestUploadTicket(uploadRequestId) {
+    const response = await fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+      action: 'ticket', uploadRequestId, submissionId: form.elements.submissionId.value,
+      clientReference: form.elements.clientReference.value, serviceCode: form.elements.serviceCode.value
+    })});
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok || !result.receiverUrl || !result.token) throw new Error(result.error || 'A secure upload could not be started.');
+    return result;
+  }
+
+  async function pollUploadStatus(uploadRequestId) {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const response = await fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        action: 'status', uploadRequestId, submissionId: form.elements.submissionId.value,
+        clientReference: form.elements.clientReference.value, serviceCode: form.elements.serviceCode.value
+      })});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || 'The document upload could not be confirmed.');
+      if (result.upload?.id) return result;
+      await wait(1000);
+    }
+    throw new Error('The document is taking longer than expected to confirm. Please try again.');
+  }
+
+  async function uploadOneDocument(fieldName, file, existingRow) {
+    const list = document.querySelector(`[data-upload-field="${fieldName}"] [data-upload-list]`);
+    const row = existingRow || document.createElement('div');
+    row.className = 'upload-item upload-pending';
+    row.replaceChildren();
+    const details = document.createElement('div');
+    const name = document.createElement('strong'); name.textContent = file.name;
+    const status = document.createElement('small'); status.textContent = 'Preparing secure upload…';
+    const progressBar = document.createElement('progress'); progressBar.max = 100; progressBar.value = 0;
+    details.append(name, status, progressBar); row.append(details);
+    if (!existingRow) list.append(row);
+    const updateProgress = value => { progressBar.value = value; status.textContent = value < 35 ? 'Preparing secure upload…' : 'Uploading securely…'; };
+
+    pendingDocumentUploads += 1;
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['pdf', 'doc', 'docx', 'txt'].includes(ext)) throw new Error(`${file.name} is not a PDF, Word or text file.`);
+      if (!file.size || file.size > config.maxFileBytes) throw new Error(`${file.name} must be smaller than 12 MB.`);
+      if (!config.uploadEndpoint) throw new Error('Secure document uploads are not available yet.');
+      const uploadRequestId = makeId();
+      const ticket = await requestUploadTicket(uploadRequestId);
+      const base64 = await readFileWithProgress(file, updateProgress);
+      progressBar.value = 45;
+      await fetch(ticket.receiverUrl, {method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({
+        action: 'file_upload', uploadRequestId,
+        submissionId: form.elements.submissionId.value,
+        clientReference: form.elements.clientReference.value,
+        serviceCode: form.elements.serviceCode.value,
+        submissionToken: ticket.token,
+        file: {field: fieldName, name: file.name, type: file.type || 'application/octet-stream', size: file.size, base64}
+      })});
+      progressBar.value = 85; status.textContent = 'Confirming secure upload…';
+      const result = await pollUploadStatus(uploadRequestId);
+      uploadedDocuments.get(fieldName).push(result.upload);
+      renderDocumentUploads(fieldName);
+      scheduleSave();
+    } catch (error) {
+      row.className = 'upload-item upload-failed';
+      status.textContent = error.message;
+      progressBar.remove();
+      const actions = document.createElement('div'); actions.className = 'upload-actions';
+      const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'upload-retry'; retry.textContent = 'Try again';
+      const dismiss = document.createElement('button'); dismiss.type = 'button'; dismiss.className = 'upload-remove'; dismiss.textContent = 'Remove';
+      retry.addEventListener('click', () => uploadOneDocument(fieldName, file, row));
+      dismiss.addEventListener('click', () => row.remove());
+      actions.append(retry, dismiss); row.append(actions);
+    } finally {
+      pendingDocumentUploads -= 1;
+    }
+  }
+
+  async function removeDocumentUpload(fieldName, upload, button) {
+    button.disabled = true; button.textContent = 'Removing…';
+    try {
+      const response = await fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        action: 'delete', submissionId: form.elements.submissionId.value, clientReference: form.elements.clientReference.value,
+        serviceCode: form.elements.serviceCode.value, uploadId: upload.id
+      })});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) throw new Error(result.error || 'The document could not be removed.');
+      uploadedDocuments.set(fieldName, (uploadedDocuments.get(fieldName) || []).filter(item => item.id !== upload.id));
+      renderDocumentUploads(fieldName); scheduleSave();
+    } catch (error) {
+      button.disabled = false; button.textContent = 'Remove';
+      alert(`${error.message} Please try again.`);
+    }
+  }
+
+  function setupDocumentUploads() {
+    document.querySelectorAll('[data-document-input]').forEach(input => input.addEventListener('change', async () => {
+      const files = [...input.files]; input.value = '';
+      for (const file of files) await uploadOneDocument(input.name, file);
+    }));
+    documentFieldNames.forEach(renderDocumentUploads);
+  }
+
+  async function deleteAllDocumentUploads() {
+    const requests = documentFieldNames.flatMap(fieldName => (uploadedDocuments.get(fieldName) || []).map(upload =>
+      fetch(config.uploadEndpoint, {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({
+        action: 'delete', submissionId: form.elements.submissionId.value, clientReference: form.elements.clientReference.value,
+        serviceCode: form.elements.serviceCode.value, uploadId: upload.id
+      })})
+    ));
+    await Promise.allSettled(requests);
+    documentFieldNames.forEach(name => { uploadedDocuments.set(name, []); renderDocumentUploads(name); });
+  }
+
+  function buildReview() {
+    const f = form.elements;
+    const data = serialise().data;
+    const clean = value => value == null ? '' : String(value).trim();
+    const inputLabel = input => {
+      const label = input?.closest('label');
+      if (!label) return clean(input?.value);
+      const copy = label.cloneNode(true);
+      copy.querySelectorAll('input, select, textarea, small').forEach(element => element.remove());
+      return clean(copy.textContent).replace(/\s+/g, ' ');
+    };
+    const selectedLabels = name => [...form.querySelectorAll(`input[name="${name}"]:checked`)].map(inputLabel).join(', ');
+    const voiceAnswer = (field, written) => [clean(written), voiceRecordings.has(field) ? 'Voice answer recorded' : ''].filter(Boolean).join('\n');
+    const formatEntries = (entries, fields) => (entries || []).map((entry, index) => {
+      const details = fields.map(([key, label]) => clean(entry[key]) ? `${label}: ${entry[key]}` : '').filter(Boolean);
+      return details.length ? `${index + 1}. ${details.join('; ')}` : '';
+    }).filter(Boolean).join('\n');
+    const files = documentFieldNames.flatMap(name => uploadedDocuments.get(name) || []).map(upload => upload.name).join(', ');
+
+    const sections = [
+      {title:'About you', step:0, rows:[
+        ['Name', [clean(f.firstName.value), clean(f.lastName.value)].filter(Boolean).join(' ')],
+        ['Preferred name', f.preferredName.value], ['Pronouns', f.pronouns.value], ['Email', f.email.value],
+        ['Telephone', f.telephone.value], ['Preferred contact', selectedLabels('preferredContact')], ['Area', f.location.value]
+      ]},
+      {title:'Your situation', step:1, rows:[['Current situation', selectedLabels('currentSituation')]]},
+      {title:'Your experience', step:2, rows:[
+        ['Work and other experience', document.getElementById('no-experience')?.checked ? 'I do not have any work or other experience to add yet' : formatEntries(data.employmentHistory, [['experienceType','Type'],['jobTitle','Role or activity'],['organisation','Organisation or setting'],['startDate','Start'],['endDate','End'],['responsibilities','What I did'],['evidence','What went well'],['reasonForLeaving','Reason for leaving or finishing']])],
+        ['Employment gaps', formatEntries(data.employmentGaps, [['startDate','Start'],['endDate','End'],['reason','Reason']])],
+        ['Qualifications and training', document.getElementById('no-qualifications')?.checked ? 'I do not have any qualifications or training to add' : formatEntries(data.qualifications, [['qualificationType','Type'],['subject','Subject or course'],['grade','Result or status'],['resultNotes','Result or equivalency details'],['completionYear','Year'],['provider','Provider'],['expiry','Expiry or renewal']])],
+        ['English and maths status', selectedLabels('englishMathsStatus')]
+      ]},
+      {title:'What you bring', step:3, rows:[
+        ['Hobbies or interests', voiceAnswer('hobbies', f.hobbies.value)], ['Tasks that hold your attention', voiceAnswer('interests', f.interests.value)],
+        ['Caring responsibilities', voiceAnswer('caringStrengths', f.caringStrengths?.value)], ['What someone who knows you might say', voiceAnswer('skillsExamples', f.skillsExamples.value)],
+        ['Things you consider yourself good at', selectedLabels('strengthAttributes')], ['Practical skill areas', selectedLabels('practicalSkillAreas')], ['Practical skills or knowledge', f.practicalSkills.value], ['Something you feel pleased or proud about', voiceAnswer('proudOf', f.proudOf.value)]
+      ]},
+      {title:'What comes next', step:4, rows:[
+        ['Roles or types of work', f.broadDirection.value], ['Sectors or settings', f.targetSectors.value], ['Roles or settings to avoid', f.rolesToAvoid.value],
+        ['What matters most', selectedLabels('priorities')], ['Anything else that matters', f.priorityNotes.value], ['Working arrangements', selectedLabels('workplace')],
+        ['Hours or working patterns', selectedLabels('hours')], ['Other hours or pattern', f.hoursOther.value], ['Contract types', selectedLabels('contractTypes')],
+        ['Maximum commute or travel', f.travelLimit.value], ['Available from', f.availability.value], ['Pay needs or expectations', f.payNeeds.value]
+      ]},
+      {title:'Your job search', step:5, rows:[
+        ['Current stage', f.searchStage.value], ['Anything else about your search', f.searchStageNotes.value], ['Parts that feel hardest', selectedLabels('difficultParts')],
+        ['Something else that feels difficult', f.difficultPartsOther.value], ['Specific jobs or roles', formatEntries(data.exampleOpportunities, [['role','Role'],['organisation','Organisation'],['url','Link']])],
+        ['Deadline', selectedLabels('deadlineGate')], ['Deadline type', f.deadlineType.value], ['Deadline date', f.deadline.value], ['Deadline notes', f.deadlineNotes.value],
+        ['Application or supporting statement', selectedLabels('applicationDraft')], ['What would make the service successful', selectedLabels('successOutcomes')], ['Other successful outcome', f.successOutcomeOther.value]
+      ]},
+      {title:'Documents', step:6, rows:[['Files selected', files], ['Document or profile links', f.documentUrl.value], ['Documents to send later', f.documentNotes.value]]},
+      {title:'Working together', step:7, rows:[
+        ['Accessibility consent', selectedLabels('specialCategoryConsent')], ['Accessibility or adjustment information', f.accessibilityNeeds.value],
+        ['Who you would like to discuss this with', selectedLabels('accessibilityDiscussion')], ['Optional follow-up discussion', selectedLabels('followUpDiscussion')], ['How we work together', f.workingPreferences.value], ['Anyone else involved', selectedLabels('supporter')],
+        ['Supporter name', f.supporterName.value], ['Supporter relationship', f.supporterRelationship.value], ['Supporter contact details', f.supporterContact.value], ['What the supporter may help with', f.supporterRole.value]
+      ]}
+    ];
+
+    const review = document.getElementById('review-summary');
+    review.innerHTML = sections.map((section, index) => {
+      const rows = section.rows.filter(([, value]) => clean(value));
+      const body = rows.length
+        ? `<dl>${rows.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(clean(value))}</dd></div>`).join('')}</dl>`
+        : '<p class="review-empty">No optional answers added on this page.</p>';
+      return `<details class="review-section"${index === 0 ? ' open' : ''}><summary><span>${escapeHtml(section.title)}</span><small>Open to check</small></summary>${body}<button type="button" class="review-edit" data-review-step="${section.step}">Edit this section</button></details>`;
+    }).join('');
+    review.querySelectorAll('[data-review-step]').forEach(button => button.addEventListener('click', () => showStep(Number(button.dataset.reviewStep))));
+  }
+
+  const escapeHtml = value => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const readFile = file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+
+  async function payload() {
+    if (pendingDocumentUploads > 0) throw new Error('Please wait for your document uploads to finish before sending the form.');
+    const draft = serialise(); const files = [];
+    for (const recording of voiceRecordings.values()) {
+      const ext = recording.name.split('.').pop().toLowerCase();
+      if (recording.blob.size > config.maxFileBytes || !config.acceptedExtensions.includes(ext)) throw new Error('A voice answer is larger than 12 MB or is not in an accepted audio format. Delete it and record it again.');
+      files.push({
+        field: `voice_${recording.field}`,
+        name: recording.name,
+        type: recording.type || 'application/octet-stream',
+        size: recording.blob.size,
+        base64: await readFile(recording.blob)
+      });
+    }
+    return {...draft.data, uploads: draft.uploads, files, submittedAt: new Date().toISOString(), userAgent: navigator.userAgent};
+  }
+
+  form.addEventListener('input', event => {
+    event.target.classList?.remove('invalid');
+    if (event.target.name === 'currentSituation') event.target.closest('[data-required-checkbox-group]')?.classList.remove('invalid-group');
+    if (event.target.name === 'hours' && event.target.checked) {
+      const noPreference = form.querySelector('input[name="hours"][value="no-preference"]');
+      if (event.target.value === 'no-preference') form.querySelectorAll('input[name="hours"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (noPreference) noPreference.checked = false;
+    }
+    if (event.target.name === 'workplace' && event.target.checked) {
+      const noPreference = form.querySelector('input[name="workplace"][value="no-preference"]');
+      if (event.target.value === 'no-preference') form.querySelectorAll('input[name="workplace"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (noPreference) noPreference.checked = false;
+    }
+    if (event.target.name === 'difficultParts' && event.target.checked) {
+      const notSure = form.querySelector('input[name="difficultParts"][value="not-sure"]');
+      if (event.target.value === 'not-sure') form.querySelectorAll('input[name="difficultParts"]:checked').forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (notSure) notSure.checked = false;
+    }
+    if (['strengthAttributes', 'practicalSkillAreas'].includes(event.target.name) && event.target.checked) {
+      const group = form.querySelectorAll(`input[name="${event.target.name}"]`);
+      const notSure = form.querySelector(`input[name="${event.target.name}"][value="Not sure yet"]`);
+      if (event.target.value === 'Not sure yet') group.forEach(field => { if (field !== event.target) field.checked = false; });
+      else if (notSure) notSure.checked = false;
+    }
+    updateConditional(); scheduleSave();
+  });
+  form.addEventListener('change', () => { updateConditional(); scheduleSave(); });
+  document.querySelectorAll('[data-add-entry]').forEach(button => button.addEventListener('click', () => {
+    const addedCard = addEntry(button.dataset.addEntry);
+    if (button.dataset.addEntry === 'qualifications') {
+      addedCard?.scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest'});
+      addedCard?.querySelector('[data-repeat-field="qualificationType"]')?.focus({preventScroll: true});
+    }
+    scheduleSave();
+  }));
+  form.addEventListener('click', event => {
+    const button = event.target.closest('[data-remove-entry]');
+    if (!button) return;
+    const container = button.closest('[data-repeater]');
+    button.closest('.repeat-card').remove();
+    renumberEntries(container.dataset.repeater);
+    scheduleSave();
+  });
+  next.addEventListener('click', () => { if (validateStep()) showStep(current + 1); });
+  previous.addEventListener('click', () => showStep(current - 1));
+  document.getElementById('download-draft').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(serialise(), null, 2)], {type:'application/json'}); const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'SABI-CL-2026-001-onboarding-backup.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
+  document.getElementById('restore-draft').addEventListener('change', async event => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    const message = document.getElementById('restore-draft-message');
+    if (!file) return;
+    if (pendingDocumentUploads > 0) {
+      message.textContent = 'Please wait for the current document upload to finish before restoring a backup.';
+      input.value = '';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      message.textContent = 'That backup is too large. Choose the JSON file downloaded from this form.';
+      input.value = '';
+      return;
+    }
+    try {
+      const draft = JSON.parse(await file.text());
+      if (!validBackup(draft)) throw new Error('This is not a backup for this client form.');
+      if (!confirm('Restore this backup? It will replace the answers currently saved on this device. Saved voice recordings will stay on this device.')) {
+        input.value = '';
+        return;
+      }
+      if (!applyDraft(draft)) throw new Error('The backup could not be restored.');
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+      message.textContent = 'Backup restored. Your typed answers and uploaded-document references are back in the form.';
+      saveState.textContent = 'Backup restored on this device';
+      showStep(current, {focusHeading:false});
+    } catch (error) {
+      message.textContent = error.message || 'That file could not be restored. Choose a backup downloaded from this form.';
+    } finally {
+      input.value = '';
+    }
+  });
+  document.getElementById('clear-draft').addEventListener('click', async () => { if (pendingDocumentUploads > 0) { alert('Please wait for the document upload to finish before clearing the form.'); return; } if (confirm('Clear all answers, recordings and uploaded documents? This cannot be undone.')) { discardActiveVoiceRecording(); await deleteAllDocumentUploads(); localStorage.removeItem(storageKey); await clearSavedVoice(); voiceRecordings.clear(); voiceQuestionNames.forEach(renderVoiceRecording); form.reset(); tagFields.forEach((field, name) => { field.tags.splice(0); field.input.value = ''; renderTagField(name); }); repeaterNames.forEach(name => document.querySelector(`[data-repeater="${name}"]`).replaceChildren()); document.querySelectorAll('details.preference-details, details.optional-choice-card').forEach(details => { details.open = false; }); document.getElementById('submission-id').value = makeId(); updateConditional(); showStep(0); } });
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault(); if (!validateAllSteps()) return;
+    const button = form.querySelector('[type=submit]'); const message = document.getElementById('submit-message');
+    if (!config.endpoint) { message.textContent = 'The secure submission connection is not live yet. Your answers remain saved on this device; please do not send real documents until SABI confirms the page is ready.'; message.classList.remove('hidden'); message.focus(); return; }
+    button.disabled = true; button.textContent = 'Sending securely…';
+    try {
+      const body = await payload();
+      const response = await fetch(config.endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok || result.submissionId !== body.submissionId) throw new Error(result.error || 'The form could not be confirmed as received. Your answers are still saved on this device. Please try again.');
+      localStorage.removeItem(storageKey);
+      await clearSavedVoice();
+      location.assign(`${config.confirmationUrl}?submission=${encodeURIComponent(body.submissionId)}`);
+    } catch (error) {
+      message.textContent = error.message || 'The form could not be sent. Your answers are still saved on this device. Please try again.'; message.classList.remove('hidden'); message.focus();
+      button.disabled = false; button.textContent = 'Send my onboarding';
+    }
+  });
+
+  createVoiceControls();
+  setupDocumentUploads();
+  tagFieldConfigs.forEach(setupTagField);
+  restoreVoiceRecordings();
+  restore(); tagFieldConfigs.forEach(config => loadTagField(config.name)); updateConditional(); revealPopulatedPreferenceDetails(); showStep(current, {focusHeading:false});
+})();

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Career Partner payment | SABI</title>
+  <meta name="description" content="Private payment page for a bespoke SABI Career Partner package.">
+  <link rel="icon" href="./images/favicon.png" type="image/png">
+  <link rel="stylesheet" href="./payment.css">
+  <script src="./checkout.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to payment details</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand" aria-label="SABI"><img src="./images/sabi-mark-complete.png" alt="" width="44" height="44"><span>SABI</span></div>
+      <div class="client-ref">Private client page · CL-2026-001</div>
+    </div>
+  </header>
+
+  <main id="main" class="payment-main">
+    <section class="payment-hero">
+      <div class="payment-copy">
+        <p class="eyebrow">SABI CAREER SUPPORT</p>
+        <h1>Bronagh, here’s everything in one place.</h1>
+        <p class="lead">I’ve set out the support we agreed, what happens after payment and how to get started.</p>
+        <div class="reassurance"><span aria-hidden="true">✓</span> Stripe handles your payment securely</div>
+      </div>
+    </section>
+
+    <section class="payment-content">
+      <article class="payment-section wide">
+        <h2>The support we agreed</h2>
+        <div class="included-columns">
+          <ul class="included-list">
+            <li>Review of your onboarding information and supporting documents</li>
+            <li>Career Direction and Job Search Plan</li>
+            <li>One targeted CV</li>
+            <li>One application or supporting-statement review</li>
+            <li>Two weeks of follow-up support</li>
+          </ul>
+          <ul class="included-list">
+            <li>Focused follow-up questions where more detail is needed</li>
+            <li>Core CV</li>
+            <li>One tailored cover letter</li>
+            <li>Personalised written interview preparation</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="payment-section wide">
+        <h2>What happens next</h2>
+        <ol class="process-list">
+          <li>Tick the confirmations below and pay securely through Stripe.</li>
+          <li>Stripe will confirm your payment securely. I’ll then send you the private onboarding link.</li>
+          <li>You do not need to finish the onboarding in one sitting. Your answers will stay saved on this browser and device until you are ready to send them.</li>
+          <li>When you send it, I’ll read through everything and email any focused follow-up questions.</li>
+        </ol>
+        <div class="notice-box">
+          <p><strong>You normally have a 14-day cancellation period.</strong> If you would like me to begin sooner, you can choose that separately below.</p>
+        </div>
+      </article>
+
+      <article class="payment-section payment-final">
+        <h2>When you’re ready</h2>
+
+        <div class="acceptance-preview" aria-label="Acceptance controls">
+          <label>
+            <input id="accept-terms" type="checkbox">
+            <span>I have read and agree to the <a href="./documents/terms-and-conditions.html">Terms and Conditions</a> and have read the <a href="./documents/privacy-policy.html">Privacy Policy</a>.</span>
+          </label>
+          <label>
+            <input id="early-start" type="checkbox">
+            <span><strong>Optional:</strong> I would like SABI to begin work during the 14-day cancellation period. I understand that if I cancel after work has begun, SABI may deduct a fair and proportionate amount for work already completed, and my cancellation right may end if the service is fully completed.</span>
+          </label>
+        </div>
+
+        <span class="price">£135</span>
+        <button id="pay-button" class="payment-button disabled-payment" type="button" disabled>Pay £135 securely</button>
+        <p class="secure-note"><span aria-hidden="true">🔒</span><span>You will be taken to Stripe to enter your payment details. SABI does not receive or store your full card details.</span></p>
+        <div id="checkout-message" class="notice-box hidden" role="alert"></div>
+      </article>
+    </section>
+
+    <p class="review-note">Private SABI client page · CL-2026-001 · Not listed in public navigation</p>
+  </main>
+</body>
+</html>
+

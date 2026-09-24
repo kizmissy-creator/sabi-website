@@ -1,0 +1,24 @@
+export const commercialQuestions = [
+  {"id":"labour","value":"Labour/staffing cost","label":"Labour or staffing costs","question":"Any staffing-cost target or saving you remember?","hint":"An amount or percentage is useful. Include roughly when and whether it covered your restaurant or the region."},
+  {"id":"food","value":"Food cost","label":"Food costs","question":"Any food-cost target or reduction you remember?","hint":"A percentage, amount saved or before-and-after figure would help. Add the period and restaurant or region, if known."},
+  {"id":"waste","value":"Waste","label":"Waste","question":"Any reduction in waste you remember?","hint":"An amount, percentage or quantity is useful, with roughly when and where. A target you worked towards is useful too."},
+  {"id":"stock","value":"Stock variance","label":"Stock or stock differences","question":"Any improvement in stock accuracy or reduction in stock losses?","hint":"A rough amount or percentage is enough, with the period and restaurant or region it covers."},
+  {"id":"budget","value":"Budgets","label":"Budgets or spending limits","question":"Roughly how much spending were you responsible for, and over what period?","hint":"Include the currency, what the spending covered and whether you managed it yourself or helped someone else."},
+  {"id":"forecast","value":"Forecast vs actual results","label":"Forecasts compared with actual results","question":"Any forecast value, accuracy target or improvement you remember?","hint":"Include the period and restaurant or region it covered. No need to repeat sales figures you have already given."},
+  {"id":"customer","value":"Customer KPIs","label":"Customer feedback or service targets","question":"Any customer score or service result you remember?","hint":"The score or change, its scale (for example, out of 5 or 100), and roughly when and where would help."},
+  {"id":"productivity","value":"Productivity KPIs","label":"Productivity or speed-of-service targets","question":"Any improvement in service time, output or time saved?","hint":"A rough before-and-after figure or amount of time saved is useful. Include the team or restaurant and period, if known."},
+  {"id":"audit","value":"Compliance/audit scores","label":"Compliance or audit scores","question":"Any additional audit score or improvement you remember?","hint":"Your regional compliance results are already noted. Only add a different score, with its scale and roughly when and where."},
+  {"id":"other","value":"Something else","label":"Something else","question":"Any other useful figure or target?","hint":"Say what it measures, the amount or result, and roughly when and where. A few words are enough."},
+  {"id":"sales","value":"Sales forecasts","label":"Sales forecasts","question":"Roughly what sales figures did your forecasts cover?","hint":"Include the currency, period and restaurant or region. Skip this if the sales figure you gave earlier already covers it."},
+  {"id":"profitability","value":"Profitability","label":"Profitability","question":"Any saving or improvement in profitability you remember?","hint":"An amount or percentage, with the period and restaurant or region, is useful. No need to repeat staffing or cost figures."},
+  {"id":"pl","value":"P&L","label":"Monthly P&L","question":"Any P&L target or financial result you helped with?","hint":"A rough amount or percentage and the period it covers are enough. Reading the P&L is already noted; leave this blank if there is nothing to add."},
+] as const
+
+export const previouslyKnownMeasures = ['Sales forecasts', 'Profitability', 'P&L']
+
+export const commercialGroups = [
+  { id: 'costs', title: 'Costs, forecasts and financial results', members: ['Labour/staffing cost', 'Food cost', 'Waste', 'Stock variance', 'Forecast vs actual results', 'Sales forecasts', 'Profitability', 'P&L'], prompt: 'Any target, saving or result you remember?', hint: 'If known: roughly when, restaurant or region, your part, and whether this was a target or an achieved result.' },
+  { id: 'budget', title: 'Budget or spending responsibility', members: ['Budgets'], prompt: 'Roughly how much spending did you look after?', hint: 'If known: currency, week/month/year, what it covered and what you could approve yourself.' },
+  { id: 'service', title: 'Service, productivity or audit results', members: ['Customer KPIs', 'Productivity KPIs', 'Compliance/audit scores'], prompt: 'Any score, time saved or improvement you remember?', hint: 'If known: when, where and your part. For scores, include the scale; for targets, whether they were met. Skip regional results already mentioned.' },
+  { id: 'other', title: 'Another figure or result', members: ['Something else'], prompt: 'Any other useful figure or result?', hint: 'If known: what it measures, roughly when and where, and your part. Say whether it was a target or a result.' },
+]
