@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Private SABI Career Partner career exploration for Bronagh." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>SABI Career Explorer</title>
+  <link rel="stylesheet" href="./career-explorer.css" />
+  <script defer src="./career-explorer.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <img class="brand-mark" src="../follow-up/sabi-mark.png" alt="" />
+      <div class="brand-copy">
+        <div class="eyebrow">SABI Career Partner</div>
+        <div class="brand-title">Career explorer</div>
+      </div>
+      <div class="progress-wrap" aria-label="Exploration progress">
+        <span id="progressText">0 of 14 explored</span>
+        <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <section id="introScreen" class="intro-card">
+      <p class="eyebrow">Your next step</p>
+      <h1>Let’s look at what your experience could become.</h1>
+      <p class="lede">You’ve already given me a lot of evidence about what you can do. This isn’t a test of whether you think you’re qualified enough. I’ll deal with that part.</p>
+      <p>For now, react to the <strong>work itself</strong>. Some titles may sound unfamiliar. That’s deliberate.</p>
+      <div class="intro-note">
+        <strong>Keep it instinctive.</strong>
+        <span>You can open “What would this actually look like?” whenever you want more detail.</span>
+      </div>
+      <button id="startButton" class="primary-button" type="button">Start exploring</button>
+    </section>
+
+    <section id="explorerScreen" class="hidden" aria-live="polite">
+      <div class="section-heading">
+        <p class="eyebrow" id="groupEyebrow">Career world</p>
+        <h1 id="groupTitle">Developing people</h1>
+        <p id="groupIntro"></p>
+      </div>
+
+      <div id="cardStage"></div>
+
+      <div class="nav-row">
+        <button id="backButton" class="secondary-button" type="button">Back</button>
+        <button id="nextButton" class="primary-button" type="button">Next</button>
+      </div>
+    </section>
+
+    <section id="checkpointScreen" class="hidden">
+      <div class="checkpoint-card">
+        <p class="eyebrow">Quick checkpoint</p>
+        <h1 id="checkpointTitle">What seems to be emerging?</h1>
+        <p id="checkpointText"></p>
+        <div class="checkpoint-options" role="group" aria-label="Does this reflection sound right?">
+          <button type="button" data-checkpoint="yes">Yes, roughly</button>
+          <button type="button" data-checkpoint="not-quite">Not quite</button>
+          <button type="button" data-checkpoint="too-early">Too early to tell</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="summaryScreen" class="hidden">
+      <div class="section-heading">
+        <p class="eyebrow">Your career map</p>
+        <h1>What your reactions are showing</h1>
+        <p>This is a first-pass map, not a decision. It helps us decide what deserves proper research.</p>
+      </div>
+
+      <div id="summaryBuckets" class="summary-grid"></div>
+
+      <div class="final-choice-card">
+        <h2>Which directions should I investigate properly?</h2>
+        <p>Choose up to three. You can change your mind later.</p>
+        <div id="shortlistChoices" class="shortlist-grid"></div>
+        <label for="finalNote">Anything you want me to know?</label>
+        <textarea id="finalNote" rows="4" placeholder="Optional"></textarea>
+        <div class="summary-actions">
+          <button id="reviewButton" class="secondary-button" type="button">Review my reactions</button>
+          <button id="saveButton" class="primary-button" type="button">Save my choices</button>
+        </div>
+        <p id="saveMessage" class="save-message" role="status"></p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
