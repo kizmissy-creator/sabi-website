@@ -4,5 +4,5 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* Use the approved square Canva export, framing its centred horizontal mark. */
-.logo-img{display:block;width:215px;height:84px;object-fit:cover}.logo:has(.logo-img){line-height:0;flex-shrink:0}footer .logo{background:#fcfcfa;border-radius:3px}footer .logo-img{width:185px;height:72px}
-@media(max-width:640px){.logo-img{width:180px;height:70px}header{padding:8px 0}footer .logo-img{width:150px;height:60px}}
+.logo-img{display:block;width:155px;height:61px;object-fit:cover}.logo:has(.logo-img){line-height:0;flex-shrink:0}footer .logo{background:#fcfcfa;border-radius:3px}footer .logo-img{width:140px;height:55px}
+@media(max-width:640px){.logo-img{width:125px;height:49px}header{padding:8px 0}footer .logo-img{width:115px;height:45px}}
