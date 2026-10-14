@@ -45,3 +45,23 @@ Do not expand this receiver to collect detailed financial, health, legal, identi
 - No submitted message content written to application logs
 
 The deployment URL is an endpoint, not a password. Do not put Google credentials, API keys or shared secrets into the website code.
+
+## Acknowledgement protocol v1 — draft activation procedure
+
+This branch changes both the website and receiver. Do not enable the frontend against the old deployed receiver: it does not send the required acknowledgements. No live deployment is performed by this PR.
+
+1. Use a separate fictional-test workbook and script deployment. Configure `CONTACT_ALLOWED_ORIGINS` as a comma-separated list of exact approved HTTPS origins, including only the intended test preview. Do not allow arbitrary preview hosts or use a wildcard. `configureContactReceiver` currently sets the existing Netlify production origin as a starting value; verify the actual domain and replace this value for the test deployment.
+2. Supply `submissionId`, a fresh `attemptId`, `parentOrigin`, `serviceArea`, `serviceInterest` and the existing form fields. The receiver validates origin and UUIDs before accepting. Service interest is retained in the existing message column; no private record is copied into the website.
+3. The response posts `{type: 'sabi-enquiry-result', version: 1, submissionId, attemptId, result}` to the exact configured parent origin. No answers are echoed. Because Apps Script uses nested sandbox frames, the client validates Google HTTPS response origins and both unguessable IDs. Frame loads never confirm success. The origin allowlist is not authentication: public anti-spam and rate controls are still required.
+4. Test accepted, rejected, blocked-frame, timeout, storage failure, retry and duplicate outcomes in the deployed Google sandbox. ALLOWALL is used only for a minimal non-interactive acknowledgement response. Browser/privacy settings may block the frame; the page must then report an unconfirmed request, preserving its reference.
+5. In this PR, the public form has `data-enabled="false"`, no endpoint and a disabled submit button. To enable an approved test copy, set `data-enabled="true"` and `data-endpoint` to the tested deployment URL. Never use the production receiver for automated tests.
+6. Before production, complete publication-ready privacy information, approved storage and retention, confirm the real deployment/domain, and test with explicit authorisation. Remove preview notices/noindex only when approved. Deploy the receiver first, then enable the compatible frontend. No automatic top-level redirects remain in the receiver.
+7. Unconfirmed retries preserve the submission ID and frozen answers; each attempt gets a new acknowledgement ID. A previously saved reference is acknowledged without adding another row or consuming another rate-limit allowance.
+
+Automated Node tests use fictional in-memory spreadsheet services, never Google APIs: `node --test tests/enquiry.test.cjs`.
+
+## Notice-version update
+
+The form now provides privacy information rather than requiring agreement to it. It sends `privacyNoticeVersion`; the old `privacyAcknowledged` checkbox is removed. The receiver requires an exact non-empty match to the `CONTACT_PRIVACY_NOTICE_VERSION` script property. It records the value in column H, `privacy_notice_version`. Inspect the existing Sheet schema before deployment; a conflicting column-H header blocks writes.
+
+`configureContactReceiver` intentionally leaves the notice version empty. The draft version `enquiries-draft-2026-10-14` is for isolated testing only. A production version must be chosen after the effective notice is reviewed. See `docs/enquiry-launch-readiness.md` and the isolated `ReceiverSmokeTest.gs` runner. Do not run that test against an actual client workbook.

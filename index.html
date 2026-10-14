@@ -1,534 +1,75 @@
-<!DOCTYPE html>
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SABI | Career Support, Admin, Systems and Practical Help</title>
-<meta content="SABI provides thoughtful, neurodivergent friendly career support, CV writing, admin help and practical systems for individuals and small businesses. Clear support designed around real life." name="description"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-tertiary-container": "#4f3d00",
-                        "secondary": "#1d7c79",
-                        "on-primary-fixed": "#00201f",
-                        "primary-fixed-dim": "#93d2cf",
-                        "on-secondary-fixed": "#00201f",
-                        "tertiary-container": "#F2C94C",
-                        "on-error": "#ffffff",
-                        "inverse-on-surface": "#e7f3f2",
-                        "surface-container-high": "#e4efee",
-                        "tertiary": "#745b00",
-                        "on-tertiary": "#ffffff",
-                        "error": "#ba1a1a",
-                        "background": "#f5fdfd",
-                        "on-primary-container": "#b0efec",
-                        "on-primary-fixed-variant": "#00504e",
-                        "surface-container-low": "#f8fdfd",
-                        "primary-container": "#3d8583",
-                        "outline-variant": "#bfc8c7",
-                        "secondary-fixed-dim": "#8ad3d0",
-                        "outline": "#6f7978",
-                        "on-surface": "#131d1d",
-                        "on-tertiary-fixed": "#241a00",
-                        "surface-tint": "#367d7b",
-                        "secondary-container": "#baf5f1",
-                        "tertiary-fixed": "#fdf4d0",
-                        "tertiary-fixed-dim": "#ebc246",
-                        "surface-variant": "#d9e5e4",
-                        "surface-container-lowest": "#ffffff",
-                        "surface-container-highest": "#d9e5e4",
-                        "on-error-container": "#93000a",
-                        "surface": "#f5fdfd",
-                        "on-background": "#131d1d",
-                        "inverse-primary": "#93d2cf",
-                        "on-surface-variant": "#3f4948",
-                        "error-container": "#ffdad6",
-                        "primary-fixed": "#aeeeeb",
-                        "primary": "#156d6b",
-                        "on-secondary-container": "#278583",
-                        "surface-dim": "#d8e5e4",
-                        "surface-bright": "#f5fdfd",
-                        "on-secondary-fixed-variant": "#00504e",
-                        "on-secondary": "#ffffff",
-                        "inverse-surface": "#283232",
-                        "on-primary": "#ffffff",
-                        "secondary-fixed": "#a5f0ec",
-                        "surface-container": "#f2faf9",
-                        "on-tertiary-fixed-variant": "#584400"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "max-width": "1280px",
-                        "margin": "32px",
-                        "xs": "4px",
-                        "xl": "80px",
-                        "md": "24px",
-                        "base": "8px",
-                        "lg": "48px",
-                        "sm": "12px",
-                        "gutter": "24px"
-                    },
-                    "fontFamily": {
-                        "h1": ["Newsreader"],
-                        "label-caps": ["Manrope"],
-                        "body-md": ["Manrope"],
-                        "h2": ["Newsreader"],
-                        "button": ["Manrope"],
-                        "h3": ["Newsreader"],
-                        "body-lg": ["Manrope"]
-                    },
-                    "fontSize": {
-                        "h1": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}],
-                        "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.08em", "fontWeight": "700"}],
-                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
-                        "h2": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500"}],
-                        "button": ["15px", {"lineHeight": "1.0", "fontWeight": "600"}],
-                        "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
-                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
-                    }
-                },
-            },
-        }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .organic-blob {
-            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-        }
-        .soft-shadow {
-            box-shadow: 0 10px 30px -10px rgba(61, 133, 131, 0.1);
-        }
-        #mobile-menu:not(.hidden) {
-            display: flex;
-        }
-        a:focus-visible, button:focus-visible {
-            outline: 2px solid #3d8583;
-            outline-offset: 4px;
-        }
-        [class~="text-[#3D8583]"] {
-            color: #2f6a68 !important;
-        }
-        [class~="text-[#3D8583]/70"],
-        [class~="text-[#3D8583]/80"],
-        [class~="text-[#3D8583]/60"],
-        [class~="text-[#3D8583]/40"] {
-            color: #2b6462 !important;
-        }
-        [class~="bg-[#F2C94C]"][class~="text-[#3D8583]"] {
-            color: #174f4d !important;
-        }
-        [class~="bg-[#3D8583]"][class~="text-white"] {
-            background-color: #347270 !important;
-        }
-        #sabi-enquiry input:not([type="hidden"]):not([type="checkbox"]),
-        #sabi-enquiry select {
-            min-height: 44px;
-        }
-        .imperfect-underline {
-            position: relative;
-            display: inline-block;
-        }
-        .imperfect-underline::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: #F2C94C;
-            border-radius: 5px 2px 4px 6px;
-            z-index: -1;
-        }
-        .handwritten {
-            font-family: 'Caveat', cursive, sans-serif;
-            font-size: 1.1rem;
-            transform: rotate(-2deg);
-        }
-    
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                scroll-behavior: auto !important;
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;display=swap" rel="stylesheet"/>
-<link href="images/favicon.png" rel="icon" type="image/png"/><meta content="SABI | Practical support for real life" property="og:title"/><meta content="Career support, business systems, practical advocacy and accessible resources designed around real life." property="og:description"/><meta content="website" property="og:type"/></head>
-<body class="bg-background font-body-md text-on-background antialiased selection:bg-tertiary-container selection:text-on-tertiary-container">
-<a class="fixed left-4 top-4 z-[100] -translate-y-24 rounded-lg bg-white px-4 py-3 font-button text-[#2F6A68] shadow-lg focus:translate-y-0" href="#main-content">Skip to main content</a>
-<header class="sticky top-0 z-50 bg-[#FCFEFE]/90 backdrop-blur-md border-b border-[#3D8583]/10">
-<nav class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
-<div class="flex shrink-0 items-center gap-2">
-<img alt="SABI Logo" class="h-10 w-10 object-contain" height="40" src="images/sabi-mark-complete.png" width="40"/>
-<span class="text-3xl font-bold tracking-tight text-[#3D8583] font-h1">SABI</span>
-</div>
-<div class="hidden xl:flex items-center gap-8">
-<a class="desktop-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md transition-colors" href="#how-sabi-helps">How SABI Helps</a>
-<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#services">Services</a>
-<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#starting-points">Starting Points</a>
-<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#about">About</a>
-<a class="desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors" href="#contact">Contact</a>
-</div>
-<div class="flex shrink-0 items-center gap-3">
-<a class="inline-flex shrink-0 bg-[#F2C94C] text-[#3D8583] px-3 sm:px-6 py-3 rounded-lg font-button hover:bg-[#ebd583] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#3D8583]" href="#starting-points">
-<span class="sm:hidden">Start here</span>
-<span class="hidden sm:inline">Find your starting point</span>
-        </a>
-<button aria-controls="mobile-menu" aria-expanded="false" class="xl:hidden min-h-11 min-w-11 text-[#3D8583] p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3D8583] rounded" id="mobile-menu-btn">
-<span class="sr-only">Open main menu</span>
-<span class="material-symbols-outlined">menu</span>
-</button>
-</div>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>SABI | Practical support for real life</title>
+<meta name="description" content="Career support, simpler admin and clearer writing. SABI helps individuals and small organisations find practical ways forward, with human, neurodivergent-friendly support.">
+<meta property="og:title" content="SABI | Practical support for real life">
+<meta property="og:description" content="Career support, simpler admin and clearer writing. Thoughtful support built around real people.">
+<meta property="og:type" content="website">
+<link rel="icon" href="/images/favicon.png">
+<link rel="stylesheet" href="/assets/services.css">
+<link rel="stylesheet" href="/assets/home.css">
+<script src="/assets/home.js" defer></script>
+<script src="/assets/enquiry.js" defer></script>
+</head>
+<body class="home-page">
+<a class="skip" href="#main-content">Skip to main content</a>
+<div class="preview-note">Website preview · Enquiries and payments are not enabled here.</div>
+<header class="site-header">
+<div class="wrap header-row">
+<a class="brand" href="/" aria-label="SABI home"><img src="/images/sabi-mark-complete.png" width="40" height="40" alt="SABI"><span aria-hidden="true">SABI</span></a>
+<button class="menu-toggle" id="menu-toggle" aria-controls="main-navigation" aria-expanded="false" hidden>Menu <span aria-hidden="true">+</span></button>
+<nav id="main-navigation" aria-label="Main navigation">
+<a href="#services">Services</a><a href="#how-sabi-helps">How it works</a><a href="#about">About Sam</a><a class="nav-enquiry" href="#contact-form">Enquiries <span aria-hidden="true">↗</span></a>
 </nav>
-<div class="hidden xl:hidden flex-col bg-white border-b border-[#3D8583]/10 px-8 py-4 space-y-4 shadow-lg absolute w-full left-0" id="mobile-menu">
-<a class="mobile-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md block transition-colors self-start" href="#how-sabi-helps">How SABI Helps</a>
-<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#services">Services</a>
-<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#starting-points">Starting Points</a>
-<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#about">About</a>
-<a class="mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start" href="#contact">Contact</a>
-<a class="bg-[#F2C94C] text-[#3D8583] px-4 py-2 rounded-lg font-button text-center inline-block mt-2" href="#starting-points">Find your starting point</a>
 </div>
-<script>
-        const button = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
-        const label = button.querySelector('.sr-only');
-        const icon = button.querySelector('.material-symbols-outlined');
-        const menuLinks = menu.querySelectorAll('a');
-
-        function closeMenu() {
-            menu.classList.add('hidden');
-            button.setAttribute('aria-expanded', 'false');
-            label.textContent = 'Open main menu';
-            icon.textContent = 'menu';
-        }
-
-        button.addEventListener('click', () => {
-            const isOpen = button.getAttribute('aria-expanded') === 'true';
-            menu.classList.toggle('hidden', isOpen);
-            button.setAttribute('aria-expanded', String(!isOpen));
-            label.textContent = isOpen ? 'Open main menu' : 'Close main menu';
-            icon.textContent = isOpen ? 'menu' : 'close';
-        });
-
-        menuLinks.forEach((link) => {
-            link.addEventListener('click', closeMenu);
-        });
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
-                closeMenu();
-                button.focus();
-            }
-        });
-
-        // Active Navigation State on Scroll
-        const navIds = ['how-sabi-helps', 'services', 'starting-points', 'about', 'contact'];
-        let sections = [];
-
-        function updateActiveState() {
-            let current = '';
-            const scrollPos = window.scrollY + 120; // 120px offset to account for sticky header
-
-            sections.forEach(section => {
-                if (scrollPos >= section.offsetTop) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            // Force 'contact' as active if we are scrolled to the bottom of the page
-            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 50) {
-                current = 'contact';
-            }
-
-            // If we are at the very top of the page, default to the first item
-            if (window.scrollY < 100) {
-                current = 'how-sabi-helps';
-            }
-
-            // Update desktop links
-            document.querySelectorAll('.desktop-nav-link').forEach(link => {
-                const href = link.getAttribute('href').substring(1);
-                if (href === current) {
-                    link.className = 'desktop-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md transition-colors';
-                } else {
-                    link.className = 'desktop-nav-link text-[#3D8583]/70 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md transition-colors';
-                }
-            });
-
-            // Update mobile links
-            document.querySelectorAll('.mobile-nav-link').forEach(link => {
-                const href = link.getAttribute('href').substring(1);
-                if (href === current) {
-                    link.className = 'mobile-nav-link text-[#3D8583] font-bold border-b-2 border-[#F2C94C] pb-1 font-body-md block transition-colors self-start';
-                } else {
-                    link.className = 'mobile-nav-link text-[#3D8583]/80 hover:text-[#3D8583] border-b-2 border-transparent pb-1 font-body-md block transition-colors self-start';
-                }
-            });
-        }
-
-        window.addEventListener('scroll', updateActiveState);
-        window.addEventListener('load', updateActiveState);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            sections = navIds.map(id => document.getElementById(id)).filter(el => el !== null);
-            updateActiveState();
-        });
-        </script>
 </header>
 <main id="main-content" tabindex="-1">
-<!-- Hero Section -->
-<section class="relative pt-20 pb-32 overflow-hidden">
-<div class="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-<div class="lg:col-span-7 z-10">
-<span class="inline-block px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full text-label-caps mb-6 border border-tertiary-container/30">PRACTICAL SUPPORT FOR REAL LIFE</span>
-<h1 class="font-h1 text-h1 text-primary mb-6 leading-tight">
-                    You don’t need to work harder. <br/>
-<span class="italic text-secondary imperfect-underline">You need a better system.</span>
-</h1>
-<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-6 border-l-2 border-[#F2C94C] pl-4">
-                    When work, job searching, business admin or simply keeping life moving starts to feel like too much, SABI helps you untangle it. Together, we turn the fog into clear next steps, practical support and systems that work with your brain, your energy and your circumstances.
-                </p>
-<p class="text-sm font-label-caps text-secondary mb-10 flex items-center gap-2">
-<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
-                    Warm, judgement free support | Clear pricing | Pay It Forward options available
-                </p>
-<div class="flex flex-wrap gap-4">
-<a class="bg-[#F2C94C] text-[#3D8583] px-8 py-4 rounded-lg font-button text-lg flex items-center gap-2 hover:-translate-y-1 hover:shadow-lg hover:ring-2 hover:ring-[#F2C94C]/40 transition-all inline-flex" href="#starting-points">
-                        Find the right support
-                        <span aria-hidden="true" class="material-symbols-outlined">arrow_forward</span>
-</a>
-<a class="border-2 border-primary-container text-primary-container px-8 py-4 rounded-lg font-button text-lg hover:bg-primary-container/5 transition-colors inline-flex" href="#how-sabi-helps">
-                        Explore SABI
-                    </a>
+<section class="home-hero wrap" aria-labelledby="hero-title">
+<div class="hero-copy">
+<p class="eyebrow">Practical help for real life.</p>
+<h1 id="hero-title">A lot going on.<br><em>Let’s untangle some of it.</em></h1>
+<p class="hero-intro">I’m Sam. I help with CVs, awkward admin and writing that won’t quite come together. Thoughtful, practical support for people and small organisations.</p>
+<div class="hero-actions"><a class="button yellow" href="#starting-points">See how I can help <span aria-hidden="true">↓</span></a><a class="text-link" href="#about">Meet Sam <span aria-hidden="true">↗</span></a></div>
+<p class="hero-reassurance">You don’t have to have it all worked out before you ask.</p>
 </div>
-</div>
-<div class="lg:col-span-5 relative">
-<div class="relative w-full aspect-square">
-<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-primary/5 blur-[100px] rounded-full -z-10"></div>
-<div class="absolute bottom-4 left-8 w-full h-full bg-surface-container rounded-xl overflow-hidden shadow-xl z-10 border border-primary/5">
-<img alt="Organised workspace" class="w-full h-full object-cover" decoding="async" loading="eager" src="images/hero-workspace.webp"/>
-</div>
-<div class="absolute -bottom-6 -left-6 bg-[#F2C94C] p-6 rounded-xl shadow-lg z-20 max-w-[240px] -rotate-2">
-<p class="font-h3 text-sm italic text-primary leading-tight">Sometimes the problem is not motivation. It is carrying too much without the right structure.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] organic-blob bg-secondary/5 -z-10 opacity-20"></div>
+<figure class="founder-portrait"><img src="/images/sam-portrait.webp" width="1022" height="1536" alt="Sam, founder of SABI" fetchpriority="high"><figcaption><strong>Hello, I’m Sam.</strong><span>Curious by nature. Practical by habit.</span></figcaption></figure>
 </section>
-<!-- The Problem Section -->
-<section class="py-24 bg-surface-container-low overflow-hidden" id="how-sabi-helps">
-<div class="max-w-7xl mx-auto px-8 relative">
-<div class="mb-16">
-<h2 class="font-h2 text-h2 text-primary mb-4 border-l-4 border-[#F2C94C] pl-6">If everything feels like a bit too much, you’re not alone.</h2>
-<p class="text-body-lg text-on-surface-variant max-w-3xl">
-                    Work and life do not usually fall apart all at once. It builds slowly. Too many small tasks. Too many decisions. Too many things sitting in your head. You start with a plan, but something urgent appears. Important jobs are pushed aside. Things get missed, everything feels equally demanding, and it becomes harder to know where to begin. That is not a personal failure. Sometimes the system around you simply is not giving you the support, clarity or flexibility you need.
-                </p>
+<section class="services-section" id="services" aria-labelledby="services-title">
+<div class="wrap" id="starting-points">
+<div class="section-heading"><div><p class="eyebrow">What can I help with?</p><h2 id="services-title">A few places we can start.</h2></div></div>
+<div class="service-choices">
+<article class="service-choice" id="career-support"><p class="service-category">Career &amp; Job Support</p><h3>A CV that <br>sounds like you.</h3><p>CVs, a change of direction or help with applications. We’ll work out how to put your experience into words.</p><p class="service-example">Professional CV · £50<br><span>Starter CV · £30 for a straightforward work history</span></p><a class="choice-link" href="/career/">Find help with work &amp; CVs <span aria-hidden="true">↗</span></a></article>
+<article class="service-choice" id="business-admin"><p class="service-category">Admin &amp; Systems Support</p><h3>Make the admin <br>less awkward.</h3><p>That spreadsheet, tool or process you keep working around? Let’s find a simpler way to do it.</p><p class="service-example">Admin Tool Fix · from £75<br><span>A fixed quote before we get started</span></p><a class="choice-link" href="/admin-systems/">Untangle the admin <span aria-hidden="true">↗</span></a></article>
+<article class="service-choice" id="writing-clarity"><p class="service-category">Writing &amp; Clarity</p><h3>The words you’re <br>looking for.</h3><p>For the draft that won’t come together, the report that needs a shape, or the idea you’re trying to explain.</p><p class="service-example">Clarity Edit · from £75<br><span>Also: case studies, reports and articles</span></p><a class="choice-link" href="/writing/">Find help with the words <span aria-hidden="true">↗</span></a></article>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-<!-- Card 1 -->
-<div class="p-8 bg-surface-container-lowest rounded-xl border border-outline-variant/30 relative overflow-hidden transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg">
-<div class="w-12 h-12 bg-error-container/30 rounded-lg flex items-center justify-center mb-6 text-error">
-<span aria-hidden="true" class="material-symbols-outlined" data-weight="fill">psychology</span>
-</div>
-<h3 class="font-h3 text-h3 text-primary mb-4">Everything is in your head</h3>
-<p class="font-body-md text-on-surface-variant">Appointments, deadlines, ideas, responsibilities and unfinished tasks are all competing for the same small patch of attention. SABI helps you get them out of your head and into a structure you can actually use.</p>
-</div>
-<!-- Card 2 -->
-<div class="p-8 bg-surface-container-lowest rounded-xl border border-outline-variant/30 mt-0 md:-mt-4 relative overflow-hidden transition-all z-10 hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg">
-<div class="w-12 h-12 bg-secondary-container/30 rounded-lg flex items-center justify-center mb-6 text-secondary">
-<span aria-hidden="true" class="material-symbols-outlined" data-weight="fill">checklist</span>
-</div>
-<h3 class="font-h3 text-h3 text-primary mb-4">You know what needs doing</h3>
-<p class="font-body-md text-on-surface-variant">Knowing what to do and being able to begin are not always the same thing. We break complicated or overwhelming work into clear, manageable steps without making you feel as though you are being managed.</p>
-</div>
-<!-- Card 3 -->
-<div class="p-8 bg-surface-container-lowest rounded-xl border border-outline-variant/30 relative overflow-hidden transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg">
-<div class="w-12 h-12 bg-tertiary-fixed/60 rounded-lg flex items-center justify-center mb-6 text-tertiary">
-<span aria-hidden="true" class="material-symbols-outlined" data-weight="fill">architecture</span>
-</div>
-<h3 class="font-h3 text-h3 text-primary mb-4">The usual systems do not fit</h3>
-<p class="font-body-md text-on-surface-variant">Generic templates, rigid schedules and productivity apps often create another job to maintain. SABI builds support around the person, rather than expecting the person to squeeze themselves into somebody else’s method.</p>
-</div>
-</div>
-</div>
+<div class="unsure-route"><p><strong>A bit of everything? Not quite sure?</strong> That’s a starting point too.</p><a href="/?service=unsure#contact-form">Tell me what’s getting stuck <span aria-hidden="true">↗</span></a></div>
+</div></section>
+<section class="process-section wrap" id="how-sabi-helps" aria-labelledby="process-title">
+<div class="section-heading"><div><p class="eyebrow">How it works</p><h2 id="process-title">We’ll start with<br>where you are.</h2><p class="process-intro">A few sentences are enough. We can work out the rest together.</p></div></div>
+<ol class="process-list"><li><h3>Tell me what’s getting stuck.</h3><p>What’s happening, what you’ve tried, and what you’d like to feel easier.</p></li><li><h3>We’ll work out what would help.</h3><p>You’ll know what’s included and what it costs before any work begins.</p></li><li><h3>Then we’ll get into it.</h3><p>Practical help, clear explanations and space to ask questions along the way.</p></li></ol>
 </section>
-<!-- Services Section -->
-<section class="py-32 overflow-hidden" id="services">
-<div class="max-w-7xl mx-auto px-8">
-<div class="mb-16">
-<span class="text-label-caps text-secondary tracking-widest block mb-4 uppercase">HOW SABI HELPS</span>
-<h2 class="font-h1 text-h1 text-primary border-l-4 border-[#F2C94C] pl-6 mb-6">Support for the point where life gets stuck.</h2>
-<p class="text-body-lg text-on-surface-variant max-w-4xl">
-                    SABI sits somewhere between practical support, thoughtful problem solving and having someone genuinely pay attention to the whole picture. You might need a better CV. You might need help organising your business. You might have a difficult process, a pile of paperwork or an important idea that has become tangled. You do not need to know exactly what the service is called before you ask for help. You only need to know what is not working.
-                </p>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-<!-- Pathway 1 -->
-<div class="bg-surface-container rounded-3xl p-10 flex flex-col h-full border border-outline-variant/30 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg" id="career-support"><h3 class="font-h2 text-2xl text-primary mb-4">Career and Job Support</h3><div class="text-on-surface-variant mb-8 flex-grow space-y-4 text-base"><p class="">Work out what comes next, communicate what you can do and approach applications with more confidence.</p><p class="">Support can include:</p><ul class="list-disc pl-5 space-y-1"><li class="">CV writing</li><li class="">Role-specific CVs</li><li class="">Cover letters</li><li class="">Applications</li><li class="">Career changes</li><li class="">Transferable skills</li><li class="">Job search planning</li><li class="">LinkedIn support</li><li class="">Interview preparation</li></ul><p class="">SABI does not simply make documents look prettier. The aim is to uncover the experience, strengths and evidence that are already there, then translate them into language employers understand.</p></div><a class="bg-primary text-white px-6 py-3 rounded-lg font-button self-start hover:bg-primary/90 transition-colors inline-block" href="#starting-points">Explore career support</a></div>
-<!-- Pathway 2 -->
-<div class="bg-surface-container rounded-3xl p-10 flex flex-col h-full border border-outline-variant/30 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg" id="business-admin"><h3 class="font-h2 text-2xl text-primary mb-4">Business, Admin and Systems Support</h3><div class="text-on-surface-variant mb-8 flex-grow space-y-4 text-base"><p class="">For self-employed people, small businesses and overloaded teams who have reached the point where everything is being held together by memory, messages and good intentions.</p><p class="">Support can include:</p><ul class="list-disc pl-5 space-y-1"><li class="">Organising workloads and information</li><li class="">Improving everyday processes</li><li class="">Creating clear documents and resources</li><li class="">Research</li><li class="">Written content</li><li class="">Administration</li><li class="">Project support</li><li class="">Operations support</li></ul><p class="">No jargon soup. No new software for the sake of having new software. The goal is to reduce friction and create ways of working that still function when life becomes busy.</p></div><a class="bg-secondary text-white px-6 py-3 rounded-lg font-button self-start hover:bg-secondary/90 transition-colors inline-block" href="#contact-form">Explore business support</a></div>
-<!-- Pathway 3 -->
-<div class="bg-surface-container rounded-3xl p-10 flex flex-col h-full border border-outline-variant/30 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg" id="advocacy"><h3 class="font-h2 text-2xl text-primary mb-4">Advocacy and Complex Practical Support</h3><div class="text-on-surface-variant mb-4 flex-grow space-y-4 text-base"><p class="">Some situations are difficult because the information is scattered, the process is confusing or nobody appears to be looking at the full story.</p><p class="">SABI can help:</p><ul class="list-disc pl-5 space-y-1"><li class="">Organise evidence</li><li class="">Build timelines</li><li class="">Draft correspondence</li><li class="">Research possible routes forward</li><li class="">Prepare for the next step</li></ul><p class="">Support may include complaints and disputes, evidence organisation, official correspondence, administrative processes, research and communicating vulnerability or additional needs.</p></div><p class="text-sm text-on-surface-variant/70 mb-8 italic">SABI provides practical advocacy and administrative support rather than legal representation.</p><a class="bg-[#F2C94C] text-[#3D8583] px-6 py-3 rounded-lg font-button self-start hover:bg-[#ebd583] transition-colors inline-block" href="#contact-form">Explore practical support</a></div>
-<!-- Pathway 4 -->
-<div class="bg-surface-container rounded-3xl p-10 flex flex-col h-full border border-outline-variant/30 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg" id="resources"><h3 class="font-h2 text-2xl text-primary mb-4">Resources, Tools and Developing Ideas</h3><div class="text-on-surface-variant mb-8 flex-grow space-y-4 text-base"><p class="">SABI creates accessible resources, guides and products designed to make difficult things easier to understand and use.</p><p class="">This includes:</p><ul class="list-disc pl-5 space-y-1"><li class="">The SABI Career Playbook</li><li class="">Neurodivergent-friendly tools</li><li class="">Templates</li><li class="">Practical guides</li><li class="">Creative products</li><li class="">Developing social impact ideas such as Anchor NOMI</li></ul><p class="">Some are useful. Some are thoughtful. Some have ghosts on them. All of them begin with the same question: What would make this easier for a real person?</p></div><a class="border-2 border-primary-container text-primary-container px-6 py-3 rounded-lg font-button self-start hover:bg-primary-container/5 transition-colors inline-block" href="#contact-form">Explore resources</a></div>
-</div>
-</div>
-</section>
-<!-- Approach Section -->
-<section class="py-24 bg-primary text-white overflow-hidden" id="approach">
-<div class="max-w-7xl mx-auto px-8">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-<div class="lg:col-span-5 relative">
-<span class="text-label-caps text-[#F2C94C] tracking-widest block mb-4 uppercase text-sm">THE SABI APPROACH</span>
-<h2 class="font-h1 text-h1 mb-6 border-l-4 border-[#F2C94C] pl-6">Thoughtful support that bends, rather than asking you to.</h2>
-</div>
-<div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-8"><div class="p-6 border border-white/20 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg"><h3 class="font-h3 text-xl mb-2 text-tertiary-fixed">Start with the real problem</h3><p class="text-base text-on-primary-container">The first problem you notice is not always the problem that needs solving. A missed deadline might be a planning problem, an energy problem, an unclear process or a task that has quietly grown too large.</p></div><div class="p-6 border border-white/20 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg"><h3 class="font-h3 text-xl mb-2 text-tertiary-fixed">Make the invisible visible</h3><p class="text-base text-on-primary-container">Remembering, worrying, deciding, rehearsing, anticipating and trying not to forget all consume energy. SABI turns that hidden load into something clearer, calmer and easier to act on.</p></div><div class="p-6 border border-white/20 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg"><h3 class="font-h3 text-xl mb-2 text-tertiary-fixed">Build around real life</h3><p class="text-base text-on-primary-container">Health conditions, caring responsibilities, financial pressure, fluctuating energy and neurodivergence affect what support will genuinely work. Plans should be designed around reality.</p></div><div class="p-6 border border-white/20 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg"><h3 class="font-h3 text-xl mb-2 text-tertiary-fixed">Leave people stronger</h3><p class="text-base text-on-primary-container">Good support should not create dependence. The aim is to help people understand the process, recognise their strengths and leave with tools or knowledge that remain useful afterwards.</p></div></div>
-</div>
-</div>
-</section>
-<!-- Popular Starting Points -->
-<section class="py-32" id="starting-points">
-<div class="max-w-7xl mx-auto px-8">
-<div class="text-center mb-16">
-<span class="text-label-caps text-secondary tracking-widest block mb-4 uppercase">NOT SURE WHERE TO BEGIN?</span>
-<h2 class="font-h1 text-h2 text-primary">You do not need to solve everything at once.</h2>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-<div class="bg-surface-container-low p-8 rounded-3xl border border-outline-variant/30 text-center flex flex-col transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg">
-<h3 class="font-h3 text-xl text-primary mb-2">A professionally written CV</h3>
-<p class="text-secondary font-bold mb-1">From £50</p>
-<p class="text-secondary text-sm font-bold mb-4">Students: £30</p>
-<p class="text-base text-on-surface-variant mb-8 flex-grow">For people who need a strong, clear CV that reflects their real experience and helps them compete more fairly. Includes an initial conversation or tailored information gathering, a professionally written CV in Word and PDF formats, and one round of edits within seven days. Pay It Forward supported places may be available for unemployed clients who cannot afford the standard price.</p>
-<a class="w-full bg-primary text-white py-3 rounded-lg font-button hover:bg-primary/90 transition-colors inline-block" href="#contact-form">Get started with a CV</a>
-</div>
-<div class="bg-surface-container-low p-8 rounded-3xl border border-outline-variant/30 text-center flex flex-col relative transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg">
-<h3 class="font-h3 text-xl text-primary mb-2">A business clarity session</h3>
-<p class="text-base text-on-surface-variant mb-8 mt-6 flex-grow">For people who know something is not working but cannot yet see the cleanest route forward. We look at what is taking your time, where work is getting stuck and what could be simplified, delegated, documented or redesigned. You leave with priorities and practical next steps rather than a cloud of consultancy confetti.</p>
-<a class="w-full bg-[#F2C94C] text-[#3D8583] py-3 rounded-lg font-button hover:bg-[#ebd583] transition-colors inline-block" href="#contact-form">Talk through your business</a>
-</div>
-<div class="bg-surface-container-low p-8 rounded-3xl border border-outline-variant/30 text-center flex flex-col transition-all hover:border-[#F2C94C] hover:ring-2 hover:ring-[#F2C94C]/40 hover:shadow-lg">
-<h3 class="font-h3 text-xl text-primary mb-2">Flexible ongoing support</h3>
-<p class="text-base text-on-surface-variant mb-8 mt-6 flex-grow">For individuals or small organisations who need capable support but do not need another full time employee. This can include research, writing, administration, process improvement, project support and helping important work continue moving. The scope is shaped around what the client actually needs and what SABI can deliver well.</p>
-<a class="w-full border-2 border-primary-container text-primary-container py-3 rounded-lg font-button hover:bg-primary-container/5 transition-colors inline-block" href="#contact-form">Discuss ongoing support</a>
-</div>
-</div>
-</div>
-</section>
-<!-- Accessibility -->
-<section class="py-24 bg-surface-container-high">
-<div class="max-w-3xl mx-auto px-8"><span class="text-label-caps text-secondary tracking-widest block mb-4 uppercase text-center">SUPPORT SHOULD NOT BE A LUXURY</span><h2 class="font-h2 text-h2 text-primary mb-8 text-center">Good help should be easier to reach.</h2><p class="text-on-surface-variant text-center mb-10">The ability to write a polished CV, understand a complicated process or organise a business should not depend entirely on income, confidence or knowing the right professional language. SABI aims to make support clear, respectful and accessible.</p><div class="space-y-4 mb-12"><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Transparent pricing</p></div><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Student CVs priced at £30</p></div><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Pay It Forward supported CVs when funding is available</p></div><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Flexible communication</p></div><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Neurodivergent friendly information</p></div><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Clear explanations without unnecessary jargon</p></div><div class="flex items-start gap-4"><span class="material-symbols-outlined text-secondary">check_circle</span><p class="text-on-surface-variant">Support that respects health, energy and caring responsibilities</p></div></div><p class="text-on-surface-variant text-center italic text-sm">Accessibility is not an extra feature added at the end. It is part of how the work is designed from the beginning.</p></div>
-</section>
-<!-- About Section -->
-<section class="py-24 bg-white" id="about"><div class="max-w-4xl mx-auto px-8"><div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8"><div class="shrink-0"><img alt="Sam, founder of SABI" class="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover object-[50%_18%] ring-4 ring-[#F2C94C]/60 shadow-lg" height="128" loading="lazy" src="images/sam-portrait.webp" width="128"/></div><div><span class="text-label-caps text-secondary tracking-widest block mb-4 uppercase text-center sm:text-left">MEET THE PERSON BEHIND SABI</span><h2 class="font-h1 text-h1 text-primary border-l-4 border-[#F2C94C] pl-6 text-center sm:text-left">I’m Sam, and I notice where systems fail people.</h2></div></div><div class="font-body-lg text-on-surface-variant space-y-6 mb-10 text-base"><p>My background crosses biomedical science, operations, business support, career guidance, research, writing and advocacy.</p><p>That may sound like an unusual collection, but SABI grew from the connections between them.</p><p>I am interested in how people think, how systems behave and what happens when an intelligent, capable person is made to feel as though they are failing because the process around them does not fit.</p><p>I also understand what it is like to have ambition, ideas and ability while living with limited energy and a brain that does not always follow the neat little timetable everyone else seems to have been issued.</p><p>SABI was created to bridge that gap.</p><p>I listen carefully, find the real blockage and help create a route forward that is practical, human and built for the person in front of me.</p><p>I do not believe most people need to be told to try harder.</p><p>Usually, they have already been trying very hard.</p><p>They need clarity, structure, fairer access and the right kind of support.</p></div><a class="border-2 border-primary-container text-primary-container px-8 py-4 rounded-lg font-button hover:bg-primary-container/5 transition-colors inline-block" href="#contact-form">Get in touch</a></div></section>
-<!-- Manifesto Quote -->
-<section class="py-24 max-w-4xl mx-auto px-8 text-center relative">
-<blockquote class="font-h2 text-3xl italic text-primary leading-relaxed relative z-10 mb-8 border-l-4 border-[#F2C94C] pl-8 text-left md:text-center md:border-l-0 md:border-t-4 md:pt-8 md:pl-0">
-            People do not need to be fixed. Sometimes they need clearer information, fairer systems, practical support and someone willing to see the whole picture.
-        </blockquote>
-</section>
-<!-- Final CTA -->
-<section class="py-24 bg-surface-container border-y border-[#3D8583]/10" id="contact">
-<div class="max-w-4xl mx-auto px-8 text-center">
-<h2 class="font-h1 text-3xl text-primary mb-6">Not sure what kind of help you need?</h2>
-<p class="text-on-surface-variant mb-12 text-base max-w-2xl mx-auto">
-                You do not need to arrive with a polished brief, a five year plan or the correct professional terminology. Tell me what is happening, what keeps getting stuck and what would feel different if things were working better. We will find the starting point from there.
-            </p>
-<div class="flex flex-wrap justify-center gap-6">
-<a class="bg-[#3D8583] text-white px-10 py-5 rounded-full font-button text-lg hover:bg-[#347270] hover:shadow-xl hover:ring-2 hover:ring-[#F2C94C]/40 transition-all inline-block" href="#contact-form">
-                    Tell me what you need
-                </a>
-<a class="bg-white text-primary border-2 border-primary px-10 py-5 rounded-full font-button text-lg hover:bg-primary/5 transition-colors inline-block" href="#services">
-                    View all services
-                </a>
-</div>
-</div>
-</section><section class="py-24 bg-white" id="contact-form"><div class="max-w-2xl mx-auto px-8"><h2 class="font-h2 text-3xl text-primary mb-8 text-center">Send an enquiry</h2><form action="https://script.google.com/macros/s/AKfycbwqAynskya9uZnYvfzAt3g81ZKyiXJpNbspZQ8fSN40269t-m8gCm5w4K2uc_1P-QBg9g/exec" class="space-y-6" id="sabi-enquiry" method="POST" target="sabi-enquiry-response"><input id="submission-id" name="submissionId" type="hidden"/><input id="form-started-at" name="formStartedAt" type="hidden"/><p aria-hidden="true" class="hidden"><label>Leave this field empty: <input autocomplete="off" name="company" tabindex="-1" type="text"/></label></p><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="name">Name</label><input autocomplete="name" class="rounded-lg border-outline-variant/30 focus:ring-primary" id="name" maxlength="120" name="name" required="" type="text"/></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="email">Email address</label><input autocomplete="email" class="rounded-lg border-outline-variant/30 focus:ring-primary" id="email" maxlength="254" name="email" required="" type="email"/></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="help">What would you like help with?</label><textarea class="rounded-lg border-outline-variant/30 focus:ring-primary" id="help" maxlength="3000" name="help" required="" rows="4"></textarea></div><div class="flex flex-col gap-2"><label class="font-label-caps text-primary" for="comm">Preferred way to communicate</label><select class="rounded-lg border-outline-variant/30 focus:ring-primary" id="comm" name="preferred_contact"><option value="">No preference</option><option value="email">Email</option><option value="telephone">Telephone</option><option value="video-call">Video call</option><option value="text-message">Text message</option></select></div><label class="flex items-start gap-3 text-sm text-on-surface-variant"><input class="mt-1 rounded border-outline-variant/30 text-primary focus:ring-primary" name="privacyAcknowledged" required="" type="checkbox" value="yes"/><span>I understand that SABI will use these details to respond to my enquiry.</span></label><button class="w-full bg-primary text-white py-4 rounded-lg font-button hover:bg-primary/90 transition-colors disabled:cursor-wait disabled:opacity-70" type="submit">Submit enquiry</button></form><iframe class="hidden" id="sabi-enquiry-response" name="sabi-enquiry-response" title="Enquiry submission response"></iframe></div></section>
+<section class="about-section" id="about" aria-labelledby="about-title"><div class="wrap about-grid">
+<div class="about-intro"><p class="eyebrow">A bit about me</p><h2 id="about-title">I like knowing<br>how things work.</h2><p class="about-aside">And why they sometimes don’t.</p><p class="about-location">Sam · Founder of SABI<br>Newcastle upon Tyne</p></div>
+<div class="about-copy"><p>People, ideas, systems. I’m interested in the connections between them—and why something that looks simple on paper can be so awkward in real life.</p><p>My background crosses biomedical science, operations, business support, career guidance, research and writing. SABI brings those interests together in useful, everyday help.</p><p>I’ll listen, ask questions and help you make sense of the CV, process or piece of writing in front of you. Your time, energy and circumstances matter too.</p><p class="about-signoff">There’s usually a thread. I like finding it.</p></div>
+</div></section>
+<section class="access-section wrap" aria-labelledby="access-title"><div class="access-intro"><p class="eyebrow">Before you ask</p><h2 id="access-title">A few things you might be wondering.</h2><p>Prefer to write things down? Need a bit of time to think? We can start there.</p></div><div class="questions">
+<details><summary>Do I have to have a call?</summary><p>No. Writing things down is fine. Tell me how you prefer to communicate, and we’ll agree what works for the service.</p></details>
+<details><summary>What if I don’t know exactly what I need?</summary><p>You don’t have to pick a package first. Tell me what’s getting stuck and what you’d like to be easier. We’ll work out where to start.</p></details>
+<details><summary>Is there lower-cost career support?</summary><p>Starter CVs are £30 for a relatively straightforward work history. Pay It Forward CV support is also available when funding allows. <a href="/career/">See the career support options.</a></p></details>
+</div></section>
+<section class="contact-section" id="contact" aria-labelledby="contact-title"><div class="wrap contact-grid">
+<div class="contact-intro"><p class="eyebrow">No perfect brief needed</p><h2 id="contact-title">Let’s make this feel easier.</h2><p>When enquiries open, you can start with a few sentences. No need to know the service name or have all the answers.</p></div>
+<div class="contact-form-panel" id="contact-form"><h3>Enquiries aren’t open in this preview.</h3><p class="preview-explanation">You can explore the services and review the short form below. No answers will be sent or stored.</p>
+<details class="form-disclosure" id="enquiry-preview"><summary>View the enquiry form <span>(preview)</span></summary><div class="form-disclosure-content">
+<p id="enquiry-guidance" class="form-guidance">A brief outline and any deadline are enough. Please leave out medical, legal, financial or identity details, passwords and information about other people. No documents are needed here.</p>
+<form class="enquiry-form" id="sabi-enquiry" method="POST" target="sabi-enquiry-response" data-enabled="false" data-endpoint="" aria-describedby="enquiry-guidance enquiry-privacy"><input id="submission-id" name="submissionId" type="hidden"><input id="attempt-id" name="attemptId" type="hidden"><input id="parent-origin" name="parentOrigin" type="hidden"><input id="form-started-at" name="formStartedAt" type="hidden"><fieldset class="enquiry-fields"><legend class="sr-only">Enquiry details</legend><p aria-hidden="true" class="hidden" hidden><label>Leave this field empty: <input autocomplete="off" name="company" tabindex="-1" type="text"></label></p><div class="field"><label for="name">Name</label><input  autocomplete="name" id="name" maxlength="120" name="name" required type="text"></div><div class="field"><label for="email">Email address</label><input  autocomplete="email" id="email" maxlength="254" name="email" required type="email"></div><div class="field field-wide"><label for="service-area">What is your enquiry about?</label><select  id="service-area" name="serviceArea"><option value="unsure">I am not sure / another enquiry</option><option value="career">Career &amp; Job Support</option><option value="admin">Admin &amp; Systems Support</option><option value="writing">Writing &amp; Clarity</option></select><span id="selected-service" class="small"></span><input name="serviceInterest" id="service-interest" type="hidden"></div><div class="field field-wide"><label for="help">Briefly, what would you like help with?</label><textarea  id="help" maxlength="2000" name="help" required rows="4" aria-describedby="enquiry-guidance"></textarea></div><div class="field field-wide"><label for="comm">Preferred way to communicate</label><select  id="comm" name="preferred_contact"><option value="">No preference</option><option value="email">Email</option><option value="telephone">Telephone</option><option value="video-call">Video call</option><option value="text-message">Text message</option></select></div><p id="enquiry-privacy" class="small field-wide">SABI would use your details to assess and respond to your enquiry. Read the <a  href="/privacy/">website and enquiry privacy information (review draft)</a>. You do not need to agree to the notice. This preview does not send or store enquiry answers.</p><input name="privacyNoticeVersion" type="hidden" value="enquiries-draft-2026-10-14"></fieldset><button class="button submit-button" disabled type="submit">Enquiries disabled in preview</button><p id="enquiry-status" class="enquiry-status" role="status" aria-live="polite" tabindex="-1"></p></form>
+<noscript><p>Enquiries are disabled in this preview. JavaScript is required for verified submission feedback after activation.</p></noscript><iframe hidden id="sabi-enquiry-response" name="sabi-enquiry-response" title="Enquiry submission response"></iframe>
+</div></details>
+</div></div></section>
 </main>
-<footer class="bg-[#FCFEFE] border-t-2 border-[#F2C94C]/20">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full px-8 py-16 max-w-7xl mx-auto">
-<div class="space-y-6">
-<div class="flex items-center gap-2">
-<img alt="SABI Logo" class="h-24 w-auto object-contain" height="160" src="images/sabi-logo.png" width="160"/>
-
-</div>
-<p class="font-body-md italic text-[#3D8583]/60 max-w-sm">
-                Practical support for careers, businesses, complicated situations and ideas that deserve the chance to become real. Built with care in Newcastle upon Tyne.
-            </p>
-<p class="text-xs font-label-caps text-secondary uppercase tracking-widest pt-4">
-                Clearer systems. Fairer access. More room to move forward.
-            </p>
-</div>
-<div class="grid grid-cols-2 gap-8">
-<div class="flex flex-col gap-4">
-<h3 class="font-label-caps text-primary border-l-2 border-tertiary-container pl-2">Services</h3>
-<a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#career-support">Career Support</a>
-<a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#business-admin">Business and Admin</a>
-<a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#advocacy">Advocacy and Practical Support</a>
-<a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#resources">Resources</a>
-</div>
-<div class="flex flex-col gap-4">
-<h3 class="font-label-caps text-primary border-l-2 border-tertiary-container pl-2">Information</h3>
-<a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#about">About SABI</a>
-<a class="text-[#3D8583]/60 hover:text-[#F2C94C] transition-colors font-body-md text-base" href="#contact">Contact</a>
-<span class="text-[#3D8583]/60 font-body-md text-base">Privacy page coming soon</span>
-<span class="text-[#3D8583]/60 font-body-md text-base">Terms page coming soon</span>
-</div>
-</div>
-</div>
-<div class="border-t border-[#3D8583]/10 py-8 text-center text-[10px] text-[#3D8583]/40 font-label-caps uppercase tracking-widest">
-        © 2026 SABI. Built with care in Newcastle upon Tyne.
-    </div>
-</footer>
-<script>
-    (() => {
-        const form = document.getElementById('sabi-enquiry');
-        if (!form) return;
-
-        const submissionId = document.getElementById('submission-id');
-        const formStartedAt = document.getElementById('form-started-at');
-        const responseFrame = document.getElementById('sabi-enquiry-response');
-        const submitButton = form.querySelector('button[type="submit"]');
-        let submissionInProgress = false;
-        const createSubmissionId = () => {
-            if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-                return window.crypto.randomUUID();
-            }
-
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, character => {
-                const random = Math.random() * 16 | 0;
-                const value = character === 'x' ? random : (random & 0x3 | 0x8);
-                return value.toString(16);
-            });
-        };
-
-        submissionId.value = createSubmissionId();
-        formStartedAt.value = String(Date.now());
-
-        form.addEventListener('submit', () => {
-            submissionInProgress = true;
-            submitButton.disabled = true;
-            submitButton.textContent = 'Sending enquiry...';
-        });
-
-        responseFrame.addEventListener('load', () => {
-            if (!submissionInProgress) return;
-            window.location.assign('/thank-you.html');
-        });
-    })();
-</script>
+<footer class="site-footer"><div class="wrap footer-row"><div><strong>SABI</strong><p>Practical help. A curious mind.<br>Room to be human.</p></div><nav aria-label="Footer navigation"><a href="/career/">Career support</a><a href="/admin-systems/">Admin &amp; systems</a><a href="/writing/">Writing &amp; clarity</a><a href="/privacy/">Privacy information (review draft)</a></nav><p class="copyright">© 2026 SABI<br>Built with care in Newcastle upon Tyne.</p></div></footer>
 </body></html>

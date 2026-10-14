@@ -1,0 +1,52 @@
+name: Website checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check local links, HTML basics and JavaScript syntax
+        run: python3 scripts/check_site.py
+      - name: Test enquiry acknowledgement and receiver
+        run: node --test tests/enquiry.test.cjs
+
+  browser-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/sabi-browser" --no-save --ignore-scripts playwright@1.62.1
+          node "$RUNNER_TEMP/sabi-browser/node_modules/playwright/cli.js" install --with-deps chromium
+      - name: Test local journeys with mocked submissions
+        env:
+          NODE_PATH: ${{ runner.temp }}/sabi-browser/node_modules
+          EVIDENCE_DIR: ${{ runner.temp }}/browser-evidence
+        run: node scripts/browser-checks.cjs
+      - name: Keep browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-browser-evidence
+          path: ${{ runner.temp }}/browser-evidence
+          if-no-files-found: ignore
