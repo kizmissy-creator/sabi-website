@@ -15,4 +15,4 @@ Confirmed code findings:
 
 First delivery target: public launch service journeys and reliable enquiry feedback, under the acceptance criteria in `website-build-workflow.md`. Detailed intake, checkout and production activation are later work.
 
-Verification: offline checks passed for 2 HTML pages and 4 scripts. A temporary missing-page link and invalid inline script were both rejected by the checker, then removed. GitHub Actions execution and Netlify preview must be checked after PR creation. Drive writeback pending.
+Verification: offline checks passed for 2 HTML pages and 4 scripts. A temporary missing-page link and invalid inline script were both rejected by the checker, then removed. GitHub Actions run 38630885310 passed for implementation commit 29a123310d839cda4c1f6135903e62c391ac03c6. Netlify reported preview #4 ready for that commit. The dated entry in the Drive Website Master Plan was appended and verified by readback. Draft PR: https://github.com/kizmissy-creator/sabi-website/pull/4. Preview: https://deploy-preview-4--celadon-melomakarona-a77f9d.netlify.app. This log-only follow-up does not change site behaviour.
