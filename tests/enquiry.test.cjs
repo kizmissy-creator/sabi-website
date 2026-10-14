@@ -31,20 +31,28 @@ test('rejection and uncertain failures never become accepted',()=>{
 test('preview cannot submit',()=>{
  let submitted=false;const c=createController({enabled:false,uuid:()=>A,onState:()=>{},submit:()=>submitted=true});assert.equal(c.start(),false);assert.equal(submitted,false);
 });
-function receiver({failWrite=false}={}) {
+function receiver({failWrite=false,testMode=false,testName="SABI RECEIVER TEST - fixture"}={}) {
  const rows=[],calls={rate:0},cache={};
- const sheet={getLastRow:()=>rows.length,appendRow:row=>{if(failWrite&&rows.length)throw Error('write unavailable');rows.push(row)},setFrozenRows:()=>{},getRange:()=>({createTextFinder:id=>({matchEntireCell:()=>({findNext:()=>rows.find(r=>r[1]===id)})})})};
- const ctx={console:{error:()=>{}},Date,PropertiesService:{getScriptProperties:()=>({getProperty:()=> 'https://sabi.example'})},LockService:{getScriptLock:()=>({waitLock:()=>{},releaseLock:()=>{}})},SpreadsheetApp:{getActiveSpreadsheet:()=>({getSheetByName:()=>sheet})},Utilities:{computeDigest:()=>[1],DigestAlgorithm:{SHA_256:1},base64EncodeWebSafe:()=> 'hash'},CacheService:{getScriptCache:()=>({get:k=>cache[k],put:(k,v)=>{calls.rate++;cache[k]=v}})},HtmlService:{XFrameOptionsMode:{ALLOWALL:1},createHtmlOutput:html=>({html,setXFrameOptionsMode(){return this}})}};
+ const sheet={getLastRow:()=>rows.length,appendRow:row=>{if(failWrite&&rows.length)throw Error('write unavailable');rows.push(row)},setFrozenRows:()=>{},getRange:(row,col)=>({getValue:()=>rows[0]?.[7]||'',setValue:value=>{rows[0][7]=value},createTextFinder:id=>({matchEntireCell:()=>({findNext:()=>rows.find(r=>r[1]===id)})})})};
+ const ctx={console:{error:()=>{}},Date,PropertiesService:{getScriptProperties:()=>({getProperty:key=>key==='CONTACT_PRIVACY_NOTICE_VERSION'?'enquiries-draft-2026-10-14':key==='CONTACT_TEST_MODE'?String(testMode):'https://sabi.example'})},LockService:{getScriptLock:()=>({waitLock:()=>{},releaseLock:()=>{}})},SpreadsheetApp:{getActiveSpreadsheet:()=>({getName:()=>testName,getSheetByName:()=>sheet})},Utilities:{getUuid:()=>require('node:crypto').randomUUID(),computeDigest:()=>[1],DigestAlgorithm:{SHA_256:1},base64EncodeWebSafe:()=> 'hash'},CacheService:{getScriptCache:()=>({get:k=>cache[k],put:(k,v)=>{calls.rate++;cache[k]=v}})},HtmlService:{XFrameOptionsMode:{ALLOWALL:1},createHtmlOutput:html=>({html,getContent(){return html},setXFrameOptionsMode(){return this}})}};
  vm.createContext(ctx);vm.runInContext(fs.readFileSync('google-workspace/contact-form/Code.gs','utf8'),ctx);
- const submit=(extra={})=>ctx.doPost({parameter:{submissionId:A,attemptId:B,parentOrigin:'https://sabi.example',serviceArea:'career',serviceInterest:'Professional CV',name:'Example Client',email:'client@example.test',help:'Brief fictional enquiry',formStartedAt:String(Date.now()-4000),privacyAcknowledged:'yes',...extra}}).html;
- return {submit,rows,calls};
+ const submit=(extra={})=>ctx.doPost({parameter:{submissionId:A,attemptId:B,parentOrigin:'https://sabi.example',serviceArea:'career',serviceInterest:'Professional CV',name:'Example Client',email:'client@example.test',help:'Brief fictional enquiry',formStartedAt:String(Date.now()-4000),privacyNoticeVersion:'enquiries-draft-2026-10-14',...extra}}).html;
+ vm.runInContext(fs.readFileSync('google-workspace/contact-form/ReceiverSmokeTest.gs','utf8'),ctx);
+ return {submit,rows,calls,runSmoke:()=>ctx.runContactReceiverSmokeTest()};
 }
 test('receiver stores once and acknowledges duplicate without rate-limit charge',()=>{
- const {submit,rows,calls}=receiver();assert.match(submit(),/"result":"accepted"/);assert.match(submit({attemptId:C}),/"result":"accepted"/);assert.equal(rows.length,2);assert.equal(calls.rate,1);assert.match(rows[1][5],/Professional CV/);
+ const {submit,rows,calls}=receiver();assert.match(submit(),/"result":"accepted"/);assert.match(submit({attemptId:C}),/"result":"accepted"/);assert.equal(rows.length,2);assert.equal(calls.rate,1);assert.match(rows[1][5],/Professional CV/);assert.equal(rows[1][7],'enquiries-draft-2026-10-14');
 });
 test('receiver rejects invalid input, honeypot and unapproved origins without saving',()=>{
- for (const extra of [{email:'bad'},{company:'bot'},{serviceArea:'advocacy'},{parentOrigin:'https://evil.example'}]) {const {submit,rows}=receiver();assert.doesNotMatch(submit(extra),/"result":"accepted"/);assert.equal(rows.length,0);}
+ for (const extra of [{email:'bad'},{privacyNoticeVersion:''},{privacyNoticeVersion:'unknown-version'},{company:'bot'},{serviceArea:'advocacy'},{parentOrigin:'https://evil.example'}]) {const {submit,rows}=receiver();assert.doesNotMatch(submit(extra),/"result":"accepted"/);assert.equal(rows.length,0);}
 });
 test('storage failure is unconfirmed and response contains no client answers',()=>{
  const {submit}=receiver({failWrite:true});const html=submit();assert.match(html,/"result":"unconfirmed"/);assert.doesNotMatch(html,/Example Client|client@example|Brief fictional/);
+});
+
+test('isolated receiver runner completes checks and leaves only one fictional record',()=>{
+ const {runSmoke,rows}=receiver({testMode:true});const result=runSmoke();assert.equal(result.result,'passed');assert.equal(result.checks,8);assert.equal(rows.length,2);
+});
+test('receiver runner refuses ordinary workbooks or missing explicit test mode',()=>{
+ for(const options of [{testMode:false},{testMode:true,testName:'Actual enquiries'}]){const {runSmoke,rows}=receiver(options);assert.throws(runSmoke,/isolated/);assert.equal(rows.length,0);}
 });

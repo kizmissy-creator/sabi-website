@@ -24,7 +24,7 @@ const server = http.createServer((req,res)=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  for(const width of [390,1280]) {
  await page.setViewportSize({width,height:850});
- for(const route of ['/career/','/admin-systems/','/writing/','/writing/clarity-edit/','/writing/case-studies/','/writing/reports/','/writing/articles/']) {
+ for(const route of ['/career/','/admin-systems/','/writing/','/writing/clarity-edit/','/writing/case-studies/','/writing/reports/','/writing/articles/','/privacy/']) {
  await page.goto(base+route);assert.equal(await page.locator('h1').count(),1);
  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'overflow '+route+' at '+width);
  await page.keyboard.press('Tab');assert.equal(await page.locator(':focus').textContent(),'Skip to main content');
@@ -40,15 +40,15 @@ const server = http.createServer((req,res)=>{
  let result='accepted', requests=0;
  await context.route('https://script.google.com/macros/s/fixture/exec',async route=>{
  requests++;const p=new URLSearchParams(route.request().postData());
- assert.equal(p.get('name'),'Example Client');assert.equal(p.get('help'),'Brief fictional enquiry');
+ assert.equal(p.get('privacyNoticeVersion'),'enquiries-draft-2026-10-14');assert.equal(p.get('name'),'Example Client');assert.equal(p.get('help'),'Brief fictional enquiry');
  const data={type:'sabi-enquiry-result',version:1,submissionId:p.get('submissionId'),attemptId:p.get('attemptId'),result};
  await route.fulfill({contentType:'text/html',body:'<script>window.top.postMessage('+JSON.stringify(data)+','+JSON.stringify(base)+');</script>'});
  });
- async function fill(){await page.goto(base+'/');await page.locator('#name').fill('Example Client');await page.locator('#email').fill('client@example.test');await page.locator('#help').fill('Brief fictional enquiry');await page.locator('[name=privacyAcknowledged]').check();}
+ async function fill(){await page.goto(base+'/');await page.locator('#name').fill('Example Client');await page.locator('#email').fill('client@example.test');await page.locator('#help').fill('Brief fictional enquiry');assert.equal(await page.locator('[name=privacyNoticeVersion]').inputValue(),'enquiries-draft-2026-10-14');assert.equal(await page.locator('[name=privacyAcknowledged]').count(),0);}
  await fill();await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('has been received'));assert.equal(requests,1);
  result='rejected';await fill();await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('not accepted'));assert.equal(await page.locator('#name').isDisabled(),false);assert.equal(await page.locator('button[type=submit]').isDisabled(),false);
  result='unconfirmed';await fill();await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('could not confirm'));assert.equal(await page.locator('#name').isDisabled(),true);const id=await page.locator('#submission-id').inputValue();result='accepted';await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('has been received'));assert.equal(await page.locator('#submission-id').inputValue(),id);
  assert.deepEqual(errors,[]);
- console.log('Browser checks passed: seven service pages at two widths, keyboard skip links, service routing, preview gate, accepted/rejected/unconfirmed acknowledgements and retry. All submissions mocked.');
+ console.log('Browser checks passed: eight service/privacy pages at two widths, keyboard skip links, service routing, preview gate, accepted/rejected/unconfirmed acknowledgements and retry. All submissions mocked.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>server.close());

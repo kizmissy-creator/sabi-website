@@ -59,3 +59,9 @@ This branch changes both the website and receiver. Do not enable the frontend ag
 7. Unconfirmed retries preserve the submission ID and frozen answers; each attempt gets a new acknowledgement ID. A previously saved reference is acknowledged without adding another row or consuming another rate-limit allowance.
 
 Automated Node tests use fictional in-memory spreadsheet services, never Google APIs: `node --test tests/enquiry.test.cjs`.
+
+## Notice-version update
+
+The form now provides privacy information rather than requiring agreement to it. It sends `privacyNoticeVersion`; the old `privacyAcknowledged` checkbox is removed. The receiver requires an exact non-empty match to the `CONTACT_PRIVACY_NOTICE_VERSION` script property. It records the value in column H, `privacy_notice_version`. Inspect the existing Sheet schema before deployment; a conflicting column-H header blocks writes.
+
+`configureContactReceiver` intentionally leaves the notice version empty. The draft version `enquiries-draft-2026-10-14` is for isolated testing only. A production version must be chosen after the effective notice is reviewed. See `docs/enquiry-launch-readiness.md` and the isolated `ReceiverSmokeTest.gs` runner. Do not run that test against an actual client workbook.

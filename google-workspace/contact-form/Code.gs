@@ -13,7 +13,8 @@ function configureContactReceiver() {
   if (!spreadsheet) throw new Error('Open this script from its dedicated contact-form spreadsheet.');
 
   PropertiesService.getScriptProperties().setProperties({
-    CONTACT_ALLOWED_ORIGINS: 'https://celadon-melomakarona-a77f9d.netlify.app'
+    CONTACT_ALLOWED_ORIGINS: 'https://celadon-melomakarona-a77f9d.netlify.app',
+    CONTACT_PRIVACY_NOTICE_VERSION: '' // Set only after reviewing the applicable notice.
   });
 
   ensureContactSheet_(spreadsheet);
@@ -67,7 +68,7 @@ function normaliseContactSubmission_(e) {
     email: cleanText_(input.email, 254).toLowerCase(),
     help: cleanText_(input.help, 3000),
     preferredContact: cleanText_(input.preferred_contact || input.preferredContact, 40),
-    privacyAcknowledged: input.privacyAcknowledged === true || input.privacyAcknowledged === 'yes' || input.privacyAcknowledged === 'on'
+    privacyNoticeVersion: cleanText_(input.privacyNoticeVersion, 100)
   };
 }
 
@@ -80,7 +81,8 @@ function validateContactSubmission_(submission) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(submission.email)) throw new Error('Valid email is required.');
   if (!submission.help) throw new Error('Message is required.');
   if (CONTACT_CONFIG.allowedContactMethods.indexOf(submission.preferredContact) === -1) throw new Error('Invalid contact preference.');
-  if (!submission.privacyAcknowledged) throw new Error('Privacy acknowledgement is required.');
+  const noticeVersion = PropertiesService.getScriptProperties().getProperty('CONTACT_PRIVACY_NOTICE_VERSION');
+  if (!noticeVersion || submission.privacyNoticeVersion !== noticeVersion) throw new Error('Privacy notice version is not configured.');
 
   const startedAt = Number(submission.formStartedAt);
   const elapsed = Date.now() - startedAt;
@@ -104,7 +106,8 @@ function saveContactSubmission_(submission) {
     safeContactCell_(submission.email),
     safeContactCell_(submission.preferredContact),
     safeContactCell_('[' + submission.serviceArea + (submission.serviceInterest ? ': ' + submission.serviceInterest : '') + '] ' + submission.help),
-    'New'
+    'New',
+    safeContactCell_(submission.privacyNoticeVersion)
   ]);
 }
 
@@ -113,9 +116,12 @@ function ensureContactSheet_(spreadsheet) {
   if (!sheet) sheet = spreadsheet.insertSheet(CONTACT_CONFIG.sheetName);
 
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['received_at', 'submission_id', 'name', 'email', 'preferred_contact', 'message', 'status']);
+    sheet.appendRow(['received_at', 'submission_id', 'name', 'email', 'preferred_contact', 'message', 'status', 'privacy_notice_version']);
     sheet.setFrozenRows(1);
   }
+  const versionHeader = sheet.getRange(1, 8).getValue();
+  if (versionHeader && versionHeader !== 'privacy_notice_version') throw new Error('Unexpected enquiry schema.');
+  if (!versionHeader) sheet.getRange(1, 8).setValue('privacy_notice_version');
   return sheet;
 }
 
