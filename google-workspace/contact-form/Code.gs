@@ -13,7 +13,7 @@ function configureContactReceiver() {
   if (!spreadsheet) throw new Error('Open this script from its dedicated contact-form spreadsheet.');
 
   PropertiesService.getScriptProperties().setProperties({
-    CONTACT_SUCCESS_URL: 'https://celadon-melomakarona-a77f9d.netlify.app/thank-you.html'
+    CONTACT_ALLOWED_ORIGINS: 'https://celadon-melomakarona-a77f9d.netlify.app'
   });
 
   ensureContactSheet_(spreadsheet);
@@ -21,28 +21,27 @@ function configureContactReceiver() {
 }
 
 function doPost(e) {
+  let submission = null;
+  let writing = false;
   try {
     const rawLength = e && e.postData && e.postData.contents ? e.postData.contents.length : 0;
     if (rawLength > CONTACT_CONFIG.maxBodyLength) throw new Error('Submission too large.');
-
-    const submission = normaliseContactSubmission_(e);
+    submission = normaliseContactSubmission_(e);
     validateContactSubmission_(submission);
-
-    if (submission.company) return contactSuccessResponse_();
-
+    if (submission.company) throw new Error('Submission rejected.');
     const lock = LockService.getScriptLock();
     lock.waitLock(15000);
     try {
-      enforceContactRateLimit_(submission.email);
+      writing = true;
       saveContactSubmission_(submission);
     } finally {
       lock.releaseLock();
     }
-
-    return contactSuccessResponse_();
+    return contactResultResponse_(submission, 'accepted');
   } catch (error) {
-    console.error('Contact submission rejected: ' + error.message);
-    return contactErrorResponse_();
+    // No raw exception text or submitted information in application logs.
+    console.error('Contact submission not confirmed.');
+    return contactResultResponse_(submission, writing ? 'unconfirmed' : 'rejected');
   }
 }
 
@@ -58,6 +57,10 @@ function normaliseContactSubmission_(e) {
 
   return {
     submissionId: cleanText_(input.submissionId, 80),
+    attemptId: cleanText_(input.attemptId, 80),
+    parentOrigin: cleanText_(input.parentOrigin, 300),
+    serviceArea: cleanText_(input.serviceArea, 20),
+    serviceInterest: cleanText_(input.serviceInterest, 100),
     formStartedAt: cleanText_(input.formStartedAt, 20),
     company: cleanText_(input.company, 200),
     name: cleanText_(input.name, 120),
@@ -70,6 +73,9 @@ function normaliseContactSubmission_(e) {
 
 function validateContactSubmission_(submission) {
   if (!/^[a-f0-9-]{36}$/i.test(submission.submissionId)) throw new Error('Invalid submission identifier.');
+  if (!/^[a-f0-9-]{36}$/i.test(submission.attemptId)) throw new Error('Invalid attempt identifier.');
+  if (!isAllowedContactOrigin_(submission.parentOrigin)) throw new Error('Origin is not approved.');
+  if (['unsure', 'career', 'admin', 'writing'].indexOf(submission.serviceArea) === -1) throw new Error('Invalid service area.');
   if (!submission.name) throw new Error('Name is required.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(submission.email)) throw new Error('Valid email is required.');
   if (!submission.help) throw new Error('Message is required.');
@@ -90,13 +96,14 @@ function saveContactSubmission_(submission) {
   const existing = sheet.getRange('B:B').createTextFinder(submission.submissionId).matchEntireCell(true).findNext();
   if (existing) return;
 
+  enforceContactRateLimit_(submission.email);
   sheet.appendRow([
     new Date(),
     safeContactCell_(submission.submissionId),
     safeContactCell_(submission.name),
     safeContactCell_(submission.email),
     safeContactCell_(submission.preferredContact),
-    safeContactCell_(submission.help),
+    safeContactCell_('[' + submission.serviceArea + (submission.serviceInterest ? ': ' + submission.serviceInterest : '') + '] ' + submission.help),
     'New'
   ]);
 }
@@ -130,12 +137,27 @@ function safeContactCell_(value) {
   return /^[=+\-@]/.test(text) ? "'" + text : text;
 }
 
-function contactSuccessResponse_() {
-  const successUrl = PropertiesService.getScriptProperties().getProperty('CONTACT_SUCCESS_URL');
-  const safeUrl = JSON.stringify(successUrl || 'https://celadon-melomakarona-a77f9d.netlify.app/thank-you.html').replace(/</g, '\\u003c');
-  return HtmlService.createHtmlOutput('<!doctype html><meta charset="utf-8"><base target="_top"><title>Thank you</title><script>window.top.location.replace(' + safeUrl + ');</script><p>Your enquiry has been received. <a href=' + safeUrl + '>Continue to SABI</a>.</p>');
+function isAllowedContactOrigin_(origin) {
+  if (!/^https:\/\/[a-z0-9.-]+(?::[0-9]+)?$/i.test(origin || '')) return false;
+  const configured = PropertiesService.getScriptProperties().getProperty('CONTACT_ALLOWED_ORIGINS') || '';
+  return configured.split(',').map(value => value.trim()).indexOf(origin) !== -1;
 }
 
-function contactErrorResponse_() {
-  return HtmlService.createHtmlOutput('<!doctype html><meta charset="utf-8"><title>Unable to send</title><p>Your enquiry could not be sent. Please return to the form and try again.</p>');
+function contactResultResponse_(submission, result) {
+  // Only a configured exact parent origin may receive the acknowledgement.
+  // This allowlist is not caller authentication or a substitute for anti-spam.
+  if (!submission || !isAllowedContactOrigin_(submission.parentOrigin)) {
+    return HtmlService.createHtmlOutput('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Unable to confirm</title></head><body><p>Your enquiry could not be confirmed. Return to the form and try again.</p></body></html>');
+  }
+  const payload = JSON.stringify({
+    type: 'sabi-enquiry-result', version: 1,
+    submissionId: submission.submissionId, attemptId: submission.attemptId,
+    result: result
+  }).replace(/</g, '\\u003c');
+  const target = JSON.stringify(submission.parentOrigin).replace(/</g, '\\u003c');
+  const text = result === 'accepted' ? 'Your enquiry has been received.' : 'Your enquiry could not be confirmed. Return to the form and try again.';
+  // A small, non-interactive response only. Apps Script nests this in its
+  // sandbox. No top-level redirect and no client answers are returned.
+  return HtmlService.createHtmlOutput('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Enquiry response</title></head><body><p>' + text + '</p><script>window.top.postMessage(' + payload + ',' + target + ');</script></body></html>')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
