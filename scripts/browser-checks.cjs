@@ -37,11 +37,17 @@ const server = http.createServer((req,res)=>{
      await toggle.click();await nav.getByRole('link',{name:'Services',exact:true}).click();
      assert.equal(await nav.isVisible(),false);assert.equal(new URL(page.url()).hash,'#services');
    }else{assert.equal(await page.locator('#main-navigation').isVisible(),true);}
-   await page.locator('summary').first().click();assert.equal(await page.locator('details').first().getAttribute('open'),'');
-   await page.locator('summary').first().click();
+   await page.locator('.questions summary').first().click();assert.equal(await page.locator('details').first().getAttribute('open'),'');
+   await page.locator('.questions summary').first().click();
    for(const href of ['/career/','/admin-systems/','/writing/']){
      await page.locator('.choice-link[href="'+href+'"]').click();assert.equal(new URL(page.url()).pathname,href);await page.goBack();
    }
+   const disclosure=page.locator('#enquiry-preview');
+   assert.equal(await disclosure.getAttribute('open'),null);
+   assert.equal(await page.locator('#sabi-enquiry').isVisible(),false);
+   await disclosure.locator('summary').click();assert.equal(await page.locator('#sabi-enquiry').isVisible(),true);
+   assert.equal(await page.locator('button[type=submit]').isDisabled(),true);
+   await disclosure.locator('summary').click();
    await page.evaluate(()=>{document.activeElement.blur();window.scrollTo(0,0);});
    if(process.env.EVIDENCE_DIR){fs.mkdirSync(process.env.EVIDENCE_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.EVIDENCE_DIR,'homepage-'+width+'.png'),fullPage:true});}
  }
@@ -69,6 +75,8 @@ const server = http.createServer((req,res)=>{
  }
  assert.deepEqual(externalRequests,[],'public pages must load entirely local assets');
  await page.goto(base+'/?service=writing-reports#contact-form');
+ assert.equal(await page.locator('#enquiry-preview').getAttribute('open'),'');
+ assert.equal(await page.locator('#sabi-enquiry').isVisible(),true);
  assert.equal(await page.locator('#service-area').inputValue(),'writing');assert.equal(await page.locator('#service-interest').inputValue(),'Reports & Briefings');
  assert.equal(await page.locator('button[type=submit]').isDisabled(),true);
  // Enable only the served in-memory HTML copy, never the tracked preview.
@@ -86,6 +94,6 @@ const server = http.createServer((req,res)=>{
  result='rejected';await fill();await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('not accepted'));assert.equal(await page.locator('#name').isDisabled(),false);assert.equal(await page.locator('button[type=submit]').isDisabled(),false);
  result='unconfirmed';await fill();await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('could not confirm'));assert.equal(await page.locator('#name').isDisabled(),true);const id=await page.locator('#submission-id').inputValue();result='accepted';await page.locator('button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#enquiry-status').textContent.includes('has been received'));assert.equal(await page.locator('#submission-id').inputValue(),id);
  assert.deepEqual(errors,[]);
- console.log('Browser checks passed: homepage at four widths, menu/FAQ/service links, larger-text reflow, no-JS navigation, local-only assets, eight service/privacy pages at two widths, keyboard skip links, service routing, preview gate, accepted/rejected/unconfirmed acknowledgements and retry. All submissions mocked.');
+ console.log('Browser checks passed: homepage at four widths, menu/FAQ/service links, collapsed preview form and service-specific expansion, larger-text reflow, no-JS navigation, local-only assets, eight service/privacy pages at two widths, keyboard skip links, service routing, preview gate, accepted/rejected/unconfirmed acknowledgements and retry. All submissions mocked.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(()=>server.close());

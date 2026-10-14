@@ -59,6 +59,8 @@
   const interest = root.document.getElementById('service-interest');
   const selected = root.document.getElementById('selected-service');
   if (choice) { area.value = choice[0]; interest.value = choice[1]; selected.textContent = 'Your starting point: ' + choice[1]; }
+  const preview = root.document.getElementById('enquiry-preview');
+  if (preview && (choice || enabled)) preview.open = true;
   area.addEventListener('change', () => { interest.value = ''; selected.textContent = ''; });
   if (!enabled) {
     form.addEventListener('submit', event => { event.preventDefault(); });
