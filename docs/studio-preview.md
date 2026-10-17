@@ -1,14 +1,17 @@
 # SABI Studio storefront preview
 
-Route: `/studio/`. Static HTML/CSS/JS, served by the existing Netlify publish root. No change to public home or client routes. Branch: `feat/sabi-studio-storefront`.
+Route: `/studio/`. Static HTML/CSS/JS served by the existing Netlify publish root. Branch: `feat/sabi-studio-storefront`, draft PR #3. Public home and client routes are unchanged.
 
-Reference: https://www.canva.com/design/DAHVOVoqGQw/-n2-H3bBFMPHPO19bGQMVg/edit
+## Current direction
 
-Uses the revised four-product brief from “Brand Design Expertise”. The Canva editor still displayed the older six-product layout on 4 October 2026. The two hero assets were exported from that design; the model is labelled as a styling reference, not a verified launch product photograph. Header and footer use the approved transparent PNG from SABI Studio Design WEBLOGO (Canva DAHXEqnsSVA). CSS frames the centred horizontal mark from the original square export. Product cards use explicit photo placeholders.
+The 17 October rebuild replaces the generic boundaries-led storefront with a founder-led introduction, real product imagery, the mask crop, and a warmer storybook influence drawn from Sam's Scenic Route brief. See `studio-direction.md` for source context and superseded decisions.
 
-Before selling: replace placeholders with approved Drive product photos, verify Printful garment IDs and variants, prices and shipping; add product measurement charts and feel notes; finalise delivery, returns, privacy and terms; integrate server-validated Stripe checkout and confirmed Printful fulfilment. No cart, payment, tracking or order submission exists in this preview. Page is noindex.
+Header/footer use the small original cream-and-teal clothing mark, with readable SABI Studio text. Products: I Wear My Mask All Year Round washed crop, Social Battery tee, Ghost Mode hoodie, embroidered ghost beanie, and Social Battery tote. Native dialogs explain each product's status. Founder portrait already exists on the public site; the worn hoodie sample comes from the product-review material.
 
-Deploy as a GitHub branch/PR Netlify Deploy Preview, not a production merge. Existing netlify.toml needs no change for this static route.
+The crop image is an earlier sample mockup, not a photograph of the final Inkthreadable blank. Tee, beanie and tote are explicitly marked design mockups. The Scenic Route drawing is a small website illustration of the idea, not production artwork.
 
+## Preview boundaries
 
-17 October update: see studio-direction.md for current user direction, crop addition and experimental type-led header. The older four-product brief and logo treatment above are superseded. Supplier setup now includes the Inkthreadable crop; checkout remains closed.
+Orders are closed and the page is noindex. No cart, checkout, payment, analytics or order submission is added. Prices, sizes, supplier variants, fabric/feel information, production times, delivery and returns must be verified before opening. The washed crop is planned with Inkthreadable, front artwork only and no back logo; the Ghost Mode range is planned through Printful.
+
+Publish through the existing GitHub PR Netlify Deploy Preview. Do not merge to production without instruction.
