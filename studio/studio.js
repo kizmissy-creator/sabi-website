@@ -4,6 +4,7 @@ const nav = document.querySelector('#nav');
 menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; menu.setAttribute('aria-expanded', String(open)); nav.classList.toggle('open', open); });
 nav.addEventListener('click', event => { if (event.target.closest('a')) { menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('open'); } });
 const products = {
+  crop: ['I Wear My Mask All Year Round — Washed Crop', 'The five-mask artwork on a washed crop, with the print on the front and no back logo. We are preparing the Inkthreadable version; final measurements, colours, price and delivery will be confirmed before orders open.'],
   tee: ['Social Battery 1% T-Shirt', 'The Social Battery graphic in the collection’s everyday T-shirt. Final garment, fabric and fit information will be added after production verification.'],
   tote: ['Social Battery Eco Tote', 'The Social Battery character on a tote for everyday essentials. Dimensions and material details will be confirmed before launch.'],
   beanie: ['Ghost Embroidered Beanie', 'A small embroidered ghost detail brings the character into the collection’s accessory. Yarn, sizing and care details will be confirmed before launch.'],

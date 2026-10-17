@@ -9,3 +9,6 @@ Uses the revised four-product brief from “Brand Design Expertise”. The Canva
 Before selling: replace placeholders with approved Drive product photos, verify Printful garment IDs and variants, prices and shipping; add product measurement charts and feel notes; finalise delivery, returns, privacy and terms; integrate server-validated Stripe checkout and confirmed Printful fulfilment. No cart, payment, tracking or order submission exists in this preview. Page is noindex.
 
 Deploy as a GitHub branch/PR Netlify Deploy Preview, not a production merge. Existing netlify.toml needs no change for this static route.
+
+
+17 October update: see studio-direction.md for current user direction, crop addition and experimental type-led header. The older four-product brief and logo treatment above are superseded. Supplier setup now includes the Inkthreadable crop; checkout remains closed.
