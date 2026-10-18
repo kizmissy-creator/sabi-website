@@ -33,3 +33,13 @@ Asset provenance (original files copied without bitmap edits):
 - mask-a4-print.jpg from sabi-mask-dstudio-a4-landscape.jpg. dStudio remains the selected supplier; the Prodigi A4 mockup did not change that decision.
 
 Ghost Mode keeps its four existing products. Founder story, palette, small clothing mark and practical information remain. Supplier FAQ now covers the mask clothing/tote, both print suppliers, and Ghost Mode. No checkout or prices are added; all pieces remain previews pending sample checks.
+
+## 18 October 2026 — product image accuracy and consistency
+
+The user rejected the mixed editor screenshots and AI model previews: editing guides were visible, the oversized tee's hem was cut off, and the fitted tee print appeared too large. They explicitly approved uploading the existing transparent mask artwork to Inkthreadable to prepare product previews, without ordering.
+
+Five mask clothing/tote cards now use clean supplier garment layers with the original artwork. The native SVG compositions were read from Inkthreadable's visible editor after choosing the correct colour and setting the saved print width: crop 253mm, oversized 280mm, fitted 240mm, hoodie 300mm, tote 260mm. Vertical placement was recreated visually against the saved draft screenshots; these remain illustrative mockups pending physical sample checks. Supplier base image pixels and original artwork are unchanged. Editor selection handles and the separate guide/clip overlay are omitted. An inline SVG preserves the supplier transforms and avoids a new generative redraw; CSS places each on the same warm paper background.
+
+Supplier garment layers: mask-crop-supplier-0.png (AS Colour 4089, Faded Black), mask-oversized-supplier-0.png (AS Colour 5069, Black), mask-fitted-supplier-0.png (Stella Expresser 2.0, Black), mask-hoodie-supplier-0.png (AWDis Vision JH111, Deep Black), mask-tote-supplier-0.png (EarthAware W821, Black). Each uses mask-all-year-artwork.png. The hero now matches the current crop rather than the earlier Printful garment. Product cards distinguish cropped versus full length and name the actual garment. Obsolete descriptions of guides and AI scale are removed. Mini/A4 print art and Ghost Mode assets retain their established provenance.
+
+The supplier preview/download buttons did not return an export, so only the visible native composition and its public garment image layers were preserved locally. Saved account drafts were not overwritten, no basket was changed, and no order was placed.
