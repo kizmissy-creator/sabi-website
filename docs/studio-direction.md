@@ -17,3 +17,19 @@ The 17 October rebuild uses cream, rust, olive and forest green, paper-like imag
 Founder copy is an adaptation of the existing public homepage story (ideas, ambition, limited energy, systems that do not fit) and the user's current instructions (neurodivergent founder, recognition, belonging, whimsy). It is new draft website copy, not a verbatim historical quotation. Private client details are not used.
 
 The crop uses an earlier washed-black mockup, explicitly labelled, while the Inkthreadable version is prepared. The hoodie photo is the actual worn camouflage sample from Product review. The tee, beanie and tote are design mockups from the user's saved exports. All ordering remains closed. No unconfirmed price or sensory benefit is asserted.
+
+## 18 October 2026 — full mask collection
+
+The user explicitly requested the whole mask collection alongside Ghost Mode, using the product-development chat's artwork and mockups, preserving the warm SABI feel, with prices left off.
+
+Source chat: 01a14bae-73fa-7b00-9e6f-0f6560c14998. Seven developed mask products: washed crop; AS Colour 5069 oversized black tee; black Stella Expresser 2.0 fitted tee; Deep Black AWDis Vision hoodie; EarthAware W821 heavyweight black tote; Prodigi 6x4 matte mini print with envelope; dStudio A4 landscape print on Fotospeed Matt Ultra 240gsm, unframed. The baby tee remains an idea, not a saved product; stickers were dropped. No additional products or proposed selling prices are promoted to approved status.
+
+The hoodie uses the explicitly selected 30 x 17.4cm front placement. Other saved prints: oversized tee 28 x 16.2cm, fitted tee 24 x 13.9cm, tote 26 x 15.1cm. Clothing and tote backs are plain. These describe saved drafts, not measured physical samples.
+
+Asset provenance (original files copied without bitmap edits):
+- mask-crop-draft.png from mask-crop-saved-draft.png; mask-oversized-draft.png from mask-oversized-tee-draft.png; mask-tote-draft.png from mask-heavyweight-tote-draft.png in the POD workspace. Inline SVG viewports frame only the garment/detail region, excluding supplier controls and costs. Dotted printing guides remain, and the views are labelled design drafts/details.
+- mask-fitted-model.png from generated image exec-7114cbdc-c70f-40de-ba41-1ef0d0f053ca; mask-hoodie-model.png from the corrected exec-a246652c-0fd1-4c6a-8673-b07342f1bde5. Both are existing AI model previews from the source chat and labelled accordingly; exact garment fit and centimetre scale are not promised.
+- mask-mini-print.png from sabi-mask-prodigi-6x4-preview.png; mask-mini-front-back.jpg from sabi-mask-prodigi-6x4-back-refined.jpg. The mini print detail view includes the latest lower, darker back branding.
+- mask-a4-print.jpg from sabi-mask-dstudio-a4-landscape.jpg. dStudio remains the selected supplier; the Prodigi A4 mockup did not change that decision.
+
+Ghost Mode keeps its four existing products. Founder story, palette, small clothing mark and practical information remain. Supplier FAQ now covers the mask clothing/tote, both print suppliers, and Ghost Mode. No checkout or prices are added; all pieces remain previews pending sample checks.

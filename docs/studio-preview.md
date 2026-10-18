@@ -15,3 +15,9 @@ The crop image is an earlier sample mockup, not a photograph of the final Inkthr
 Orders are closed and the page is noindex. No cart, checkout, payment, analytics or order submission is added. Prices, sizes, supplier variants, fabric/feel information, production times, delivery and returns must be verified before opening. The washed crop is planned with Inkthreadable, front artwork only and no back logo; the Ghost Mode range is planned through Printful.
 
 Publish through the existing GitHub PR Netlify Deploy Preview. Do not merge to production without instruction.
+
+## 18 October collection expansion
+
+The catalogue now contains seven mask products and four Ghost Mode products in two linked collection sections. Mask clothing is grouped separately from the tote and art prints. Product dialogs show the relevant image and status-specific description; the mini print also shows its refined reverse design. Existing AI model previews are explicitly labelled. Supplier draft screenshots are framed within inline SVG viewports to exclude controls and costs while preserving the original artwork.
+
+No selling prices are displayed. The fitted tee is included because a draft exists; the uncreated baby tee and abandoned stickers are not included. See studio-direction.md for source assets, selected suppliers and saved print dimensions.
