@@ -25,7 +25,7 @@ async function initialise() {
   }
   function update() {
     if (!state || !product) return;
-    help.textContent = '';
+    help.textContent = state.test ? 'Test mode — this won’t reserve a real sample.' : '';
     if (state.used) {
       add.textContent = state.status === 'cancelled' ? 'Sample request cancelled' : 'Your sample is already requested'; add.disabled = true;
       help.textContent = `Reference ${state.reference}. Contact Sam to make a change.`;
@@ -83,6 +83,11 @@ async function initialise() {
     requestDialog = document.querySelector('#sample-dialog');
     form = requestDialog.querySelector('form'); size = form.elements.size;
     review = requestDialog.querySelector('#sample-review');
+    if (state.test) {
+      const note = document.createElement('p'); note.className = 'sample-terms'; note.textContent = 'Test mode — choose any item. This won’t reserve a real sample or create a supplier order.';
+      requestDialog.querySelector('#sample-title').after(note);
+      requestDialog.querySelector('#sample-success > p:last-of-type').textContent = 'This was a test request only. Your friends’ sample stock is unchanged, and nothing will be ordered.';
+    }
     function close() { if (!submitting) requestDialog.close(); }
     requestDialog.addEventListener('cancel', event => { if (submitting) event.preventDefault(); });
     requestDialog.querySelector('.sample-close').addEventListener('click', close);
@@ -124,7 +129,7 @@ async function initialise() {
     state = { ...state, used: true, reference };
     form.reset(); pending = null; form.hidden = true; review.hidden = true; update();
     const success = requestDialog.querySelector('#sample-success'); success.hidden = false;
-    requestDialog.querySelector('#sample-confirmation').textContent = `Your reference is ${reference}. There is nothing for you to pay.`;
+    requestDialog.querySelector('#sample-confirmation').textContent = `${state.test ? 'Your test reference' : 'Your reference'} is ${reference}. There is nothing for you to pay.`;
     success.focus();
   }
   add.addEventListener('click', async () => {

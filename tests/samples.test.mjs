@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { reserve, validate, authenticate, body, readState, normaliseCode } from '../netlify/lib/samples.mjs';
+import { reserve, validate, authenticate, body, readState, normaliseCode, inventoryKey, isTest } from '../netlify/lib/samples.mjs';
+import { trialCodes } from '../netlify/lib/sample-trials.mjs';
 class MemoryStore {
   records = new Map(); version = 0;
   async getWithMetadata(key) { const value = this.records.get(key); await new Promise(resolve => setImmediate(resolve)); return value ? structuredClone(value) : null; }
@@ -65,4 +66,17 @@ test('personal codes allow spacing and case changes but cannot authenticate as o
   assert.equal(normaliseCode(code), normaliseCode(' SABI ABCDE FGHJK LMNPQ RSTUV '));
   assert.equal(authenticate(code), null); assert.equal(authenticate(code, true), null);
   assert.equal(authenticate('SABI-' + 'A'.repeat(1000)), null);
+});
+test('owner trials have full independent inventory and never consume friends or other trials', async () => {
+  const store = new MemoryStore();
+  const [owner, verification] = Object.values(trialCodes);
+  assert.equal(isTest(owner),true);
+  assert.notEqual(inventoryKey(owner),inventoryKey(verification));
+  assert.notEqual(inventoryKey(owner),inventoryKey('friend'));
+  await reserve(store, inventoryKey(verification), verification, input());
+  assert.equal((await readState(store, inventoryKey(owner))).data.claims.length,0);
+  await reserve(store, inventoryKey(owner), owner, input());
+  assert.equal((await readState(store, inventoryKey('friend'))).data.claims.length,0);
+  await reserve(store, inventoryKey('friend'), 'friend', input());
+  await assert.rejects(reserve(store, inventoryKey(owner), owner, input({product:'mask-oversized'})),error=>error.status===409);
 });

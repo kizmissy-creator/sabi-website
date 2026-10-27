@@ -2,6 +2,7 @@ import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { catalogue } from '../../studio/samples/catalogue.mjs';
 import { inviteHashes, adminHash, testInviteHashes } from './sample-access.mjs';
 import { codeInvites } from './sample-codes.mjs';
+import { trialCodes } from './sample-trials.mjs';
 
 export const hash = value => createHash('sha256').update(value).digest('hex');
 export const normaliseCode = value => value.replace(/[\s-]/g, '').toUpperCase();
@@ -9,14 +10,16 @@ export function authenticate(token, admin = false) {
   if (typeof token !== 'string' || token.length > 128) return null;
   if (!admin) {
     const code = normaliseCode(token);
-    if (/^SABI[A-HJ-NP-Z2-9]{20}$/.test(code)) return codeInvites[hash(code)] || null;
+    if (/^SABI[A-HJ-NP-Z2-9]{20}$/.test(code)) return codeInvites[hash(code)] || trialCodes[hash(code)] || null;
   }
   if (token.length < 32) return null;
   const digest = hash(token);
   if (admin) return timingSafeEqual(Buffer.from(digest), Buffer.from(adminHash)) ? digest : null;
   return [...inviteHashes, ...testInviteHashes].includes(digest) ? digest : null;
 }
-export const isTest = digest => testInviteHashes.includes(digest);
+const isTrial = digest => Object.values(trialCodes).includes(digest);
+export const isTest = digest => testInviteHashes.includes(digest) || isTrial(digest);
+export const inventoryKey = digest => isTrial(digest) ? `trial-${digest}` : isTest(digest) ? 'test-round' : 'friends-round';
 export class RequestError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }

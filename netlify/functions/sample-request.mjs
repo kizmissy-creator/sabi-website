@@ -1,12 +1,12 @@
 import { getStore } from '@netlify/blobs';
-import { authenticate, isTest, readState, reserve, response, body, RequestError } from '../lib/samples.mjs';
+import { authenticate, isTest, inventoryKey, readState, reserve, response, body, RequestError } from '../lib/samples.mjs';
 export default async request => {
   try {
     const input = await body(request);
     const invite = authenticate(input.token);
     if (!invite) throw new RequestError(403, 'That code wasn’t recognised. Please check the personal sample code Sam sent you.');
     const store = getStore({ name: 'sabi-studio-samples-v1', consistency: 'strong' });
-    const key = isTest(invite) ? 'test-round' : 'friends-round';
+    const key = inventoryKey(invite);
     if (input.action === 'availability') {
       const { data } = await readState(store, key);
       const mine = data.claims.find(c => c.invite === invite);
