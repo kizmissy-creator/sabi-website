@@ -4,7 +4,7 @@ export default async request => {
   try {
     const input = await body(request);
     const invite = authenticate(input.token);
-    if (!invite) throw new RequestError(403, 'You’ll need the personal invitation link Sam sent you.');
+    if (!invite) throw new RequestError(403, 'That code wasn’t recognised. Please check the personal sample code Sam sent you.');
     const store = getStore({ name: 'sabi-studio-samples-v1', consistency: 'strong' });
     const key = isTest(invite) ? 'test-round' : 'friends-round';
     if (input.action === 'availability') {

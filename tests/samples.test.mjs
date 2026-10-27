@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { reserve, validate, authenticate, body, readState } from '../netlify/lib/samples.mjs';
+import { reserve, validate, authenticate, body, readState, normaliseCode } from '../netlify/lib/samples.mjs';
 class MemoryStore {
   records = new Map(); version = 0;
   async getWithMetadata(key) { const value = this.records.get(key); await new Promise(resolve => setImmediate(resolve)); return value ? structuredClone(value) : null; }
@@ -50,4 +50,19 @@ test('test reservations do not consume real inventory', async () => {
   const store = new MemoryStore();
   await reserve(store, 'test-round', 'test', input());
   assert.equal((await readState(store, 'friends-round')).data.claims.length, 0);
+});
+test('free checkout ignores client-supplied prices and records zero item and delivery totals', async () => {
+  const store = new MemoryStore();
+  const saved = await reserve(store, 'round', 'alice', input({total: 9900, delivery: 400, currency: 'USD'}));
+  assert.equal(saved.total, 0); assert.equal(saved.delivery, 0); assert.equal(saved.currency, 'GBP');
+  const claim = (await readState(store, 'round')).data.claims[0];
+  assert.equal(claim.total, 0); assert.equal(claim.delivery, 0); assert.equal(claim.currency, 'GBP');
+  const retry = await reserve(store, 'round', 'alice', input());
+  assert.equal(retry.reference, saved.reference); assert.equal(retry.total, 0);
+});
+test('personal codes allow spacing and case changes but cannot authenticate as owner credentials', () => {
+  const code = 'sabi-abcde-fghjk-lmnpq-rstuv';
+  assert.equal(normaliseCode(code), normaliseCode(' SABI ABCDE FGHJK LMNPQ RSTUV '));
+  assert.equal(authenticate(code), null); assert.equal(authenticate(code, true), null);
+  assert.equal(authenticate('SABI-' + 'A'.repeat(1000)), null);
 });

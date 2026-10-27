@@ -4,23 +4,23 @@ try {
   if (token) sessionStorage.setItem('sabi-sample-invite', token);
   else token = sessionStorage.getItem('sabi-sample-invite') || '';
 } catch { /* An invitation still works if browser session storage is disabled. */ }
-if (token) initialise();
+if (token || location.hash === '#samples') initialise();
 
 async function initialise() {
   const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = 'samples/product-samples.css'; document.head.append(style);
   const productDialog = document.querySelector('#product-dialog');
-  const add = document.createElement('button'); add.type = 'button'; add.className = 'button sample-add'; add.textContent = 'Checking sample availability…'; add.disabled = true;
+  const add = document.createElement('button'); add.type = 'button'; add.className = 'button sample-add'; add.textContent = token ? 'Checking sample availability…' : 'Enter your sample code'; add.disabled = !!token;
   productDialog.querySelector('.close-secondary').before(add);
-  let state, product, requestDialog, form, size, submitting = false, opening = false;
+  let state, product, requestDialog, form, size, review, pending, codeDialog, submitting = false, opening = false;
   const help = document.createElement('p'); help.className = 'sample-help'; help.setAttribute('role', 'status'); add.after(help);
-  async function api(action, data = {}) {
+  async function api(action, data = {}, credential = token) {
     let response;
     try {
-      response = await fetch('/.netlify/functions/sample-request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, action, token }), cache: 'no-store', signal: AbortSignal.timeout(20000) });
+      response = await fetch('/.netlify/functions/sample-request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, action, token: credential }), cache: 'no-store', signal: AbortSignal.timeout(20000) });
     } catch { throw new Error('We couldn’t confirm the request. Please try again; your details are still here.'); }
     let value;
     try { value = await response.json(); } catch { throw new Error('Sample requests are temporarily unavailable. Please try again.'); }
-    if (!response.ok) throw new Error(value.error || 'Please try again in a moment.');
+    if (!response.ok) { const error = new Error(value.error || 'Please try again in a moment.'); error.status = response.status; throw error; }
     return value;
   }
   function update() {
@@ -34,8 +34,40 @@ async function initialise() {
     } else { add.textContent = 'Add sample'; add.disabled = false; }
   }
   async function check() {
+    if (!token) return;
     try { state = await api('availability'); update(); }
-    catch (error) { add.disabled = false; add.textContent = 'Check sample availability'; help.textContent = error.message; }
+    catch (error) {
+      if (error.status === 403) { token = ''; state = null; try { sessionStorage.removeItem('sabi-sample-invite'); } catch {} }
+      add.disabled = false; add.textContent = token ? 'Check sample availability' : 'Enter your sample code'; help.textContent = error.message;
+    }
+  }
+  async function enterCode() {
+    if (!codeDialog) {
+      const response = await fetch('samples/code.html');
+      if (!response.ok) throw new Error('The code form couldn’t load. Please try again.');
+      const template = document.createElement('template'); template.innerHTML = await response.text(); document.body.append(template.content);
+      codeDialog = document.querySelector('#sample-code-dialog');
+      codeDialog.querySelector('.sample-close').addEventListener('click', () => codeDialog.close());
+      codeDialog.addEventListener('close', () => { if (product) { productDialog.showModal(); add.focus(); } });
+      codeDialog.querySelector('form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const codeForm = event.currentTarget, button = codeForm.querySelector('button[type="submit"]');
+        if (button.disabled || !codeForm.reportValidity()) return;
+        const candidate = codeForm.elements.code.value.trim();
+        button.disabled = true;
+        const status = codeForm.querySelector('[role="status"]'); status.textContent = 'Checking your code…';
+        try {
+          const result = await api('availability', {}, candidate);
+          if (result.used) { status.textContent = `This code has already been used. Reference ${result.reference}. Contact Sam to change your request.`; return; }
+          token = candidate; state = result;
+          try { sessionStorage.setItem('sabi-sample-invite', token); } catch {}
+          add.textContent = 'Add sample'; add.disabled = false; update(); status.textContent = ''; codeDialog.close();
+        } catch (error) { status.textContent = error.message; }
+        finally { button.disabled = false; }
+      });
+    }
+    if (productDialog.open) productDialog.close();
+    codeDialog.showModal(); codeDialog.querySelector('input').focus();
   }
   document.addEventListener('click', event => {
     const trigger = event.target.closest('[data-product]');
@@ -50,6 +82,7 @@ async function initialise() {
     const template = document.createElement('template'); template.innerHTML = await response.text(); document.body.append(template.content);
     requestDialog = document.querySelector('#sample-dialog');
     form = requestDialog.querySelector('form'); size = form.elements.size;
+    review = requestDialog.querySelector('#sample-review');
     function close() { if (!submitting) requestDialog.close(); }
     requestDialog.addEventListener('cancel', event => { if (submitting) event.preventDefault(); });
     requestDialog.querySelector('.sample-close').addEventListener('click', close);
@@ -61,33 +94,48 @@ async function initialise() {
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (submitting || !form.reportValidity()) return;
+      pending = Object.fromEntries(new FormData(form)); pending.consent = form.elements.consent.checked;
+      review.querySelector('[data-review="size"]').textContent = pending.size;
+      review.querySelector('[data-review="contact"]').textContent = `${pending.name}\n${pending.email}`;
+      review.querySelector('[data-review="address"]').textContent = ['address1','address2','city','region','postcode','country'].map(key => pending[key]).filter(Boolean).join('\n');
+      review.querySelector('[data-review="notes"]').textContent = pending.notes || 'None';
+      review.querySelector('[role="status"]').textContent = '';
+      form.hidden = true; review.hidden = false; review.focus();
+    });
+    review.querySelector('.sample-edit').addEventListener('click', () => {
+      if (submitting) return;
+      review.hidden = true; form.hidden = false; size.focus();
+    });
+    review.querySelector('.sample-confirm').addEventListener('click', async () => {
+      if (submitting || !pending) return;
       submitting = true;
-      const submit = form.querySelector('[type="submit"]'); submit.disabled = true;
-      const status = form.querySelector('#submit-status'); status.textContent = 'Saving your sample request…';
-      const values = Object.fromEntries(new FormData(form)); values.consent = form.elements.consent.checked;
-      try { const saved = await api('reserve', values); showSuccess(saved.reference); }
+      const submit = review.querySelector('.sample-confirm'); submit.disabled = true;
+      review.querySelector('.sample-edit').disabled = true;
+      const status = review.querySelector('[role="status"]'); status.textContent = 'Confirming your free sample…';
+      try { const saved = await api('reserve', pending); showSuccess(saved.reference); }
       catch (error) {
         status.textContent = error.message;
         try { state = await api('availability'); update(); if (state.used && state.status !== 'cancelled') showSuccess(state.reference); }
         catch { /* Keep entered details available for a retry. */ }
-      } finally { submitting = false; submit.disabled = false; }
+      } finally { submitting = false; submit.disabled = false; review.querySelector('.sample-edit').disabled = false; }
     });
   }
   function showSuccess(reference) {
     state = { ...state, used: true, reference };
-    form.reset(); form.hidden = true; update();
+    form.reset(); pending = null; form.hidden = true; review.hidden = true; update();
     const success = requestDialog.querySelector('#sample-success'); success.hidden = false;
     requestDialog.querySelector('#sample-confirmation').textContent = `Your reference is ${reference}. There is nothing for you to pay.`;
     success.focus();
   }
   add.addEventListener('click', async () => {
     if (!product || opening) return;
+    if (!token) { try { await enterCode(); } catch (error) { help.textContent = error.message; } return; }
     if (!state) { await check(); return; }
     if (state.used || state.claimed.includes(product.id)) return;
     opening = true; add.disabled = true;
     try {
       await prepareForm();
-      form.hidden = false; requestDialog.querySelector('#sample-success').hidden = true;
+      form.hidden = false; review.hidden = true; pending = null; requestDialog.querySelector('#sample-success').hidden = true;
       form.elements.product.value = product.id;
       requestDialog.querySelector('#sample-product-name').textContent = `${product.collection === 'Mask' ? 'I Wear My Mask All Year Round' : 'Ghost Mode'} — ${product.name}`;
       const previousSize = size.value;
@@ -101,5 +149,6 @@ async function initialise() {
     } catch (error) { help.textContent = error.message; }
     finally { opening = false; update(); }
   });
-  check();
+  if (token) check();
+  else enterCode().catch(error => { help.textContent = error.message; });
 }

@@ -1,10 +1,17 @@
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { catalogue } from '../../studio/samples/catalogue.mjs';
 import { inviteHashes, adminHash, testInviteHashes } from './sample-access.mjs';
+import { codeInvites } from './sample-codes.mjs';
 
 export const hash = value => createHash('sha256').update(value).digest('hex');
+export const normaliseCode = value => value.replace(/[\s-]/g, '').toUpperCase();
 export function authenticate(token, admin = false) {
-  if (typeof token !== 'string' || token.length < 32 || token.length > 128) return null;
+  if (typeof token !== 'string' || token.length > 128) return null;
+  if (!admin) {
+    const code = normaliseCode(token);
+    if (/^SABI[A-HJ-NP-Z2-9]{20}$/.test(code)) return codeInvites[hash(code)] || null;
+  }
+  if (token.length < 32) return null;
   const digest = hash(token);
   if (admin) return timingSafeEqual(Buffer.from(digest), Buffer.from(adminHash)) ? digest : null;
   return [...inviteHashes, ...testInviteHashes].includes(digest) ? digest : null;
@@ -58,14 +65,14 @@ export async function reserve(store, key, invite, input) {
     const previous = data.claims.find(c => c.invite === invite);
     if (previous) {
       if (previous.status === 'cancelled') throw new RequestError(409, 'This request was cancelled. Please contact Sam if you need help.');
-      if (previous.product === details.product && previous.emailKey === details.emailKey) return { unchanged: true, value: { reference: previous.reference, repeated: true } };
+      if (previous.product === details.product && previous.emailKey === details.emailKey) return { unchanged: true, value: { reference: previous.reference, repeated: true, total: 0, delivery: 0, currency: 'GBP' } };
       throw new RequestError(409, 'This invitation has already been used. There is one sample per person. Contact Sam if you need to change your request.');
     }
     if (data.claims.some(c => c.emailKey === details.emailKey)) throw new RequestError(409, 'There is already a sample request for this email. There is one sample per person.');
     if (data.claims.some(c => c.product === details.product && c.status !== 'cancelled')) throw new RequestError(409, 'Someone has just claimed this item. Please choose another available sample.');
     const reference = `SABI-${randomUUID().slice(0, 8).toUpperCase()}`;
-    data.claims.push({ ...details, invite, reference, status: 'requested', createdAt: new Date().toISOString() });
-    return { value: { reference } };
+    data.claims.push({ ...details, invite, reference, status: 'requested', total: 0, delivery: 0, currency: 'GBP', createdAt: new Date().toISOString() });
+    return { value: { reference, total: 0, delivery: 0, currency: 'GBP' } };
   });
 }
 
