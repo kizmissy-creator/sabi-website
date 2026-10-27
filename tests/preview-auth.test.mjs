@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { credentialDigest, protectPreview } from '../netlify/lib/preview-auth.mjs';
 const credential = { salt: 'test-only-salt', digest: await credentialDigest('sabi:test-password', 'test-only-salt') };
+credential.sessionDigest = await credentialDigest(await credentialDigest('sabi:test-password', `session:${credential.salt}`), credential.salt);
 function context(deployContext = 'deploy-preview') {
   return { deploy: { context: deployContext }, calls: 0, async next() { this.calls++; return new Response('original page', { headers: { 'Content-Type': 'text/html', 'Cache-Control': 'public, max-age=3600' } }); } };
 }
@@ -10,7 +11,7 @@ test('all preview pages, images and direct function URLs require authentication'
   for (const path of ['/', '/studio/', '/studio/assets/clothing-mark.png', '/.netlify/functions/sample-request', '/.netlify/functions/sample-admin']) {
     const ctx = context(); const response = await protectPreview(request(path), ctx, credential);
     assert.equal(response.status, 401); assert.equal(ctx.calls, 0);
-    assert.match(response.headers.get('WWW-Authenticate'), /^Basic /);
+    assert.match(await response.text(), /Preview password/);
     assert.equal(response.headers.get('Cache-Control'), 'private, no-store');
   }
 });
@@ -32,4 +33,21 @@ test('unknown deployment context is protected and spoofed context headers are ig
   const ctx = context(); delete ctx.deploy;
   const req = new Request('https://preview.example/', { headers: { 'x-netlify-context': 'production', 'x-forwarded-host': 'www.sabigroup.co.uk' } });
   assert.equal((await protectPreview(req, ctx, credential)).status, 401);
+});
+test('password form creates a secure session without putting the password in a cookie', async () => {
+  const ctx = context();
+  const req = new Request('https://preview.example/studio/', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Origin:'https://preview.example'},body:'_sabi_preview_login=1&password=test-password'});
+  const response = await protectPreview(req,ctx,credential);
+  assert.equal(response.status,303); assert.equal(ctx.calls,0);
+  const cookie = response.headers.get('Set-Cookie');
+  assert.match(cookie,/HttpOnly; Secure; SameSite=Strict/); assert.ok(!cookie.includes('test-password'));
+  const access = await protectPreview(new Request('https://preview.example/studio/',{headers:{Cookie:cookie.split(';')[0]}}),ctx,credential);
+  assert.equal(access.status,200);
+});
+test('forged cookies and cross-origin login attempts fail', async () => {
+  const ctx = context();
+  const forged = new Request('https://preview.example/',{headers:{Cookie:'__Host-sabi-preview='+ '0'.repeat(64)}});
+  assert.equal((await protectPreview(forged,ctx,credential)).status,401);
+  const crossSite = new Request('https://preview.example/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',Origin:'https://other.example'},body:'_sabi_preview_login=1&password=test-password'});
+  assert.equal((await protectPreview(crossSite,ctx,credential)).status,403);
 });
