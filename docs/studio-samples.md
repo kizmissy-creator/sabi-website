@@ -1,5 +1,7 @@
 # SABI friends sample round
 
+Friends use the existing `/studio/` page and its original product dialogs. A valid invitation adds only an `Add sample` button to the product dialog, opening size and delivery fields in a second dialog. The page's existing design, story, descriptions and copy remain unchanged. Old `/studio/samples/#invite=…` links redirect to the original Studio page. The invitation is retained in tab-only sessionStorage so collection anchors and refreshes do not lose it; no delivery details are persisted in browser storage.
+
 Both collections; one sample of each of the 11 products across all sizes; one successful request per invitation, with a second check against normalised email. Sam should send a different invitation to each person. No identity verification: someone with several invitations and different email addresses could bypass the person limit. Do not distribute the complete invitation file.
 
 Local `.sample-private/SABI-sample-invitations.html` contains 11 friend links and a private organiser link. Original credentials are local only; only SHA-256 hashes are committed. Invitation fragments are not sent in page requests or referrers. JavaScript sends the token in POST JSON to the matching Netlify function. Neither addresses nor credentials are stored in localStorage or logs. The owner link can read delivery addresses; treat it as a password. Rotate a compromised credential by generating a new random 32-byte token and replacing its digest in `sample-access.mjs`, then redeploying (do not rerun the initial generator).
