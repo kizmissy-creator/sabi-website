@@ -2,4 +2,4 @@
 @media(max-width:700px){.sample-wrap{width:calc(100% - 36px)}.sample-intro{grid-template-columns:1fr;gap:20px;padding-top:35px}.sample-intro h1{font-size:48px}.sample-note{transform:none;padding:24px}.sample-note h2{font-size:30px}.sample-products{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.sample-card .sample-visual{height:180px;padding:10px}.sample-card strong{font-size:20px}.sample-card small{font-size:9px}.fields{grid-template-columns:1fr}.wide{grid-column:auto}.back-link{font-size:11px;max-width:145px;text-align:right}legend{font-size:25px}.privacy-note{padding:20px}.success{padding:25px}.success h2{font-size:34px}}
 @media(max-width:380px){.sample-card .sample-visual{height:145px}.sample-card strong{font-size:18px;margin-inline:10px}.sample-card small,.sample-card .availability{margin-inline:10px}}
 /* The supplier sample journey does not use preview collaboration controls. */
-iframe[title="Netlify Drawer"]{display:none!important}
+div[data-netlify-deploy-id][data-netlify-site-id]{display:none!important}
