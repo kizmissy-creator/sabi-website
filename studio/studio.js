@@ -1,6 +1,12 @@
 'use strict';
 const menu = document.querySelector('.menu');
 const nav = document.querySelector('#nav');
+const siteHeader = document.querySelector('.site-header');
+function updateHeaderHeight() {
+ document.documentElement.style.setProperty('--site-header-height', `${Math.ceil(siteHeader.getBoundingClientRect().height)}px`);
+}
+new ResizeObserver(updateHeaderHeight).observe(siteHeader);
+updateHeaderHeight();
 function closeMenu() { menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('open'); }
 menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; menu.setAttribute('aria-expanded', String(open)); nav.classList.toggle('open', open); });
 nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });

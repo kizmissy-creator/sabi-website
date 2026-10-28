@@ -3,7 +3,18 @@
 :root {
   --text-gap: 16px;
   --section-gap: 48px;
+  --site-header-height: 145px;
 }
+/* Keep both navigation rows on one continuous, sticky SABI header. */
+html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
+.site-header { position: sticky; top: 0; z-index: 20; }
+.site-header .quick-browse { position: static; background: inherit; color: inherit; border: 0; }
+.quick-browse-inner { border-top: 1px solid #f4eedf26; padding-block: 8px 12px; }
+.quick-browse-label { color: var(--paper); }
+.quick-browse nav a { border-color: #f4eedf66; box-shadow: none; }
+.quick-browse nav a:hover { border-color: var(--paper); }
+.site-header a:focus-visible, .site-header button:focus-visible { outline-color: var(--gold); }
+.story .founder-photo { top: calc(var(--site-header-height) + 24px); }
 main h1, main h2, main h3, main h4, dialog h2, dialog h3 {
   text-transform: capitalize;
   word-spacing: normal;
