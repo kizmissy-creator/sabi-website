@@ -142,7 +142,7 @@ async function initialise() {
       await prepareForm();
       form.hidden = false; review.hidden = true; pending = null; requestDialog.querySelector('#sample-success').hidden = true;
       form.elements.product.value = product.id;
-      requestDialog.querySelector('#sample-product-name').textContent = `${product.collection === 'Mask' ? 'I Wear My Mask All Year Round' : 'Ghost Mode'} — ${product.name}`;
+      requestDialog.querySelector('#sample-product-name').textContent = `${product.collection === 'Mask' ? 'I Wear My Mask All Year Round' : product.collection} — ${product.name}`;
       const previousSize = size.value;
       size.replaceChildren(new Option('Choose your size or format', ''));
       for (const option of product.sizes) size.add(new Option(option, option));

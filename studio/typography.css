@@ -1,0 +1,46 @@
+/* One spacing scale over the recovered SABI artwork and colour treatments. */
+:root {
+  --text-gap: 16px;
+  --section-gap: 64px;
+}
+main h1, main h2, main h3, main h4, dialog h2, dialog h3 {
+  text-transform: capitalize;
+  word-spacing: normal;
+}
+main h1 { line-height: 1.08; letter-spacing: -.025em; margin-bottom: 24px; }
+main h2, .story h2, .making h2, .questions h2, .collection-intro h3 {
+  line-height: 1.15;
+  letter-spacing: -.018em;
+  margin-bottom: var(--text-gap);
+}
+main .eyebrow { line-height: 1.4; margin-bottom: 8px; }
+.hero-copy .hero-start, .collection-intro > p:last-child,
+.product-copy, .making-copy p, .feel-grid p, .faq-list p,
+.story-copy > p:not(.eyebrow):not(.story-signoff),
+.studio-notes p:not(.eyebrow), .questions > div > p:not(.eyebrow) {
+  line-height: 1.55;
+  margin-bottom: var(--text-gap);
+}
+.hero-lead { line-height: 1.45; margin-bottom: 24px; }
+.hero-lead span + span { margin-top: 8px; }
+.hero-start { line-height: 1.55 !important; }
+.hero-actions { margin-top: 24px; }
+.section-heading { gap: 24px; margin-bottom: 32px; align-items: start; }
+.section-heading h2 { margin-bottom: 0; }
+.section-heading > p { margin: 24px 0 0; line-height: 1.55; }
+.collection-intro { margin-bottom: 32px; }
+.collection-subhead { margin: 32px 0 20px; padding-top: 20px; }
+.collection-subhead h4 { line-height: 1.25; }
+.feel-grid h3 { line-height: 1.25; margin-bottom: var(--text-gap); }
+.range-grid .product h4 { margin: 20px 0 8px; line-height: 1.25; letter-spacing: -.01em; }
+.range-grid .product-type { line-height: 1.5; margin-bottom: 12px; }
+.collection, .story, .studio-notes, .making, .questions, .feel { padding-block: var(--section-gap); }
+.story-copy .story-intro { line-height: 1.55 !important; margin-bottom: var(--text-gap); }
+@media (max-width: 700px) {
+  :root { --section-gap: 40px; }
+  main h1 { font-size: clamp(40px, 9.5vw, 56px); }
+  .section-heading { gap: 16px; margin-bottom: 24px; }
+  .section-heading > p { margin: 0; }
+  .collection-intro { margin-bottom: 24px; }
+  .collection-subhead h4 { margin-bottom: 8px; }
+}

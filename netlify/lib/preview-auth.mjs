@@ -1,3 +1,4 @@
+import { studioSiteId } from './studio-site.mjs';
 export async function credentialDigest(value, salt) {
   const bytes = new TextEncoder().encode(`${salt}:${value}`);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -23,7 +24,7 @@ function loginPage(message = '') {
 const privateHeaders = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex, nofollow', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin', 'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'" };
 export async function protectPreview(request, context, credential) {
   // Deploy context is supplied by Netlify, never inferred from a client-controlled header.
-  if (context.deploy?.context === 'production') return context.next();
+  if (context.deploy?.context === 'production' && context.site?.id !== studioSiteId) return context.next();
   if (!(await authorised(request, credential))) {
     let message = '';
     if (request.method === 'POST' && request.headers.get('content-type')?.startsWith('application/x-www-form-urlencoded')) {

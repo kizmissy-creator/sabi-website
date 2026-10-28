@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { credentialDigest, protectPreview } from '../netlify/lib/preview-auth.mjs';
+import { studioSiteId } from '../netlify/lib/studio-site.mjs';
 const credential = { salt: 'test-only-salt', digest: await credentialDigest('sabi:test-password', 'test-only-salt') };
 credential.sessionDigest = await credentialDigest(await credentialDigest('sabi:test-password', `session:${credential.salt}`), credential.salt);
 function context(deployContext = 'deploy-preview') {
@@ -28,6 +29,13 @@ test('correct credentials preserve original content and prevent shared caching',
 test('production remains unchanged without a password', async () => {
   const ctx = context('production'); const response = await protectPreview(request('/'), ctx, credential);
   assert.equal(response.status, 200); assert.equal(response.headers.get('Cache-Control'), 'public, max-age=3600');
+});
+
+test('the standalone Studio preview requires its password even on its primary URL', async () => {
+  const ctx = context('production'); ctx.site = { id: studioSiteId };
+  assert.equal((await protectPreview(request('/'), ctx, credential)).status, 401);
+  assert.equal(ctx.calls, 0);
+  assert.equal((await protectPreview(request('/', `Basic ${btoa('sabi:test-password')}`), ctx, credential)).status, 200);
 });
 test('unknown deployment context is protected and spoofed context headers are ignored', async () => {
   const ctx = context(); delete ctx.deploy;

@@ -16,7 +16,7 @@ async function load() {
     const data = await api('list'); requests.replaceChildren();
     status.textContent = `${test ? 'TEST ROUND · ' : ''}${data.claims.length} request${data.claims.length === 1 ? '' : 's'}. ${data.claims.length ? 'No supplier orders are placed automatically.' : 'No requests yet.'}`;
     for (const claim of data.claims) {
-      const product = catalogue.find(item => item.id === claim.product);
+      const product = catalogue.find(item => item.id === claim.product) || { collection: 'Earlier sample range', name: claim.product };
       const article = node('article', ''); article.className = 'admin-request';
       article.append(node('h2', `${product.collection} — ${product.name}`), node('p', `${claim.reference} · ${claim.status}\nRequested ${new Date(claim.createdAt).toLocaleString('en-GB')}\nSize / format: ${claim.size}`), node('p', `${claim.name}\n${claim.email}\n${[claim.address1, claim.address2, claim.city, claim.region, claim.postcode, claim.country].filter(Boolean).join('\n')}`));
       if (claim.notes) article.append(node('p', `Notes: ${claim.notes}`));

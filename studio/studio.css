@@ -13,3 +13,251 @@
 @media(max-width:1000px){.clothing-grid,.ghost-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.range-grid .product-image{aspect-ratio:1}.extras-grid{gap:20px}.print-image .product-visual{padding:20px}.mini-image .product-visual{padding:28px}}
 @media(max-width:700px){.collection-jumps{gap:10px;margin-bottom:32px}.collection-jumps a{font-size:12px;padding:10px 14px}.collection-intro h3{font-size:35px}.collection-intro>p:last-child{font-size:14px}.collection-subhead{display:block;margin-top:28px;padding-top:17px}.collection-subhead h4{font-size:24px;margin-bottom:6px}.range-grid{gap:28px 16px}.range-grid .product h4{font-size:23px}.extras-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.extras-grid .product:last-child{grid-column:span 2;max-width:420px}.ghost-group{margin-top:38px;padding-top:35px}.dialog-preview .product-visual{height:250px}.range-grid .image-caption{font-size:9px}}
 @media(max-width:440px){.clothing-grid,.extras-grid,.ghost-grid{grid-template-columns:1fr}.extras-grid .product:last-child{grid-column:auto;max-width:none}.range-grid .product-image{aspect-ratio:1.1}.range-grid .model-image{aspect-ratio:4/5}.range-grid .product h4{font-size:27px}.range-grid .product-copy{font-size:14px}.range-grid .product-link{font-size:13px}.range-grid .product-type{font-size:12px}.range-grid .image-caption{font-size:10px}.print-image .product-visual{padding:38px}.mini-image .product-visual{padding:50px}}
+
+.hoodie-two-views{display:flex;width:100%;align-items:center}.hoodie-two-views svg{width:50%!important;min-width:0}#launch-product-details{font-size:14px;line-height:1.7}#launch-product-details ul{padding-left:20px}#launch-product-details details{border-top:1px solid var(--line);padding:14px 0}#launch-product-details details a{font-size:13px}#launch-product-details summary{font-weight:600}
+
+/* SABI range refinement */
+.ghost-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ghost-grid .product:has([data-product="sb-hoodie"]){grid-column:1/-1;order:4}
+.ghost-grid .product:has([data-product="sb-hoodie"]) .product-image{aspect-ratio:auto}
+.hoodie-two-views{display:grid;grid-template-columns:1fr 1fr;width:100%;height:100%;gap:24px}
+.hoodie-view{display:flex;flex-direction:column;align-items:center;min-width:0;height:100%}
+.hoodie-two-views .hoodie-view svg{width:100%!important;height:calc(100% - 38px);min-height:0;flex:1}
+.hoodie-view-label{display:block;font-size:12px;line-height:1.5;text-align:center;padding:8px 4px 12px;color:var(--ink)}
+.ghost-grid .product:has([data-product="sb-hoodie"]) .product-visual{height:620px;padding:24px 24px 48px}
+dialog:has(.hoodie-two-views){width:min(1000px,calc(100% - 32px));max-width:1000px}
+.dialog-preview:has(.hoodie-two-views) .product-visual{height:540px;padding:16px}
+@media(max-width:700px){.ghost-grid{grid-template-columns:1fr}.ghost-grid .product:has([data-product="sb-hoodie"]) .product-visual{height:auto;padding:18px 14px 48px}.hoodie-two-views{grid-template-columns:1fr;height:auto;gap:18px}.hoodie-view{height:360px}.dialog-preview:has(.hoodie-two-views) .product-visual{height:auto}.hoodie-view-label{font-size:12px}}
+/* End SABI range refinement */
+
+
+
+/* SABI combined story */
+.story-grid{align-items:start}.story .founder-photo{position:sticky;top:36px}.story-copy p{max-width:660px}
+.making{display:grid;grid-template-columns:1fr 1.25fr;gap:64px;padding-block:72px;border-bottom:1px solid var(--line)}
+.making h2{font-size:clamp(32px,3.5vw,46px)}.making-copy{max-width:650px;color:var(--muted)}.making-copy p:last-child{color:var(--ink);margin-bottom:0}
+@media(max-width:700px){.story .founder-photo{position:static}.making{grid-template-columns:1fr;gap:16px;padding-block:44px}.making h2{font-size:35px}.story-copy p{max-width:100%}}
+/* End SABI combined story */
+
+/* SABI quick navigation */
+html{scroll-padding-top:90px}
+.quick-browse{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+.quick-browse-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:10px}
+.quick-browse-label{font:italic 16px Georgia,serif;color:var(--muted)}
+.quick-browse nav{display:flex;gap:12px;margin:0;align-items:center}
+.quick-browse nav a{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:9px 16px;border:1px solid #9da691;border-radius:5px 13px 5px 13px;text-decoration:none;font-size:13px;min-height:44px}
+.quick-browse nav a:hover{background:#e2e5d5}.story-browse{margin-top:30px}
+.collection-group{scroll-margin-top:0}
+@media(max-width:700px){.quick-browse-inner{width:calc(100% - 32px);padding-block:8px;gap:0}.quick-browse-label{display:none}.quick-browse nav{display:grid!important;grid-template-columns:1fr 1.8fr 1fr;width:100%;gap:7px;position:static;background:transparent;padding:0;border:0}.quick-browse nav a{font-size:12px;padding:8px 9px;gap:8px;white-space:nowrap}.quick-browse nav a span{font-size:11px}.quick-browse nav a:nth-child(2){white-space:normal;text-align:left;line-height:1.3}}
+/* End SABI quick navigation */
+
+
+
+/* SABI layout tidy */
+body{font-size:16px;line-height:1.6}
+.hero{padding-block:44px;min-height:0}.hero-lead{font-size:19px}.hero-actions{margin-top:22px}
+.ghost-note{background:var(--paper);color:var(--ink);border:1px solid #a6aa96;padding:9px;box-shadow:4px 6px 0 #263f3715}
+.ghost-note img{background:var(--green);border:1px solid var(--green)}
+.ghost-note figcaption{font:13px/1.4 Arial,Helvetica,sans-serif;text-align:left;border-top:1px solid var(--line);padding:8px 3px 2px;margin-top:7px}
+.ghost-note figcaption span{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.welcome{padding-block:20px;gap:0}.welcome p{font-size:16px;line-height:1.6;max-width:900px}
+.collection{padding-block:52px}.section-heading{margin-bottom:26px}.collection-jumps{margin-bottom:30px}
+.story{padding-block:56px}.studio-notes{padding-block:56px}.making{padding-block:48px}.questions{padding-block:52px}
+.collection-intro>p:last-child,.product-copy,.story-copy>p:not(.story-intro):not(.eyebrow):not(.story-signoff),.making-copy p,.feel-grid p,.faq-list p{font-size:15px;line-height:1.65}
+.story-copy .story-intro{font-size:17px;line-height:1.65}
+.range-grid .product h4{font-size:25px}.collection-intro h3{font-size:clamp(32px,3.5vw,43px)}
+@media(max-width:700px){
+ .hero{padding-block:30px;gap:24px}.hero-lead{font-size:18px}.hero-copy>p:not(.eyebrow):not(.hero-lead){font-size:15px}
+ .hero-collage{margin-top:4px;aspect-ratio:1.05}.ghost-note{width:40%;padding:7px;right:0;bottom:0}
+ .ghost-note figcaption{font-size:11px;padding:6px 2px 1px;margin-top:5px}.ghost-note figcaption span{font-size:10px}
+ .wandering-line{opacity:.45}.hero-star{display:none}
+ .welcome{margin-top:8px;padding-block:19px}.welcome p{font-size:15px}
+ .collection{padding-block:36px}.story{padding-block:36px}.studio-notes,.making,.questions{padding-block:36px}
+ h2,.collection-intro h3,.making h2{font-size:34px;line-height:1.12}
+ .range-grid .product h4{font-size:25px}.story-copy .story-intro{font-size:16px}
+}
+.ghost-note{background:var(--green);color:var(--paper);border:0;padding:12px 10px;box-shadow:0 8px 18px #263f3715}
+.ghost-note img{border:0}
+.ghost-note figcaption{position:relative;display:block;margin:10px 0 0;padding:8px 10px;background:var(--paper);color:var(--ink);border:1px solid #a6aa96;border-radius:13px 13px 13px 3px;font:italic 13px/1.4 Georgia,serif;text-align:center}
+.hand-note{position:absolute;bottom:2%;left:0;max-width:47%;padding:10px 12px;background:var(--paper);border:1px solid #a6aa96;border-radius:14px 14px 3px 14px;font:italic 15px/1.4 Georgia,serif;transform:rotate(-3deg);color:var(--rust);box-shadow:2px 3px 0 #263f3709}
+@media(max-width:700px){.ghost-note{width:40%;padding:9px 8px}.ghost-note figcaption{font-size:11px;padding:7px 6px;margin-top:8px}.hand-note{bottom:1%;left:0;max-width:48%;font-size:12px;padding:9px;transform:rotate(-2deg)}}
+/* End SABI layout tidy */
+
+/* SABI consistent design */
+:root{--body-size:16px;--body-leading:1.55;--section-title:clamp(32px,3.5vw,46px);--caption-size:12px}
+body{font-size:var(--body-size);line-height:var(--body-leading)}
+p{margin-bottom:16px}
+h1,h2,h3,h4{font-family:Georgia,'Times New Roman',serif;font-weight:400;text-transform:none}
+h1{font-size:clamp(46px,5.3vw,70px);line-height:1.06;letter-spacing:-1.8px;margin-bottom:22px}
+h2,.story h2,.questions h2,.making h2,.collection-intro h3{font-size:var(--section-title);line-height:1.12;letter-spacing:-.9px;margin-bottom:18px}
+h1 em,h2 em,h3 em{color:var(--rust);background:linear-gradient(110deg,#9f4d31 15%,#687354 95%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.story h2 em{background-image:linear-gradient(110deg,#e2b356,#afc9bc)}
+.eyebrow,.story .eyebrow{font-size:11px;line-height:1.35;letter-spacing:1.5px;margin-bottom:9px;font-weight:600}
+.hero-copy>p:not(.eyebrow):not(.hero-lead),.collection-intro>p:last-child,.product-copy,.making-copy p,.feel-grid p,.faq-list p,.studio-notes p:not(.eyebrow),.questions>div>p:not(.eyebrow){font-size:16px;line-height:1.55}
+.story-copy>p:not(.eyebrow):not(.story-signoff){font-size:16px;line-height:1.6}
+.story-copy .story-intro{font-size:17px!important;line-height:1.55!important}
+.hero-lead{font-size:18px;line-height:1.4;margin-bottom:18px}
+.hero-lead span{display:block}.hero-lead span+span{margin-top:8px}
+.hero-start{line-height:1.5!important}
+.section-heading{gap:24px;margin-bottom:24px;align-items:start}
+.section-heading h2{margin-bottom:0}
+.section-heading>p{font-size:15px;line-height:1.5;margin-top:8px;max-width:340px}
+.collection-intro{margin-bottom:24px}.collection-subhead{margin-top:24px;padding-top:18px}
+.range-grid .product h4{font-size:25px;line-height:1.2;margin-top:16px;margin-bottom:8px}
+.product-type,.product-link,.text-link{font-size:13px;line-height:1.45}
+.image-caption{font-size:11px;line-height:1.4}.collection-note,.feel-note,.dialog-availability{font-size:13px;line-height:1.5}
+.brand{gap:9px}.brand>span{letter-spacing:.8px;line-height:1}
+.brand-studio{letter-spacing:2.5px;margin-top:4px;font-size:9px;line-height:1.1}
+.header-inner{min-height:76px}
+.quick-browse-inner{padding-block:9px}
+.quick-browse nav{gap:28px}
+.quick-browse nav a{border:0;border-radius:0;background:none;padding:10px 0;min-height:42px;gap:10px;text-decoration:underline;text-decoration-color:#9da691;text-decoration-thickness:1px;text-underline-offset:6px}
+.quick-browse nav a:hover{background:none;color:var(--rust);text-decoration-color:var(--rust)}
+.quick-browse nav a span{opacity:.65}
+.collection-jumps a{border:0;border-bottom:1px solid #9da691;border-radius:0;padding:9px 0;margin-right:24px;gap:16px}
+.collection-jumps a:hover{background:none;color:var(--rust)}
+.welcome{position:relative;background:#eae6d6;border:0;border-left:3px solid #9f4d31;border-radius:0 20px 0 0;padding:22px 26px;margin-top:14px}
+.welcome p{max-width:870px;font-size:16px;line-height:1.55}
+.hand-note{background:var(--paper);border:0;border-radius:0;box-shadow:none;padding:5px 0;bottom:0;left:0;max-width:48%;font:italic 16px/1.4 Georgia,serif;transform:rotate(-3deg)}
+.ghost-note{padding:12px 10px 15px}
+.ghost-note figcaption{position:relative;background:var(--paper);color:var(--ink);border:0;border-radius:50% 46% 48% 12%;padding:11px 12px;margin-top:11px;box-shadow:2px 3px 0 #132c2330;font:italic 14px/1.35 Georgia,serif;transform:rotate(-3deg)}
+.ghost-note figcaption:before{content:'';position:absolute;width:10px;height:10px;background:var(--paper);border-radius:50%;left:12px;top:-7px}
+.hero{gap:32px;padding-block:38px}.collection{padding-block:44px}.story,.studio-notes,.making,.questions{padding-block:48px}.feel{padding-block:48px}
+@media(max-width:700px){
+ :root{--section-title:34px}
+ .header-inner{min-height:66px;padding-block:7px}.brand img{width:30px;height:43px}.brand>span{font-size:23px}.brand-studio{margin-top:3px;letter-spacing:2.5px;font-size:8px}
+ .menu{border:0;border-bottom:1px solid #ffffff70;border-radius:0;padding:7px 0;min-height:42px}
+ .quick-browse nav{grid-template-columns:auto auto auto;justify-content:space-between;gap:15px}
+ .quick-browse nav a{font-size:12px;gap:7px;padding:9px 0;white-space:normal}
+ .quick-browse nav a:nth-child(2){line-height:1.45}
+ h1{font-size:clamp(44px,10vw,60px);line-height:1.07;letter-spacing:-1.5px;margin-bottom:20px}
+ .hero{padding-block:28px;gap:24px}.hero-lead{font-size:17px}.hero-lead span+span{margin-top:8px}
+ .hero-copy>p:not(.eyebrow):not(.hero-lead){font-size:16px;line-height:1.5}
+ .hero-collage{aspect-ratio:1; margin-top:6px}.ghost-note{width:41%;bottom:0;padding:9px 8px 11px}
+ .ghost-note figcaption{font-size:12px;padding:10px 8px;margin-top:9px}
+ .hand-note{font-size:14px;line-height:1.35;max-width:48%;bottom:0;padding:5px 0}
+ .welcome{padding:19px 20px;margin-top:16px}.welcome p{font-size:16px;line-height:1.55}
+ .collection,.story,.studio-notes,.making,.questions,.feel{padding-block:36px}
+ .eyebrow,.story .eyebrow{font-size:11px;margin-bottom:9px;letter-spacing:1.4px}
+ .section-heading{margin-bottom:22px}.section-heading>p{font-size:15px;line-height:1.5;margin-top:12px;margin-bottom:0}
+ .collection-intro>p:last-child,.product-copy,.making-copy p,.feel-grid p,.faq-list p,.studio-notes p:not(.eyebrow){font-size:16px;line-height:1.55}
+ .story-copy>p:not(.eyebrow):not(.story-signoff){font-size:16px;line-height:1.6}.story-copy .story-intro{font-size:17px!important;line-height:1.55!important}
+ .collection-jumps{gap:14px;margin-bottom:28px}.collection-jumps a{margin-right:0;font-size:13px}
+}
+/* End SABI consistent design */
+
+/* SABI annotation refinements */
+.hero-lead{margin-bottom:26px}
+.story-copy .story-intro{margin-bottom:24px}
+.section-heading>p{margin-top:18px}
+.collection-intro>p:last-child{margin-top:24px}
+.ghost-note figcaption{border:0;border-radius:0;box-shadow:none;transform:none;margin:10px -10px -15px;padding:10px 9px;background:var(--paper);color:var(--rust);border-top:1px solid #a6aa96;font:italic 14px/1.35 Georgia,serif}
+.ghost-note figcaption:before{content:none}
+.welcome{display:grid;grid-template-columns:100px 1fr;gap:18px;align-items:center;padding:22px 24px}
+.welcome-illustration{display:block;width:100px;height:80px;color:var(--rust)}
+.quick-browse nav a,.collection-jumps a{background:var(--green);color:var(--paper);border:1px solid var(--green);border-radius:3px 10px 3px 10px;text-decoration:none;padding:10px 15px;font-weight:600;box-shadow:2px 2px 0 #263f3715}
+.quick-browse nav a:hover,.collection-jumps a:hover{background:#3b594b;color:var(--paper);border-color:#3b594b}
+.quick-browse nav{gap:12px}.quick-browse nav a span{opacity:1}
+.collection-jumps{gap:12px}.collection-jumps a{margin-right:0;min-height:46px}
+@media(max-width:700px){
+ .hero-lead{margin-bottom:26px}
+ .quick-browse nav{grid-template-columns:1fr 1.75fr 1fr;gap:7px}
+ .quick-browse nav a{padding:9px 8px;font-size:12px;gap:6px;font-weight:500}
+ .collection-jumps{display:grid;grid-template-columns:1fr;width:100%;gap:10px}
+ .collection-jumps a{font-size:14px;padding:12px 15px;justify-content:space-between}
+ .ghost-note figcaption{margin:9px -8px -11px;padding:9px 7px;font-size:12px}
+ .welcome{grid-template-columns:1fr;gap:8px;padding:18px 20px}
+ .welcome-illustration{width:90px;height:64px}
+ .section-heading>p{margin-top:18px}
+ .collection-intro>p:last-child{margin-top:24px}
+}
+/* End SABI annotation refinements */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* SABI final consistency */
+.ghost-note figcaption{position:relative;width:calc(100% - 4px);margin:13px 0 -6px 7px;padding:14px 10px 16px;background:linear-gradient(174deg,#eee3b8 0%,#f5ebc9 85%);color:var(--ink);border:0;border-radius:0;transform:rotate(-5deg);box-shadow:2px 5px 5px #142c2320;font:italic 14px/1.4 Georgia,serif}
+.ghost-note figcaption:after{content:'';position:absolute;right:0;bottom:0;width:13px;height:13px;background:linear-gradient(135deg,#dfd0a0 50%,var(--green) 51%)}
+dialog{scroll-padding:24px}
+dialog p,dialog li,#launch-product-details{font-size:16px;line-height:1.55}
+dialog .eyebrow{font-size:11px;line-height:1.35;margin-bottom:9px}
+dialog h2{font-size:32px;line-height:1.15;letter-spacing:-.6px;margin-bottom:24px}
+dialog .close{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;top:8px;right:8px}
+dialog .dialog-availability,dialog .dialog-note{font-size:13px;line-height:1.5}
+dialog summary{min-height:44px;display:list-item;padding-block:10px}
+.faq-list summary{min-height:44px;line-height:1.5}
+@media(max-width:700px){.ghost-note figcaption{font-size:12px;padding:12px 8px 14px;margin-top:12px}dialog h2{font-size:28px}dialog{padding-top:48px}}
+.ghost-note figcaption{width:124px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;padding:17px 13px;margin:8px -20px -43px auto;transform:rotate(-9deg);line-height:1.45;box-shadow:3px 6px 7px #142c2328}
+.brand{gap:13px;align-items:center}.brand>span{display:flex;flex-direction:column;align-items:center;gap:7px;font:400 32px/.9 Georgia,'Times New Roman',serif;letter-spacing:2px}.brand .brand-studio{display:block;font:500 9px/1 Arial,Helvetica,sans-serif;letter-spacing:4px;margin:0;padding-left:4px}.brand img{width:35px;height:49px}.header-inner{min-height:82px}
+.hero{overflow-x:clip}.hero-collage{margin-bottom:25px}
+@media(max-width:700px){.brand{gap:11px}.brand>span{font-size:29px;letter-spacing:1.8px;gap:6px}.brand .brand-studio{font-size:8px;letter-spacing:3.7px;padding-left:3.7px}.brand img{width:31px;height:44px}.header-inner{min-height:73px}.ghost-note figcaption{width:105px;padding:14px 10px;margin:8px -15px -38px auto;font-size:12px}.hero-collage{margin-bottom:27px}}
+.ghost-note{padding:10px;bottom:55px}.ghost-note img{aspect-ratio:1.2;object-fit:contain}.ghost-note figcaption{position:absolute;right:-9px;bottom:-86px;margin:0;width:112px;transform:rotate(-11deg);padding:15px 11px}
+@media(max-width:700px){.ghost-note{bottom:45px;padding:9px}.ghost-note figcaption{width:100px;right:1px;bottom:-79px;margin:0;padding:13px 10px}.hero-collage{margin-bottom:20px}}
+.ghost-note figcaption{background:#f1e4a4;border:0;box-shadow:2px 4px 6px #273b3520;transform:rotate(-3deg);text-align:left;font-family:'Segoe Print','Bradley Hand','Comic Sans MS',cursive;font-style:normal;font-size:14px;line-height:1.45;justify-content:flex-start;padding:17px 13px 22px;right:-9px;bottom:-95px;color:#35443a}
+.ghost-note figcaption:after{content:none}
+@media(max-width:700px){.ghost-note figcaption{font-size:12px;padding:16px 11px 20px;right:2px;bottom:-88px;transform:rotate(-3deg)}}
+.hero-collage{margin-bottom:45px}
+@media(max-width:700px){.hero-collage{margin-bottom:44px}}
+.hero-collage{margin-bottom:35px}
+.ghost-note{bottom:75px;right:1%;transform:rotate(6deg)}
+.ghost-note figcaption{right:-8px;bottom:-45px;transform:rotate(-3deg)}
+@media(max-width:700px){.hero-collage{aspect-ratio:1.02;margin-bottom:30px}.hero-garment{width:79%;left:5%;top:0}.ghost-note{width:40%;right:3%;bottom:62px}.ghost-note figcaption{right:-7px;bottom:-40px;transform:rotate(-3deg)}.hand-note{bottom:2%;max-width:47%}}
+.hero-collage .wandering-line{opacity:.75;color:#8e997c}
+.hero-collage .hand-note{z-index:2;background:var(--paper)}
+.ghost-note{width:47%;right:0;bottom:82px}
+.ghost-note figcaption{right:-9px;bottom:-108px}
+@media(max-width:700px){.hero-collage{aspect-ratio:.92;margin-bottom:40px}.ghost-note{width:46%;right:3%;bottom:91px}.ghost-note figcaption{right:-4px;bottom:-98px}.hand-note{bottom:3%;max-width:43%}}
+.ghost-note{padding-bottom:24px}.ghost-note figcaption{bottom:-88px}
+@media(max-width:700px){.ghost-note{padding-bottom:23px}.ghost-note figcaption{bottom:-80px}}
+/* End SABI final consistency */
+
+
+
+
+
+
+
+/* SABI composed hero */
+.hero{gap:42px;align-items:center}
+.hero-collage{width:100%;max-width:560px;min-height:0;aspect-ratio:560/630;margin:0;isolation:isolate;justify-self:center}
+.hero-collage .wandering-line{inset:0;width:100%;height:100%;color:#8d987c;opacity:.85;z-index:2;overflow:visible}
+.hero-garment{width:77%;left:5%;top:4%;padding:14px 12px 11px;transform:rotate(-4deg);z-index:1;box-shadow:3px 5px 9px #263f3714;border:1px solid #d3c4a6}
+.hero-garment .hero-supplier{aspect-ratio:1}
+.hero-garment figcaption{padding-left:4px}
+.hero-garment figcaption span{font:10px/1.4 Arial,Helvetica,sans-serif;margin-top:6px}
+.hero-garment .tape{width:88px;left:36%;height:22px;top:-10px;transform:rotate(2deg)}
+.ghost-note{width:46%;right:3%;left:auto;top:43%;bottom:auto;padding:10px 10px 23px;transform:rotate(5deg);z-index:3;box-shadow:3px 5px 9px #172f2526}
+.ghost-note img{width:100%;height:auto;aspect-ratio:1.15;object-fit:contain;background:var(--green);border:0}
+.ghost-note figcaption{position:absolute;width:112px;aspect-ratio:1;right:3px;bottom:-83px;margin:0;padding:17px 13px 22px;transform:rotate(-8deg);background:#f1e4a4;box-shadow:2px 4px 6px #273b3520;font-family:'Segoe Print','Bradley Hand','Comic Sans MS',cursive;font-size:14px;line-height:1.45;text-align:left;border:0;border-radius:0;color:#35443a}
+.ghost-note figcaption:before,.ghost-note figcaption:after{content:none}
+.hero-collage .hand-note{position:absolute;left:1%;top:83%;bottom:auto;max-width:45%;margin:0;padding:4px 0;font:italic 16px/1.4 Georgia,serif;transform:rotate(-3deg);background:var(--paper);color:var(--rust);z-index:2;border:0;box-shadow:none;border-radius:0}
+@media(max-width:1050px) and (min-width:701px){.hero{gap:25px}.ghost-note figcaption{width:98px;font-size:12px;bottom:-72px;padding:14px 10px}.hero-collage .hand-note{font-size:14px}}
+@media(max-width:700px){.hero{gap:22px;padding-bottom:32px}.hero-collage{width:100%;max-width:480px;aspect-ratio:560/630;margin:5px 0 0;min-height:0}.hero-garment{width:77%;left:5%;top:4%;padding:11px 10px 9px}.hero-garment figcaption span{font-size:9px}.ghost-note{width:46%;right:3%;top:43%;bottom:auto;padding:9px 9px 23px}.ghost-note figcaption{width:100px;right:3px;bottom:-75px;font-size:12px;padding:16px 11px 20px}.hero-collage .hand-note{top:83%;bottom:auto;max-width:45%;font-size:14px}.hero-collage .wandering-line{inset:0;width:100%;height:100%}.welcome{margin-top:16px}}
+.hero-star{display:none}
+@media(max-width:700px){.hero-collage{aspect-ratio:560/540}.hero-garment{width:70%;left:5%;top:3%;padding:9px 9px 8px}.ghost-note{width:45%;right:3%;top:40%;padding:9px 9px 24px}.ghost-note figcaption{width:90px;font-size:12px;right:-2px;bottom:-64px;padding:13px 10px 17px}.hero-collage .hand-note{top:85%;max-width:47%;font-size:13px}.hero-collage .wandering-line{height:100%}}
+/* End SABI composed hero */
+
+.product-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 12px;margin:14px 0;color:var(--ink,#243e35)}
+.product-price strong{font-size:1.35rem;font-weight:600}.product-price span{font-size:.875rem;line-height:1.4}
+
+.product-price small{flex-basis:100%;font-size:.8rem;line-height:1.45;color:#655f50;font-weight:400}

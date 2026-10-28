@@ -1,7 +1,9 @@
 import { getStore } from '@netlify/blobs';
+import { studioSiteId } from '../lib/studio-site.mjs';
 import { authenticate, isTest, inventoryKey, readState, reserve, response, body, RequestError } from '../lib/samples.mjs';
-export default async request => {
+export default async (request, context) => {
   try {
+    if (context?.site?.id && context.site.id !== studioSiteId) throw new RequestError(410, 'The sample checkout has moved to graceful-parfait-b83a8f.netlify.app. Your personal code works there.');
     const input = await body(request);
     const invite = authenticate(input.token);
     if (!invite) throw new RequestError(403, 'That code wasn’t recognised. Please check the personal sample code Sam sent you.');
