@@ -41,6 +41,8 @@ main .eyebrow { line-height: 1.4; margin-bottom: 8px; }
 .studio-notes { align-items: start; }
 .making-copy p:last-child, .studio-notes p:last-child { margin-bottom: 0; }
 .story-copy .story-intro { line-height: 1.55 !important; margin-bottom: var(--text-gap); }
+.story .founder-photo { max-width: 360px; }
+.story .founder-photo img { aspect-ratio: 9 / 16; object-fit: contain; object-position: center; filter: none; }
 
 /* Match the regular product widths at each breakpoint. The two-sided hoodie
    keeps its wider presentation, with both views together on small screens. */
