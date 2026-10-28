@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "node scripts/build-site.mjs"
   publish = "dist"
 
 [functions]
