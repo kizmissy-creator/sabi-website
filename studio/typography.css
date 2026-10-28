@@ -1,7 +1,8 @@
-/* One spacing scale over the recovered SABI artwork and colour treatments. */
+/* Text and section rhythm for the recovered SABI design. Keep these grouped
+   here so historical spacing in studio.css cannot split related content. */
 :root {
   --text-gap: 16px;
-  --section-gap: 64px;
+  --section-gap: 48px;
 }
 main h1, main h2, main h3, main h4, dialog h2, dialog h3 {
   text-transform: capitalize;
@@ -25,22 +26,39 @@ main .eyebrow { line-height: 1.4; margin-bottom: 8px; }
 .hero-lead span + span { margin-top: 8px; }
 .hero-start { line-height: 1.55 !important; }
 .hero-actions { margin-top: 24px; }
-.section-heading { gap: 24px; margin-bottom: 32px; align-items: start; }
+.section-heading { display: flex; gap: 24px; margin-bottom: 24px; align-items: start; }
 .section-heading h2 { margin-bottom: 0; }
 .section-heading > p { margin: 24px 0 0; line-height: 1.55; }
-.collection-intro { margin-bottom: 32px; }
-.collection-subhead { margin: 32px 0 20px; padding-top: 20px; }
-.collection-subhead h4 { line-height: 1.25; }
+.collection-jumps { margin-bottom: 32px; }
+.collection-intro { margin-bottom: 24px; }
+.collection-intro > p:last-child { margin: 0; }
+.collection-subhead { margin: 24px 0 20px; padding-top: 16px; }
+.collection-subhead h4 { margin: 0; line-height: 1.25; }
 .feel-grid h3 { line-height: 1.25; margin-bottom: var(--text-gap); }
 .range-grid .product h4 { margin: 20px 0 8px; line-height: 1.25; letter-spacing: -.01em; }
 .range-grid .product-type { line-height: 1.5; margin-bottom: 12px; }
 .collection, .story, .studio-notes, .making, .questions, .feel { padding-block: var(--section-gap); }
+.studio-notes { align-items: start; }
+.making-copy p:last-child, .studio-notes p:last-child { margin-bottom: 0; }
 .story-copy .story-intro { line-height: 1.55 !important; margin-bottom: var(--text-gap); }
+
+/* Match the regular product widths at each breakpoint. The two-sided hoodie
+   keeps its wider presentation, with both views together on small screens. */
+.ghost-grid .product:has([data-product="sb-hoodie"]) .product-visual {
+  height: 440px;
+}
+@media (min-width: 441px) and (max-width: 1000px) {
+  .clothing-grid, .ghost-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 700px) {
-  :root { --section-gap: 40px; }
+  :root { --section-gap: 36px; }
   main h1 { font-size: clamp(40px, 9.5vw, 56px); }
-  .section-heading { gap: 16px; margin-bottom: 24px; }
-  .section-heading > p { margin: 0; }
+  .section-heading { display: grid; gap: 12px; margin-bottom: 24px; }
+  .section-heading > p { margin: 0; max-width: 100%; }
+  .collection-jumps { margin-bottom: 24px; }
   .collection-intro { margin-bottom: 24px; }
   .collection-subhead h4 { margin-bottom: 8px; }
+  .ghost-grid .product:has([data-product="sb-hoodie"]) .product-visual { height: auto; }
+  .ghost-grid .hoodie-two-views { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .ghost-grid .hoodie-view { height: clamp(220px, 42vw, 280px); }
 }

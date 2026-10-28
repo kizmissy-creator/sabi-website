@@ -9,6 +9,9 @@ await rm(output, { recursive: true, force: true });
 await mkdir('dist');
 if (process.env.SITE_ID === studioSiteId || process.argv.includes('--studio')) {
   await cp('studio', 'dist', { recursive: true });
+  // The studio's founder portrait is shared with the company site.
+  await mkdir('dist/images', { recursive: true });
+  await cp('images/sam-portrait.webp', 'dist/images/sam-portrait.webp');
 } else {
 for (const path of ['index.html', 'thank-you.html', 'images', 'studio']) {
   await cp(path, `dist/${path}`, { recursive: true });
