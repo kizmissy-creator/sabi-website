@@ -9,10 +9,34 @@
 html { scroll-padding-top: calc(var(--site-header-height) + 20px); }
 .site-header { position: sticky; top: 0; z-index: 20; }
 .site-header .quick-browse { position: static; background: inherit; color: inherit; border: 0; }
-.quick-browse-inner { border-top: 1px solid #f4eedf26; padding-block: 8px 12px; }
-.quick-browse-label { color: var(--paper); }
-.quick-browse nav a { border-color: #f4eedf66; box-shadow: none; }
-.quick-browse nav a:hover { border-color: var(--paper); }
+.quick-browse-inner { border-top: 1px solid #f4eedf26; padding-block: 0; }
+.quick-browse-label { color: #d9b877; }
+.quick-browse nav { gap: 28px; }
+.quick-browse nav a {
+  position: relative; padding: 14px 4px; min-height: 48px;
+  background: transparent; border: 0; border-radius: 0; box-shadow: none;
+  font-weight: 500; color: var(--paper);
+}
+.quick-browse nav a::after {
+  content: ''; position: absolute; left: 4px; right: 4px; bottom: 7px;
+  height: 2px; background: var(--gold); transform: scaleX(0);
+}
+.quick-browse nav a:hover, .quick-browse nav a[aria-current="location"] {
+  background: transparent; color: #f1d8a6;
+}
+.quick-browse nav a:hover::after, .quick-browse nav a[aria-current="location"]::after {
+  transform: scaleX(1);
+}
+.quick-browse nav a:last-child { margin-left: 16px; }
+.quick-browse nav a span { opacity: .65; font-weight: 400; }
+@media (max-width: 700px) {
+  .quick-browse nav { gap: 10px; grid-template-columns: 1fr 1.75fr 1fr; }
+  .quick-browse nav a { padding: 12px 0; font-size: 12px; gap: 5px; min-height: 48px; }
+  .quick-browse nav a:last-child { margin-left: 0; }
+  .quick-browse nav a span { display: none; }
+  .quick-browse nav a:first-child, .quick-browse nav a:last-child { white-space: nowrap; }
+  .quick-browse nav a::after { left: 0; right: 0; bottom: 5px; }
+}
 .site-header a:focus-visible, .site-header button:focus-visible { outline-color: var(--gold); }
 .story .founder-photo { top: calc(var(--site-header-height) + 24px); }
 main h1, main h2, main h3, main h4, dialog h2, dialog h3 {

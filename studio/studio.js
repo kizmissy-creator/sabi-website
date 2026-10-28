@@ -7,9 +7,29 @@ function updateHeaderHeight() {
 }
 new ResizeObserver(updateHeaderHeight).observe(siteHeader);
 updateHeaderHeight();
-function closeMenu() { menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('open'); }
+function closeMenu() { menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('open'); updateHeaderHeight(); }
 menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; menu.setAttribute('aria-expanded', String(open)); nav.classList.toggle('open', open); });
 nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
+document.querySelector('.quick-browse').addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
+
+// Orient visitors as they move through the collections and story.
+const quickLinks = [...document.querySelectorAll('.quick-browse a')];
+const pageSections = [...document.querySelectorAll('main section[id], .collection-group[id]')];
+let navigationFrame;
+function updateCurrentSection() {
+ navigationFrame = null;
+ const boundary = siteHeader.getBoundingClientRect().bottom + 80;
+ const current = pageSections.filter(section => section.getBoundingClientRect().top <= boundary).at(-1);
+ quickLinks.forEach(link => {
+  if (current && link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
+  else link.removeAttribute('aria-current');
+ });
+}
+window.addEventListener('scroll', () => {
+ if (!navigationFrame) navigationFrame = requestAnimationFrame(updateCurrentSection);
+}, { passive: true });
+window.addEventListener('resize', updateCurrentSection);
+window.addEventListener('load', updateCurrentSection);
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && nav.classList.contains('open')) { closeMenu(); menu.focus(); } });
 const products = {
  crop: ['I Wear My Mask All Year Round · Washed Crop', "Five masks across the front of a short, boxy crop, with a plain back. The 240gsm cotton gives it a substantial feel, while the washed black finish keeps it looking lived in."],
