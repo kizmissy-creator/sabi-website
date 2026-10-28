@@ -4,7 +4,18 @@ try {
   if (token) sessionStorage.setItem('sabi-sample-invite', token);
   else token = sessionStorage.getItem('sabi-sample-invite') || '';
 } catch { /* An invitation still works if browser session storage is disabled. */ }
-if (token || location.hash === '#samples') initialise();
+let started = false;
+function startSamples() {
+  if (started) return;
+  const invitation = new URLSearchParams(location.hash.slice(1)).get('invite');
+  if (invitation) {
+    token = invitation;
+    try { sessionStorage.setItem('sabi-sample-invite', token); } catch {}
+  }
+  if (token || location.hash === '#samples') { started = true; initialise(); }
+}
+startSamples();
+window.addEventListener('hashchange', startSamples);
 
 async function initialise() {
   const style = document.createElement('link'); style.rel = 'stylesheet'; style.href = 'samples/product-samples.css'; document.head.append(style);
