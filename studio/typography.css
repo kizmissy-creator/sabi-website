@@ -198,8 +198,8 @@ main .eyebrow { line-height: 1.4; margin-bottom: 8px; }
 /* The footer has two purposeful groups, sharing a left alignment. */
 footer .footer-main { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 40px; padding-block: 40px 32px; }
 .footer-main .footer-brand { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
-.footer-main .footer-brand p { margin: 0; text-align: left; font: 400 24px/1.25 Georgia,serif; }
-.footer-main .footer-brand p span { display: block; margin-top: 10px; font: 14px/1.5 Arial,Helvetica,sans-serif; color: #e2e5d9; }
+.footer-main .footer-brand p { margin: 0; text-align: left; font: 400 18px/1.35 Georgia,serif; }
+.footer-main .footer-brand p span { display: block; margin-top: 6px; font: 14px/1.5 Arial,Helvetica,sans-serif; color: #e2e5d9; }
 .footer-main .footer-brand p br { display: none; }
 .footer-main .footer-links { display: grid; grid-template-columns: repeat(2, auto); gap: 4px 32px; align-content: start; margin: 0; padding: 0; }
 .footer-links a { display: flex; align-items: center; min-height: 44px; padding: 8px 0; font: 14px/1.5 Arial,Helvetica,sans-serif; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: #f4eedf70; text-underline-offset: 5px; }
@@ -208,7 +208,7 @@ footer .footer-main { display: grid; grid-template-columns: minmax(0, 1fr) auto;
 footer .footer-bottom { margin-top: 0; padding-block: 18px; gap: 12px 24px; font-size: 12px; }
 @media (max-width: 850px) {
  .footer-main .footer-links { grid-template-columns: 1fr; }
- .footer-main .footer-brand p { font-size: 22px; }
+ .footer-main .footer-brand p { font-size: 18px; }
 }
 @media (max-width: 540px) {
  footer .footer-main { grid-template-columns: 1fr; gap: 24px; padding-block: 32px 24px; }
@@ -240,24 +240,24 @@ footer { padding: 0; }
  footer .footer-bottom { padding-block: 16px; }
 }
 
-/* Two distinct, full-width sections on the shared page alignment. */
-.home-founder { background: #eee5d2; padding-block: 36px; }
-.home-founder-inner { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 28px; align-items: center; }
+/* Quiet supporting sections: the garments and hero keep the strongest emphasis. */
+.home-founder { background: #f0e9da; padding-block: 24px; }
+.home-founder-inner { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 24px; align-items: center; }
 .home-founder-photo { margin: 0; padding: 5px; background: var(--white); border: 1px solid #d3c4a6; box-shadow: 2px 3px 0 #263f3709; transform: rotate(-2deg); }
 .home-founder-photo img { display: block; width: 100%; height: auto; }
-.home-founder-copy p { max-width: 520px; margin: 0 0 8px; font-size: 18px; line-height: 1.55; }
+.home-founder-copy p { max-width: 520px; margin: 0 0 4px; font-size: 16px; line-height: 1.55; }
 .home-founder-copy .text-link { display: inline-flex; align-items: center; min-height: 44px; gap: 12px; font-size: 14px; }
-.page-home .welcome { display: block; margin: 0; padding: 32px 0; background: #e4e6d8; border-top: 1px solid #cdd1be; }
-.page-home .welcome-inner { display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: center; gap: 20px; }
-.page-home .welcome-illustration { width: 60px; height: 50px; margin: 0; align-self: start; }
-.page-home .welcome p { max-width: 680px; font-size: 16px; line-height: 1.6; }
+.page-home .welcome { display: block; margin: 0; padding: 24px 0; background: #eeeddf; border-top: 1px solid #dcdccd; }
+.page-home .welcome-inner { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 16px; }
+.page-home .welcome-illustration { width: 44px; height: 36px; margin: 0; align-self: start; }
+.page-home .welcome p { max-width: 680px; margin-bottom: 0; font-size: 15px; line-height: 1.6; }
 @media (max-width: 700px) {
- .home-founder { padding-block: 28px; }
- .home-founder-inner { grid-template-columns: 76px minmax(0, 1fr); gap: 20px; }
+ .home-founder { padding-block: 20px; }
+ .home-founder-inner { grid-template-columns: 64px minmax(0, 1fr); gap: 20px; }
  .home-founder-copy p { font-size: 16px; }
- .page-home .welcome { padding-block: 24px; }
- .page-home .welcome-inner { grid-template-columns: 1fr; gap: 8px; }
- .page-home .welcome-illustration { margin-left: -10px; height: 44px; }
+ .page-home .welcome { padding-block: 20px; }
+ .page-home .welcome-inner { grid-template-columns: 36px minmax(0, 1fr); gap: 12px; }
+ .page-home .welcome-illustration { width: 36px; height: 30px; margin: 2px 0 0; }
 }
 @media (max-width: 360px) {
  .home-founder-inner { grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }
