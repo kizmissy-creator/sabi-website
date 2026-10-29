@@ -2,35 +2,45 @@
 const menu = document.querySelector('.menu');
 const nav = document.querySelector('#nav');
 const siteHeader = document.querySelector('.site-header');
+const collectionMenu = document.querySelector('.collection-menu');
 function updateHeaderHeight() {
  document.documentElement.style.setProperty('--site-header-height', `${Math.ceil(siteHeader.getBoundingClientRect().height)}px`);
 }
 new ResizeObserver(updateHeaderHeight).observe(siteHeader);
 updateHeaderHeight();
-function closeMenu() { menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('open'); updateHeaderHeight(); }
-menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; menu.setAttribute('aria-expanded', String(open)); nav.classList.toggle('open', open); });
+function closeMenu() {
+ menu.setAttribute('aria-expanded', 'false'); nav.classList.remove('open'); collectionMenu.open = false;
+}
+menu.addEventListener('click', () => {
+ const open = menu.getAttribute('aria-expanded') !== 'true';
+ menu.setAttribute('aria-expanded', String(open)); nav.classList.toggle('open', open);
+ if (!open) collectionMenu.open = false;
+});
 nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
-document.querySelector('.quick-browse').addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
-
-// Orient visitors as they move through the collections and story.
-const quickLinks = [...document.querySelectorAll('.quick-browse a')];
+document.addEventListener('click', event => { if (!siteHeader.contains(event.target)) closeMenu(); });
+document.addEventListener('focusin', event => { if (!siteHeader.contains(event.target)) closeMenu(); });
+document.addEventListener('keydown', event => {
+ if (event.key !== 'Escape') return;
+ if (collectionMenu.open) { collectionMenu.open = false; collectionMenu.querySelector('summary').focus(); }
+ else if (nav.classList.contains('open')) { closeMenu(); menu.focus(); }
+});
+// Show location quietly without introducing another navigation row.
+const sectionLinks = [...nav.querySelectorAll('a[href^="#"]')];
 const pageSections = [...document.querySelectorAll('main section[id], .collection-group[id]')];
 let navigationFrame;
 function updateCurrentSection() {
  navigationFrame = null;
  const boundary = siteHeader.getBoundingClientRect().bottom + 80;
  const current = pageSections.filter(section => section.getBoundingClientRect().top <= boundary).at(-1);
- quickLinks.forEach(link => {
+ sectionLinks.forEach(link => {
   if (current && link.hash === `#${current.id}`) link.setAttribute('aria-current', 'location');
   else link.removeAttribute('aria-current');
  });
+ collectionMenu.toggleAttribute('data-current', !!current && ['collection', 'mask-collection', 'ghost-collection'].includes(current.id));
 }
-window.addEventListener('scroll', () => {
- if (!navigationFrame) navigationFrame = requestAnimationFrame(updateCurrentSection);
-}, { passive: true });
-window.addEventListener('resize', updateCurrentSection);
+window.addEventListener('scroll', () => { if (!navigationFrame) navigationFrame = requestAnimationFrame(updateCurrentSection); }, { passive: true });
+window.addEventListener('resize', () => { if (innerWidth > 880) closeMenu(); updateCurrentSection(); });
 window.addEventListener('load', updateCurrentSection);
-document.addEventListener('keydown', event => { if (event.key === 'Escape' && nav.classList.contains('open')) { closeMenu(); menu.focus(); } });
 const products = {
  crop: ['I Wear My Mask All Year Round · Washed Crop', "Five masks across the front of a short, boxy crop, with a plain back. The 240gsm cotton gives it a substantial feel, while the washed black finish keeps it looking lived in."],
  'mask-oversized': ['I Wear My Mask All Year Round · Oversized Tee', "Five masks and familiar words on a roomy black tee. A full-length, oversized shape with dropped shoulders and a plain back."],
