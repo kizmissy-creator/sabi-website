@@ -220,3 +220,22 @@ footer .footer-bottom { margin-top: 0; padding-block: 18px; gap: 12px 24px; font
 
 footer { padding: 0; }
 .footer-main .footer-links { border: 0; }
+
+/* Mobile rhythm: keep the handmade arrangement inside a calm reading flow. */
+@media (max-width: 700px) {
+ .hero-display .hero-collage { aspect-ratio: 560 / 595; }
+ .hero-hoodie { width: 51%; left: 47%; top: 27%; }
+ .hero-display .hand-note { top: 78%; max-width: 41%; }
+ .collage-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: clamp(8px, calc(128px - 30vw), 32px) 4px 0; }
+ .collage-links a { display: block; min-height: 56px; padding-block: 8px; line-height: 1.45; }
+ .collage-links a:first-child { max-width: none; }
+ .collage-links a:last-child { white-space: normal; }
+ .page-home .hero { padding-bottom: 24px; }
+ .page-home .welcome { gap: 8px; padding-top: 8px; }
+ .page-home .welcome-illustration { height: 52px; }
+}
+@media (max-width: 540px) {
+ footer .footer-main { gap: 16px; padding-block: 28px 20px; }
+ .footer-main .footer-brand { gap: 14px; }
+ footer .footer-bottom { padding-block: 16px; }
+}
