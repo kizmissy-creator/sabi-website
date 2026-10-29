@@ -240,8 +240,9 @@ footer { padding: 0; }
  footer .footer-bottom { padding-block: 16px; }
 }
 
-/* The founder note and welcome share a quiet studio-paper setting. */
-.home-notes { max-width: 900px; margin-bottom: 48px; padding: 28px 36px; background: #eee5d2; border: 1px solid #d3c4a6; border-radius: 3px 18px 3px 3px; }
+/* A continuous page section, with content on the shared page alignment. */
+.home-notes { background: #eee5d2; }
+.home-notes-inner { padding-block: 36px; }
 .home-founder-inner { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 28px; align-items: center; }
 .home-founder-photo { margin: 0; padding: 5px; background: var(--white); border: 1px solid #d3c4a6; box-shadow: 2px 3px 0 #263f3709; transform: rotate(-2deg); }
 .home-founder-photo img { display: block; width: 100%; height: auto; }
@@ -251,14 +252,13 @@ footer { padding: 0; }
 .page-home .home-notes .welcome-illustration { width: 60px; height: 50px; margin: 0; align-self: start; }
 .page-home .home-notes .welcome p { max-width: 680px; font-size: 16px; line-height: 1.6; }
 @media (max-width: 700px) {
- .home-notes { margin-top: 8px; margin-bottom: 36px; padding: 22px 20px; }
+ .home-notes-inner { padding-block: 28px; }
  .home-founder-inner { grid-template-columns: 76px minmax(0, 1fr); gap: 20px; }
  .home-founder-copy p { font-size: 16px; }
  .page-home .home-notes .welcome { grid-template-columns: 1fr; gap: 8px; margin-top: 20px; padding-top: 16px; }
  .page-home .home-notes .welcome-illustration { margin-left: -10px; height: 44px; }
 }
 @media (max-width: 360px) {
- .home-notes { padding: 20px 16px; }
  .home-founder-inner { grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }
  .home-founder-photo { padding: 4px; }
 }
