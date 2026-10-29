@@ -28,8 +28,8 @@ html { scroll-behavior: auto; scroll-padding-top: calc(var(--site-header-height)
 }
 @media (max-width: 540px) {
  .site-header .header-inner { width: calc(100% - 24px); min-height: 68px; gap: 6px; }
- .site-header .brand { gap: 0; }
- .site-header .brand img { display: none; }
+ .site-header .brand { gap: 6px; }
+ .site-header .brand img { display: block; width: 24px; height: 34px; }
  .site-header .brand > span { font-size: 24px; letter-spacing: 1px; gap: 5px; }
  .site-header .brand .brand-studio { font-size: 7px; letter-spacing: 2.8px; padding-left: 2.8px; }
  .site-header #nav { gap: clamp(10px, 3vw, 18px); }
@@ -38,6 +38,14 @@ html { scroll-behavior: auto; scroll-padding-top: calc(var(--site-header-height)
  .header-cart svg { width: 17px; }
  .header-cart .cart-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
  .header-cart .cart-punctuation { display: none; }
+}
+@media (max-width: 360px) {
+ .site-header .header-inner { width: calc(100% - 20px); gap: 4px; }
+ .site-header .brand { gap: 5px; }
+ .site-header .brand img { width: 22px; height: 31px; }
+ .site-header .brand > span { font-size: 22px; }
+ .site-header #nav { gap: 6px; }
+ .site-header #nav a { font-size: 13px; }
 }
 main h1, main h2, main h3, main h4, dialog h2, dialog h3 {
   text-transform: capitalize;
