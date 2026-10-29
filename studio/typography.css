@@ -247,17 +247,19 @@ footer { padding: 0; }
 .home-founder-photo img { display: block; width: 100%; height: auto; }
 .home-founder-copy p { max-width: 520px; margin: 0 0 4px; font-size: 16px; line-height: 1.55; }
 .home-founder-copy .text-link { display: inline-flex; align-items: center; min-height: 44px; gap: 12px; font-size: 14px; }
-.page-home .welcome { display: block; margin: 0; padding: 24px 0; background: #eeeddf; border-top: 1px solid #dcdccd; }
-.page-home .welcome-inner { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 16px; }
-.page-home .welcome-illustration { width: 44px; height: 36px; margin: 0; align-self: start; }
-.page-home .welcome p { max-width: 680px; margin-bottom: 0; font-size: 15px; line-height: 1.6; }
+.page-home .welcome { display: block; margin: 0; padding: 32px 0; background: #e9eadb; border-top: 1px solid #dcdccd; }
+.page-home .welcome-inner { display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: center; gap: 20px; }
+.page-home .welcome-illustration { width: 60px; height: 50px; margin: 0; align-self: start; }
+.page-home .welcome h2 { margin: 0 0 8px; font: 400 26px/1.2 Georgia,serif; letter-spacing: -.015em; }
+.page-home .welcome p { max-width: 680px; margin-bottom: 0; font-size: 16px; line-height: 1.6; }
 @media (max-width: 700px) {
  .home-founder { padding-block: 20px; }
  .home-founder-inner { grid-template-columns: 64px minmax(0, 1fr); gap: 20px; }
  .home-founder-copy p { font-size: 16px; }
- .page-home .welcome { padding-block: 20px; }
- .page-home .welcome-inner { grid-template-columns: 36px minmax(0, 1fr); gap: 12px; }
- .page-home .welcome-illustration { width: 36px; height: 30px; margin: 2px 0 0; }
+ .page-home .welcome { padding-block: 28px; }
+ .page-home .welcome h2 { font-size: 23px; }
+ .page-home .welcome-inner { grid-template-columns: 1fr; gap: 8px; }
+ .page-home .welcome-illustration { width: 54px; height: 38px; margin: 0 0 0 -8px; }
 }
 @media (max-width: 360px) {
  .home-founder-inner { grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }
