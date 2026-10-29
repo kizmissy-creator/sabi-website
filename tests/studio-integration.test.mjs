@@ -40,6 +40,6 @@ test('collections are independent pages with working shared navigation and asset
     }
     const header = html.match(/<header[\s\S]*?<\/header>/)[0];
     assert.ok(!header.includes('<details') && !header.includes('class="menu"'));
-    assert.ok(header.includes('Cart ('));
+    assert.ok(header.replace(/<[^>]*>/g, '').includes('Cart (0)'));
   }
 });
